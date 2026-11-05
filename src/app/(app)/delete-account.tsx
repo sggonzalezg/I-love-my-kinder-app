@@ -91,12 +91,12 @@ export default function DeleteAccountScreen() {
         <View style={[styles.header, { paddingTop: insets.top }]}>
           <Button icon={ArrowLeft} onPress={handleCancel} title=" " variant="plain" />
           <Text variant="title" style={{ color: c.ink, flex: 1 }}>
-            Confirmar con SMS
+            Confirmar con WhatsApp
           </Text>
         </View>
         <ScrollView contentContainerStyle={styles.content}>
           <Text style={{ color: c.muted }}>
-            Te mandamos un código por SMS al {session.phone}
+            Te mandamos un código por WhatsApp al {session.phone}
           </Text>
 
           <View style={styles.otpContainer}>
