@@ -10,13 +10,14 @@ export type OutingAnswer = {
   signer_relationship: string;
 };
 
-/** One answer per child (round 11): the latest record of the current version, from any guardian. */
+/** One answer per child: the latest record of the current version, from any guardian. */
 export function permissionStatus(rows: OutingAnswer[], childId: string, version: number) {
   const latest = rows
     .filter((r) => r.child_id === childId && r.permission_version === version)
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
-  const status: PermissionStatus = !latest ? 'pending' : latest.decision === 'authorized' ? 'authorized' : 'declined';
-  return { status, answer: latest ?? null };
+  if (!latest) return { status: 'pending' as PermissionStatus, answer: null };
+  const status: PermissionStatus = latest.decision === 'authorized' ? 'authorized' : 'declined';
+  return { status, answer: latest };
 }
 
 export function summarizePermissions(rows: OutingAnswer[], childIds: string[], version: number) {

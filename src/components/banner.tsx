@@ -9,7 +9,6 @@ import { Text } from './text';
 type Kind = 'offline' | 'info' | 'error';
 const ICONS: Record<Kind, LucideIcon> = { offline: CloudOff, info: Info, error: CircleAlert };
 
-/** design.md section 6 Banner: inline, full width inside the margins; offline (wait), info (blue), error (red). */
 export function Banner({ kind, text }: { kind: Kind; text: string }) {
   const c = useColors();
   const [bg, fg] = { offline: [c.wait50, c.wait], info: [c.blue50, c.blue], error: [c.red50, c.red] }[kind];

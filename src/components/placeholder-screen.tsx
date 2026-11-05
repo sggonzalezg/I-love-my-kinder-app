@@ -11,7 +11,6 @@ import { Skeleton } from './skeleton';
 import { Text } from './text';
 import { TopBar } from './top-bar';
 
-// shortcut: step 1 shell only; each tab gets its real screen per role in steps 2-17 of the SDD.
 export function PlaceholderScreen({ title, note }: { title: string; note: string }) {
   const c = useColors();
   const reduced = useReducedMotion();

@@ -10,7 +10,6 @@ import { Text } from './text';
 
 type Props = {
   icon: LucideIcon;
-  /** Required: every icon-only control has an accessible label (design.md section 10). */
   label: string;
   onPress?: () => void;
   ghost?: boolean;
@@ -18,17 +17,20 @@ type Props = {
   disabled?: boolean;
 };
 
-/** design.md section 6 Icon button: 44 px circle, surface or transparent, optional red count badge. */
 export function IconButton({ icon: Icon, label, onPress, ghost, badge = 0, disabled }: Props) {
   const c = useColors();
   const count = badgeText(badge);
+  const background = (pressed: boolean) => {
+    if (ghost) return 'transparent';
+    return pressed ? c.raised : c.surface;
+  };
   return (
     <PressableScale
       onPress={onPress}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.base, { backgroundColor: ghost ? 'transparent' : pressed ? c.raised : c.surface }]}>
+      style={({ pressed }) => [styles.base, { backgroundColor: background(pressed) }]}>
       <Icon size={24} color={disabled ? c.muted : c.ink} strokeWidth={1.8} />
       {count && (
         <View style={[styles.badge, { backgroundColor: c.red }]} importantForAccessibility="no">

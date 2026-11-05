@@ -17,12 +17,10 @@ type Props = {
   disabled?: boolean;
   loading?: boolean;
   block?: boolean;
-  /** 52 default, 60 for the teacher action bar, 44 small. */
   height?: number;
   accessibilityHint?: string;
 };
 
-/** design.md section 6 Button: pill, label DM Sans 700 16; disabled is raised/muted, never just faded. */
 export function Button({ label, onPress, variant = 'primary', icon: Icon, disabled, loading, block, height = size.button, accessibilityHint }: Props) {
   const c = useColors();
   const palette = {
@@ -35,6 +33,10 @@ export function Button({ label, onPress, variant = 'primary', icon: Icon, disabl
   }[variant];
   const off = disabled || loading;
   const fg = disabled ? c.muted : palette.fg;
+  const background = (pressed: boolean) => {
+    if (disabled) return c.raised;
+    return pressed ? palette.pressed : palette.bg;
+  };
 
   return (
     <PressableScale
@@ -47,10 +49,11 @@ export function Button({ label, onPress, variant = 'primary', icon: Icon, disabl
       containerStyle={block && styles.block}
       style={({ pressed }) => [
         styles.base,
-        { minHeight: height, backgroundColor: disabled ? c.raised : pressed ? palette.pressed : palette.bg },
+        { minHeight: height, backgroundColor: background(pressed) },
       ]}>
       <View style={styles.row}>
-        {loading ? <ActivityIndicator color={fg} /> : Icon ? <Icon size={20} color={fg} strokeWidth={1.8} /> : null}
+        {loading && <ActivityIndicator color={fg} />}
+        {!loading && Icon && <Icon size={20} color={fg} strokeWidth={1.8} />}
         <Text variant="button" style={{ color: fg }}>
           {label}
         </Text>

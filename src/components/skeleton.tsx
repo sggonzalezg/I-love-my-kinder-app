@@ -6,7 +6,6 @@ import { useColors } from '@/theme/use-theme';
 
 const pulse = { from: { opacity: 0.15 }, to: { opacity: 0.6 } };
 
-/** design.md section 7 Loading: raised block with a surface pulse .15 ↔ .6, 1.2 s alternate; static with reduced motion. */
 export function Skeleton({ width = '100%', height, round }: { width?: DimensionValue; height: number; round?: boolean }) {
   const c = useColors();
   const reduced = useReducedMotion();

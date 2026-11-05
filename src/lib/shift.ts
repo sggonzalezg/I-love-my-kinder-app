@@ -1,4 +1,4 @@
-// The backend names shifts 'morning' / 'afternoon'; end-user copy says Matutino / Vespertino (round 14).
+// The backend names shifts 'morning' / 'afternoon'; end-user copy says Matutino / Vespertino.
 export type ShiftName = 'morning' | 'afternoon';
 
 export function shiftLabel(shift: ShiftName): string {
@@ -9,7 +9,6 @@ export function shiftBandTitle(shift: ShiftName): string {
   return shift === 'morning' ? 'Turno matutino' : 'Turno vespertino';
 }
 
-/** F6 opens on the current shift: Vespertino from 13:00. */
 export function currentShift(now = new Date()): ShiftName {
   return now.getHours() >= 13 ? 'afternoon' : 'morning';
 }

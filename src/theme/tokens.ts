@@ -1,6 +1,3 @@
-// Design tokens from docs/design/design.md section 3 (mirror of design/mockups/assets/styles.css).
-// Components use these semantic names only; no raw hex outside this file.
-
 export const lightColors = {
   ground: '#F6F8FC',
   surface: '#FFFFFF',

@@ -9,13 +9,11 @@ import { Text } from './text';
 type Props = {
   title?: string;
   subtitle?: string;
-  /** Shows the back arrow; its label says where it goes ("Volver a Hoy"). */
   backLabel?: string;
   onBack?: () => void;
   right?: ReactNode;
 };
 
-/** design.md section 6 Top bar: title 24 + optional subtitle, back and actions as icon buttons. */
 export function TopBar({ title, subtitle, backLabel, onBack, right }: Props) {
   return (
     <View style={styles.bar}>

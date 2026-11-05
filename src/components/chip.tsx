@@ -8,7 +8,6 @@ import { Text } from './text';
 
 export type ChipVariant = 'blue' | 'ok' | 'wait' | 'red' | 'grey';
 
-/** design.md section 6 Chip: 28 px pill, 13 px 600, icon + word (status is never colour only). */
 export function Chip({ label, icon: Icon, variant = 'blue' }: { label: string; icon?: LucideIcon; variant?: ChipVariant }) {
   const c = useColors();
   const [bg, fg] = {

@@ -24,7 +24,6 @@ if (Platform.OS !== 'web') {
   });
 }
 
-/** Calls an edge function and throws its `error` message on failure. */
 export async function invoke<T>(name: string, body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) {

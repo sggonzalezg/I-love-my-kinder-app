@@ -10,7 +10,6 @@ import { useColors } from '@/theme/use-theme';
 
 import { Text } from './text';
 
-// Same five tabs, same order, for every role (design.md section 4, round 7).
 export const TAB_ICONS: Record<string, LucideIcon> = {
   index: House,
   room: Users,
@@ -19,10 +18,6 @@ export const TAB_ICONS: Record<string, LucideIcon> = {
   profile: User,
 };
 
-/**
- * design.md section 6 Tab bar: icon in a 56×30 pill + 12 px label; active blue on a blue-50 pill.
- * Tabs never slide (expo-animation): only the pill background fades in, 220 ms; instant with reduced motion.
- */
 export function TabBar({ state, descriptors, navigateToTab, insets }: BottomTabBarProps) {
   const c = useColors();
   const reduced = useReducedMotion();

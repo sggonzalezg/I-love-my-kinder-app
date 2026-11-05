@@ -7,15 +7,11 @@ import { duration, easeOut } from '@/theme/motion';
 type Props = PressableProps & {
   /** Style of the animated wrapper (layout: alignSelf, flex, margins). */
   containerStyle?: StyleProp<ViewStyle>;
-  /** design.md section 7: .97 buttons, .98 cards, .96 choices. */
   pressedScale?: number;
   haptic?: 'selection' | 'light' | null;
 };
 
-/**
- * Press feedback: scale on press-in (120 ms out), back on release; the caller draws the pressed
- * colour from `pressed`. Reduced motion keeps only that colour change. Haptic fires with the visual.
- */
+/** Only the scale lives here; the caller draws the pressed colour from `pressed` in its style function. */
 export function PressableScale({ pressedScale = 0.97, haptic = null, containerStyle, onPressIn, onPressOut, ...rest }: Props) {
   const reduced = useReducedMotion();
   const scale = useSharedValue(1);

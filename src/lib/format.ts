@@ -27,7 +27,7 @@ type Sender =
   | { role: 'family'; name: string; relationship: string; childFirstName: string; childVisible: boolean }
   | { role: 'teacher' | 'assistant' | 'director'; name: string };
 
-/** consent-texts.md 7.3: the child's first name only with the visibility authorization. */
+/** The child's first name appears only with the visibility authorization (legal/consent-texts.md 7.3). */
 export function senderLabel(sender: Sender): string {
   switch (sender.role) {
     case 'director':

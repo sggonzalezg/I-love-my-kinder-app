@@ -33,7 +33,6 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        {/* Pushed screens use the native stack; with reduced motion they cross-fade (design.md section 7). */}
         <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.ground }, animation: reduced ? 'fade' : 'default' }}>
           <Stack.Screen name="(app)" />
         </Stack>

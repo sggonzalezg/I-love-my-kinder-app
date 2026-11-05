@@ -2,7 +2,6 @@ import { Tabs } from 'expo-router/tabs';
 
 import { TabBar } from '@/components/tab-bar';
 
-// Hoy · Sala · Galería · Calendario · Perfil for every role; what each tab shows depends on the role (step 2+).
 export default function TabsLayout() {
   return (
     <Tabs tabBar={(props) => <TabBar {...props} />} screenOptions={{ headerShown: false, animation: 'none' }}>
