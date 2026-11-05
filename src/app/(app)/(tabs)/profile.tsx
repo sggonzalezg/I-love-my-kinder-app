@@ -27,7 +27,7 @@ export default function ProfileTab() {
   }
 
   function handleOpenDocument(docKey: string) {
-    router.push(`/legal/${docKey}`);
+    router.push(`../legal/${docKey}`);
   }
 
   return (
@@ -135,7 +135,7 @@ export default function ProfileTab() {
         icon={Trash2}
         variant="danger-soft"
         block
-        onPress={() => router.push('/delete-account')}
+        onPress={() => router.push('../delete-account')}
       />
       <Text variant="small" style={{ color: c.red, textAlign: 'center' }}>
         No se puede deshacer. Se conservan los mensajes del chat.
