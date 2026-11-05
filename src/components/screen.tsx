@@ -31,3 +31,5 @@ const styles = StyleSheet.create({
   root: { flex: 1 },
   content: { paddingHorizontal: screenMargin, paddingBottom: 24, gap: 16 },
 });
+
+export default Screen;

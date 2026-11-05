@@ -9,12 +9,32 @@ import { useReducedMotion } from 'react-native-reanimated';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 
 import { useColors } from '@/theme/use-theme';
+import { SessionProvider, useSession } from '@/data/session';
 
 SplashScreen.preventAutoHideAsync();
 
-export default function RootLayout() {
+function RootStackLayout() {
   const c = useColors();
   const reduced = useReducedMotion();
+  const { session, loading } = useSession();
+
+  if (loading) return null;
+
+  return (
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.ground }, animation: reduced ? 'fade' : 'default' }}>
+      {!session ? (
+        <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
+      ) : (
+        <>
+          <Stack.Screen name="(app)" options={{ animation: 'none' }} />
+          <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
+        </>
+      )}
+    </Stack>
+  );
+}
+
+export default function RootLayout() {
   const [loaded, error] = useFonts({
     Nunito_800ExtraBold,
     Nunito_900Black,
@@ -33,9 +53,9 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}>
       <SafeAreaProvider>
-        <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.ground }, animation: reduced ? 'fade' : 'default' }}>
-          <Stack.Screen name="(app)" />
-        </Stack>
+        <SessionProvider>
+          <RootStackLayout />
+        </SessionProvider>
       </SafeAreaProvider>
     </GestureHandlerRootView>
   );
