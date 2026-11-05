@@ -27,10 +27,10 @@ export default function OtpInput({ value, onChangeText, error = false, editable 
   const c = useColors();
   const inputRef = useRef<any>(null);
   const shakeX = useSharedValue(0);
-  const [prevError, setPrevError] = useState(false);
+  const prevErrorRef = useRef(false);
 
   useEffect(() => {
-    if (error && !prevError) {
+    if (error && !prevErrorRef.current) {
       // Trigger shake animation: ±6 px, 3 cycles = 600 ms
       shakeX.value = withSpring(0, { damping: 18, stiffness: 220 });
       const shakeSequence = () => {
@@ -53,8 +53,8 @@ export default function OtpInput({ value, onChangeText, error = false, editable 
       };
       shakeSequence();
     }
-    setPrevError(error);
-  }, [error, shakeX, prevError]);
+    prevErrorRef.current = error;
+  }, [error, shakeX]);
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ translateX: shakeX.value }],

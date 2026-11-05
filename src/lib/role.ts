@@ -4,9 +4,9 @@ export type Role = 'family' | 'teacher' | 'director';
 
 export interface Profile {
   user_id: string;
-  family_members?: Array<{ id: string; role?: string }>;
-  teachers?: Array<{ id: string; role?: string }>;
-  directors?: Array<{ id: string }>;
+  family_members?: { id: string; role?: string }[];
+  teachers?: { id: string; role?: string }[];
+  directors?: { id: string }[];
 }
 
 export function resolveRoles(profile: Profile | null): Role[] {
