@@ -19,7 +19,7 @@ export function PlaceholderScreen({ title, note }: { title: string; note: string
   return (
     <Screen header={<TopBar title={title} />}>
       <Animated.View entering={enter(0)} style={[styles.card, { backgroundColor: c.surface }]}>
-        <Image source={require('@/assets/images/logo-client.jpg')} style={styles.logo} contentFit="contain" accessibilityLabel="I love my kinder, Jardín Maternal e Inicial" />
+        <Image source={require('@/assets/images/logo-client.png')} style={styles.logo} contentFit="contain" accessibilityLabel="I love my kinder, Jardín Maternal e Inicial" />
         <Text tone="muted" style={styles.center}>
           {note}
         </Text>

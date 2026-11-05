@@ -59,8 +59,8 @@ export default function PhoneLoginScreen() {
 
         <View style={{ alignItems: 'center', marginTop: space.s5, marginBottom: space.s10 }}>
           <Image
-            source={require('@/../../assets/images/logo-client.jpg')}
-            style={{ width: 160, height: 160 * (219 / 314), borderRadius: 8 }}
+            source={require('@/../../assets/images/logo-client.png')}
+            style={{ width: 160, height: 160 * (1003 / 1084), borderRadius: 8, resizeMode: 'contain' }}
           />
         </View>
 

@@ -2,7 +2,9 @@ import { useEffect, useState } from 'react';
 import { View, useColorScheme } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession, verifyPhoneCode } from '@/data/session';
+import { supabase } from '@/data/supabase';
 import { toE164 } from '@/lib/phone';
+import { getDocumentsToAccept } from '@/lib/consent';
 import { useColors } from '@/theme/use-theme';
 import { space, screenMargin } from '@/theme/tokens';
 import Button from '@/components/button';
@@ -40,7 +42,21 @@ export default function CodeLoginScreen() {
     try {
       const session = await verifyPhoneCode(toE164(phone), code);
       if (setActiveRole) await setActiveRole(session.active_role);
-      router.replace('/(app)' as any);
+
+      // Check which login documents need acceptance.
+      const { data: records } = await supabase
+        .from('consent_records')
+        .select('document_id, version, accepted')
+        .eq('user_id', session.user_id)
+        .in('document_id', ['terms', 'privacy']);
+
+      const docsToAccept = getDocumentsToAccept(records || []);
+
+      if (docsToAccept.length > 0) {
+        router.replace('/(auth)/consent' as any);
+      } else {
+        router.replace('/(auth)/push' as any);
+      }
     } catch (err: any) {
       if (err.code === 'invalid_code') {
         setCodeError(true);
