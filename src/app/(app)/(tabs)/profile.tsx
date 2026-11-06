@@ -1,6 +1,7 @@
 import { router } from 'expo-router';
 import { LogOut, Monitor, Trash2 } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
+import { Linking, StyleSheet, View } from 'react-native';
+import { NURSERY_WHATSAPP_URL } from '@/constants/nursery';
 import { supabase } from '@/data/supabase';
 import { useSession } from '@/data/session';
 import { Button } from '@/components/button';
@@ -114,9 +115,10 @@ export default function ProfileTab() {
       {/* Help */}
       <SectionHeader title="Ayuda" />
       <View style={[styles.section, { backgroundColor: c.surface }]}>
-        <Text style={{ color: c.ink }}>
-          WhatsApp: {session.nursery_urgent_phone}
-        </Text>
+        <LinkRow
+          label="Escribirle al jardín por WhatsApp"
+          onPress={() => Linking.openURL(NURSERY_WHATSAPP_URL)}
+        />
       </View>
 
       {/* Sign out */}
