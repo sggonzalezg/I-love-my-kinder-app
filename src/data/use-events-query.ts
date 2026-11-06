@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { EVENTS_CACHE_DURATION_MS } from '@/constants/cache';
 import { getEventsForMonth, getUpcomingEvents as getUpcomingEventsLib, type Event } from '@/data/events';
 
 const CACHE_KEY_PREFIX = 'events_';
-const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 hours
 
 interface CacheEntry {
   data: Event[];
@@ -16,7 +16,7 @@ async function getCachedEvents(key: string): Promise<Event[] | null> {
     if (!cached) return null;
 
     const entry: CacheEntry = JSON.parse(cached);
-    const isExpired = Date.now() - entry.timestamp > CACHE_DURATION;
+    const isExpired = Date.now() - entry.timestamp > EVENTS_CACHE_DURATION_MS;
 
     if (isExpired) {
       await AsyncStorage.removeItem(CACHE_KEY_PREFIX + key);
