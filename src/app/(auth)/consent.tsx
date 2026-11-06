@@ -2,7 +2,7 @@
 import { View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSession } from '@/data/session';
-import { supabase, invoke } from '@/data/supabase';
+import { recordConsent } from '@/data/consent';
 import { useColors } from '@/theme/use-theme';
 import { space, screenMargin } from '@/theme/tokens';
 import { CONSENT } from '@/legal/texts';
@@ -32,22 +32,8 @@ export default function ConsentScreen() {
     setError(null);
 
     try {
-      // Record both consents.
-      if (termsChecked) {
-        await invoke('record-consent', {
-          document_id: LOGIN_DOCUMENTS.terms.id,
-          version: LOGIN_DOCUMENTS.terms.version,
-          accepted: true,
-          screen: 'S0c',
-        });
-      }
-      if (privacyChecked) {
-        await invoke('record-consent', {
-          document_id: LOGIN_DOCUMENTS.privacy.id,
-          version: LOGIN_DOCUMENTS.privacy.version,
-          accepted: true,
-          screen: 'S0c',
-        });
+      for (const document of [LOGIN_DOCUMENTS.terms, LOGIN_DOCUMENTS.privacy]) {
+        await recordConsent({ documentId: document.id, version: document.version, accepted: true, screen: 'S0c' });
       }
 
       router.replace('/(auth)/push' as any);
