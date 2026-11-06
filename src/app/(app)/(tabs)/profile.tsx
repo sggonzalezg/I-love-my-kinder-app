@@ -4,6 +4,7 @@ import { Linking, StyleSheet, View } from 'react-native';
 import { NURSERY_WHATSAPP_URL } from '@/constants/nursery';
 import { supabase } from '@/data/supabase';
 import { useSession } from '@/data/session';
+import { ChildAuthorizationLinks } from '@/features/family/child-authorization-links';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
 import { Screen } from '@/components/screen';
@@ -55,6 +56,8 @@ export default function ProfileTab() {
         <Row label="Teléfono" value={session.phone} />
         <Row label="Jardín" value={session.nursery_name} />
       </View>
+
+      {isFamily && <ChildAuthorizationLinks userId={session.user_id} />}
 
       {/* Role-specific rows */}
       {isTeacher && (
