@@ -12,6 +12,10 @@ export function formatLongDate(date: Date): string {
   return `${WEEKDAYS[date.getDay()]} ${date.getDate()} de ${MONTHS[date.getMonth()]}`;
 }
 
+export function formatShortDate(date: Date): string {
+  return `${WEEKDAYS_SHORT[date.getDay()]} ${date.getDate()} de ${MONTHS_SHORT[date.getMonth()]}`;
+}
+
 export function formatTime(date: Date): string {
   return `${date.getHours()}:${String(date.getMinutes()).padStart(2, '0')}`;
 }
