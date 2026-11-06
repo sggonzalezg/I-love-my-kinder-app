@@ -2,14 +2,17 @@ import { useCallback, useState } from 'react';
 import { View, ScrollView, TouchableOpacity } from 'react-native';
 import { ChevronLeft, ChevronRight } from 'lucide-react-native';
 import { router } from 'expo-router';
+import Animated, { useSharedValue, useAnimatedStyle, withSpring, useReducedMotion, ReduceMotion } from 'react-native-reanimated';
+import { Gesture, GestureDetector } from 'react-native-gesture-handler';
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { Button } from '@/components/button';
 import { MonthGrid } from '@/components/month-grid';
 import { EventRow } from '@/components/event-row';
 import { monthTitle } from '@/lib/calendar';
-import { getEventsForMonth, getEventsByDate, getPastEvents, mockEvents, type Event } from '@/data/events';
-import { space, radius } from '@/theme/tokens';
+import { getEventsByDate, getPastEvents, mockEvents, type Event } from '@/data/events';
+import { useEventsForMonth } from '@/data/use-events-query';
+import { space } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 export default function CalendarTab() {
@@ -17,13 +20,34 @@ export default function CalendarTab() {
   const [month, setMonth] = useState(new Date().getMonth());
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
+  const reduced = useReducedMotion();
 
   const today = new Date();
   const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
   const todayDay = isCurrentMonth ? today.getDate() : undefined;
 
-  // Get events for the current month
-  const monthEvents = getEventsForMonth(year, month);
+  // Swipe gesture for month navigation
+  const swipeX = useSharedValue(0);
+  const gesture = Gesture.Pan()
+    .onUpdate((event) => {
+      swipeX.value = event.translationX;
+    })
+    .onEnd((event) => {
+      const threshold = 50;
+      if (event.translationX < -threshold) {
+        handleNextMonth();
+      } else if (event.translationX > threshold) {
+        handlePreviousMonth();
+      }
+      swipeX.value = withSpring(0, { damping: 18, stiffness: 220 });
+    });
+
+  const swipeAnimStyle = useAnimatedStyle(() => ({
+    transform: [{ translateX: swipeX.value }],
+  }));
+
+  // Get events for the current month (with cache)
+  const { events: monthEvents } = useEventsForMonth(year, month);
 
   // Build sets of days with events and no-classes
   const daysWithEvents = new Set<number>();
@@ -119,16 +143,20 @@ export default function CalendarTab() {
         </TouchableOpacity>
       </View>
 
-      {/* Month grid */}
-      <MonthGrid
-        year={year}
-        month={month}
-        selectedDay={selectedDay}
-        daysWithEvents={daysWithEvents}
-        noClassesDays={noClassesDays}
-        onDayPress={setSelectedDay}
-        today={todayDay}
-      />
+      {/* Month grid with swipe gesture */}
+      <GestureDetector gesture={gesture}>
+        <Animated.View style={swipeAnimStyle}>
+          <MonthGrid
+            year={year}
+            month={month}
+            selectedDay={selectedDay}
+            daysWithEvents={daysWithEvents}
+            noClassesDays={noClassesDays}
+            onDayPress={setSelectedDay}
+            today={todayDay}
+          />
+        </Animated.View>
+      </GestureDetector>
 
       {/* Lo que viene section */}
       <View style={{ marginTop: space.s10 }}>
@@ -159,8 +187,8 @@ export default function CalendarTab() {
 
         {listEvents.length > 0 ? (
           <>
-            {listEvents.map((event) => (
-              <EventRow key={event.id} event={event} onPress={handleEventPress} />
+            {listEvents.map((event, index) => (
+              <EventRow key={event.id} event={event} onPress={handleEventPress} index={index} />
             ))}
 
             {selectedDay && pastEventsCount > 0 && (
