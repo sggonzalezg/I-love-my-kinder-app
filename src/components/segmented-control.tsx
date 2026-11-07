@@ -1,10 +1,14 @@
+import type { LucideIcon } from 'lucide-react-native';
 import { View, Pressable, StyleSheet } from 'react-native';
 import { Text } from './text';
 import { useTheme } from '@/theme/use-theme';
 
+const OPTION_ICON_SIZE = 14;
+
 interface Option {
   label: string;
   value: string;
+  icon?: LucideIcon;
 }
 
 interface SegmentedControlProps {
@@ -30,6 +34,7 @@ export function SegmentedControl({ options, value, onChange }: SegmentedControlP
     >
       {options.map((option) => {
         const isSelected = value === option.value;
+        const OptionIcon = option.icon;
         return (
           <Pressable
             key={option.value}
@@ -43,6 +48,7 @@ export function SegmentedControl({ options, value, onChange }: SegmentedControlP
               },
             ]}
           >
+            {OptionIcon ? <OptionIcon size={OPTION_ICON_SIZE} color={isSelected ? colors.onPrimary : colors.onSurface} /> : null}
             <Text
               style={{
                 color: isSelected ? colors.onPrimary : colors.onSurface,
@@ -65,6 +71,8 @@ const styles = StyleSheet.create({
   },
   option: {
     flex: 1,
+    flexDirection: 'row',
+    gap: 6,
     justifyContent: 'center',
     alignItems: 'center',
   },
