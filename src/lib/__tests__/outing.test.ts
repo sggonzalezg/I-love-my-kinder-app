@@ -7,6 +7,7 @@ const answer = (child_id: string, decision: OutingAnswer['decision'], created_at
   permission_version,
   signer_name: 'Ana Rodríguez',
   signer_relationship: 'mother',
+  signed_by: 'user-ana',
 });
 
 describe('outing permission per child (round 11)', () => {
@@ -22,6 +23,11 @@ describe('outing permission per child (round 11)', () => {
   it('ignores answers to an older outing version (a material change asks again)', () => {
     const rows = [answer('c1', 'authorized', '2026-10-24T18:02:00Z', 1)];
     expect(permissionStatus(rows, 'c1', 2).status).toBe('pending');
+  });
+
+  it('stays pending when the only row is the request the nursery created', () => {
+    const rows = [answer('c1', 'pending', '2026-10-24T09:15:00Z')];
+    expect(permissionStatus(rows, 'c1', 1).status).toBe('pending');
   });
 
   it('counts one authorization per child', () => {

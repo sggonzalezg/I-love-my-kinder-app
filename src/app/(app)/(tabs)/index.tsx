@@ -6,15 +6,17 @@ import { TopBar } from '@/components/top-bar';
 import { Bell } from '@/components/bell';
 import { ChatIcon } from '@/components/chat-icon';
 import { ChildCard } from '@/components/child-card';
-import { PermissionCard } from '@/components/permission-card';
 import { Banner } from '@/components/banner';
 import { useTheme } from '@/theme/use-theme';
 import { getChildrenForFamily } from '@/data/queries';
+import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
+import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 
 export default function IndexTab() {
   const [refreshing, setRefreshing] = useState(false);
   const { colors, spacing } = useTheme();
   const children = getChildrenForFamily();
+  const pendingRequests = useFamilyOutingRequests().filter((request) => request.status === 'pending');
 
   const onRefresh = () => {
     setRefreshing(true);
@@ -42,8 +44,9 @@ export default function IndexTab() {
         {/* Offline banner */}
         <Banner kind="offline" text="Sin conexión. Los cambios se enviarán cuando vuelva la conexión." />
 
-        {/* Permission card - conditionally shown */}
-        <PermissionCard title="Permiso para salida: Parque Rodó, mañana a las 15:00" />
+        {pendingRequests.map((request) => (
+          <PermissionRequestCard key={request.eventId} request={request} />
+        ))}
 
         {/* Next event - simplified for now */}
         {/* <View style={{ marginBottom: spacing.md }}>

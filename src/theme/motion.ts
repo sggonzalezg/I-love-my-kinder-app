@@ -9,5 +9,7 @@ export const cssEaseOut = cubicBezier(0.22, 1, 0.36, 1);
 
 export const pressSpring = { damping: 18, stiffness: 220 } as const;
 
+export const signedRecord = { enter: 320, checkDraw: 420, checkDelay: 160, startScale: 0.96 } as const;
+
 export const listStagger = 40;
 export const listRise = 12;

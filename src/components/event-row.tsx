@@ -1,7 +1,10 @@
 import { View, TouchableOpacity, Image } from 'react-native';
 import Animated, { useReducedMotion, ReduceMotion, FadeInDown } from 'react-native-reanimated';
 import type { Event } from '@/data/events';
+import { Chip } from '@/components/chip';
 import { EventTypeChip } from '@/components/event-type-chip';
+import { CALENDAR_PERMISSION_LABELS, PERMISSION_CHIP_VARIANT } from '@/constants/outing';
+import type { PermissionStatus } from '@/lib/outing';
 import { Text } from '@/components/text';
 import { space, radius } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
@@ -11,9 +14,10 @@ interface EventRowProps {
   event: Event;
   onPress?: (event: Event) => void;
   index?: number;
+  permissionStatus?: PermissionStatus;
 }
 
-export function EventRow({ event, onPress, index = 0 }: EventRowProps) {
+export function EventRow({ event, onPress, index = 0, permissionStatus }: EventRowProps) {
   const c = useColors();
   const reduced = useReducedMotion();
 
@@ -62,6 +66,9 @@ export function EventRow({ event, onPress, index = 0 }: EventRowProps) {
         <View style={{ flex: 1 }}>
           <View style={{ flexDirection: 'row', gap: space.s1, marginBottom: space.s1 }}>
             <EventTypeChip type={event.type} />
+            {permissionStatus && (
+              <Chip label={CALENDAR_PERMISSION_LABELS[permissionStatus]} variant={PERMISSION_CHIP_VARIANT[permissionStatus]} />
+            )}
           </View>
 
           <Text style={{ color: c.ink, marginBottom: space.s1 }} numberOfLines={1}>
