@@ -1,7 +1,5 @@
 # Coding Standards for i-Love-My-Kinder Mobile App
 
-**English source:** This is the source of truth. See `CODING_STANDARDS.es.md` for the Spanish translation.
-
 ## Core Principles
 
 1. **Legibility over brevity** — Clear names beat clever abbreviations
@@ -59,6 +57,60 @@ export function Button({ label, onPress, disabled = false }: ButtonProps) {
   );
 }
 ```
+
+## Component State
+
+Component state uses `useReducer`, never `useState`. Action types are named constants, and the reducer is a pure function outside the component (or in its own file) with its own tests in `__tests__/`.
+
+```typescript
+export const COUNTER_ACTIONS = {
+  INCREMENTED: 'incremented',
+  RESET: 'reset',
+} as const;
+
+type CounterAction = { type: typeof COUNTER_ACTIONS.INCREMENTED } | { type: typeof COUNTER_ACTIONS.RESET };
+
+export function counterReducer(count: number, action: CounterAction): number {
+  switch (action.type) {
+    case COUNTER_ACTIONS.INCREMENTED:
+      return count + 1;
+    case COUNTER_ACTIONS.RESET:
+      return 0;
+  }
+}
+
+const [count, dispatch] = useReducer(counterReducer, 0);
+```
+
+## Styles
+
+UI is split into reusable components (shared ones in `src/components/`). There are no inline styles and no `style` objects in the markup. React Native has no SCSS or `className`, so each component keeps its styles in its own `<Component>.styles.ts` with `StyleSheet.create`; do not add a SCSS transformer.
+
+```typescript
+// child-card.styles.ts
+import { StyleSheet } from 'react-native';
+
+import { space } from '@/theme/tokens';
+
+export const styles = StyleSheet.create({
+  row: { flexDirection: 'row', gap: space.s3 },
+});
+```
+
+Styles that depend on the color scheme use `createThemedStyles` from `src/theme/themed-styles.ts`: it builds the light and dark sheets once and returns the hook that picks the current one.
+
+```typescript
+// notice-card.styles.ts
+export const useNoticeCardStyles = createThemedStyles((colors) => ({
+  card: { padding: space.s4, backgroundColor: colors.surface },
+}));
+
+// notice-card.tsx
+const styles = useNoticeCardStyles();
+return <View style={styles.card} />;
+```
+
+A value only known at runtime, such as a safe-area inset, comes from a small function exported by the same `.styles.ts` (`style={[styles.footer, footerBottomPadding(insets.bottom)]}`). Animated styles from `useAnimatedStyle` are the other exception.
 
 ## Animations and Gestures
 
@@ -173,3 +225,5 @@ const userName = user.name; // Get the user's name
 - Disable ESLint rules without explaining why
 - Animate layout properties
 - Call setState inside a gesture handler
+- Use `useState` in a component
+- Write inline styles or `style` objects in the markup

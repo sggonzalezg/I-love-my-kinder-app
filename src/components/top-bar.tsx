@@ -1,10 +1,11 @@
 import { router } from 'expo-router';
 import { ChevronLeft } from 'lucide-react-native';
 import type { ReactNode } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { IconButton } from './icon-button';
 import { Text } from './text';
+import { styles } from './top-bar.styles';
 
 type Props = {
   title?: string;
@@ -34,9 +35,3 @@ export function TopBar({ title, subtitle, backLabel, onBack, right }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  bar: { flexDirection: 'row', alignItems: 'center', gap: 12, paddingTop: 8, paddingBottom: 12, paddingHorizontal: 20, minHeight: 56 },
-  titles: { flex: 1 },
-  right: { flexDirection: 'row', gap: 8 },
-});

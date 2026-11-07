@@ -1,9 +1,11 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { ActivityIndicator, StyleSheet, View, ViewStyle } from 'react-native';
+import { ActivityIndicator, View, ViewStyle } from 'react-native';
 
-import { radius, size } from '@/theme/tokens';
+import { useBackgroundColorStyles } from '@/theme/color-styles';
+import { size } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
+import { BUTTON_ICON_SIZE, BUTTON_PALETTES, buttonHeightStyle, styles } from './button.styles';
 import { PressableScale } from './pressable-scale';
 import { Text } from './text';
 
@@ -24,25 +26,16 @@ type Props = {
 };
 
 export function Button({ label, title, onPress, variant = 'primary', icon: Icon, disabled, loading, block, height = size.button, style: containerStyle, accessibilityHint }: Props) {
-  const c = useColors();
+  const colors = useColors();
+  const backgroundStyles = useBackgroundColorStyles();
   const text = label || title || '';
 
-  // Map 'secondary' to 'soft'
-  const actualVariant = variant === 'secondary' ? 'soft' : variant;
-
-  const palette = {
-    primary: { bg: c.blue, pressed: c.bluePress, fg: c.onBlue },
-    soft: { bg: c.blue50, pressed: c.blue100, fg: c.blue },
-    plain: { bg: c.surface, pressed: c.raised, fg: c.ink },
-    danger: { bg: c.red, pressed: c.red, fg: c.onRed },
-    'danger-soft': { bg: c.red50, pressed: c.red50, fg: c.red },
-    ghost: { bg: 'transparent', pressed: c.raised, fg: c.blue },
-  }[actualVariant];
+  const palette = BUTTON_PALETTES[variant === 'secondary' ? 'soft' : variant];
   const off = disabled || loading;
-  const fg = disabled ? c.muted : palette.fg;
+  const foreground = disabled ? 'muted' : palette.label;
   const background = (pressed: boolean) => {
-    if (disabled) return c.raised;
-    return pressed ? palette.pressed : palette.bg;
+    if (disabled) return backgroundStyles.raised;
+    return backgroundStyles[pressed ? palette.pressed : palette.idle];
   };
 
   return (
@@ -54,14 +47,11 @@ export function Button({ label, title, onPress, variant = 'primary', icon: Icon,
       accessibilityHint={accessibilityHint}
       accessibilityState={{ disabled: !!disabled, busy: !!loading }}
       containerStyle={[block && styles.block, containerStyle]}
-      style={({ pressed }) => [
-        styles.base,
-        { minHeight: height, backgroundColor: background(pressed) },
-      ]}>
+      style={({ pressed }) => [styles.base, buttonHeightStyle(height), background(pressed)]}>
       <View style={styles.row}>
-        {loading && <ActivityIndicator color={fg} />}
-        {!loading && Icon && <Icon size={20} color={fg} strokeWidth={1.8} />}
-        <Text variant="button" style={{ color: fg }}>
+        {loading && <ActivityIndicator color={colors[foreground]} />}
+        {!loading && Icon && <Icon size={BUTTON_ICON_SIZE} color={colors[foreground]} strokeWidth={1.8} />}
+        <Text variant="button" tone={foreground}>
           {text}
         </Text>
       </View>
@@ -70,9 +60,3 @@ export function Button({ label, title, onPress, variant = 'primary', icon: Icon,
 }
 
 export default Button;
-
-const styles = StyleSheet.create({
-  base: { borderRadius: radius.full, paddingHorizontal: 22, justifyContent: 'center', alignItems: 'center' },
-  block: { alignSelf: 'stretch' },
-  row: { flexDirection: 'row', alignItems: 'center', gap: 8 },
-});
