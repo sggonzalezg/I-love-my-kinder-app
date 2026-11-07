@@ -14,15 +14,16 @@ interface BannerProps {
   variant?: BannerKind;
   text?: string;
   message?: string;
+  icon?: LucideIcon;
 }
 
-export function Banner({ kind, variant, text, message }: BannerProps) {
+export function Banner({ kind, variant, text, message, icon }: BannerProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   const actualKind = kind || variant || 'info';
   const actualText = text || message || '';
   const palette = BANNER_PALETTES[actualKind];
-  const Icon = ICONS[actualKind];
+  const Icon = icon ?? ICONS[actualKind];
   return (
     <View style={[styles.banner, backgroundStyles[palette.background]]} accessibilityRole={actualKind === 'error' ? 'alert' : undefined}>
       <Icon size={BANNER_ICON_SIZE} color={colors[palette.icon]} strokeWidth={1.8} />
