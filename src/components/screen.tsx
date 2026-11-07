@@ -1,19 +1,21 @@
 import { StatusBar } from 'expo-status-bar';
 import type { ReactNode } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
+import { ScrollView, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { screenMargin } from '@/theme/tokens';
-import { useColors, useIsDark } from '@/theme/use-theme';
+import { useBackgroundColorStyles } from '@/theme/color-styles';
+import { useIsDark } from '@/theme/use-theme';
+
+import { styles, topInsetStyle } from './screen.styles';
 
 type Props = { children: ReactNode; header?: ReactNode; scroll?: boolean };
 
 export function Screen({ children, header, scroll = true }: Props) {
-  const c = useColors();
+  const backgroundStyles = useBackgroundColorStyles();
   const dark = useIsDark();
   const insets = useSafeAreaInsets();
   return (
-    <View style={[styles.root, { backgroundColor: c.ground, paddingTop: insets.top }]}>
+    <View style={[styles.root, backgroundStyles.ground, topInsetStyle(insets.top)]}>
       <StatusBar style={dark ? 'light' : 'dark'} />
       {header}
       {scroll ? (
@@ -26,10 +28,5 @@ export function Screen({ children, header, scroll = true }: Props) {
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  root: { flex: 1 },
-  content: { paddingHorizontal: screenMargin, paddingBottom: 24, gap: 16 },
-});
 
 export default Screen;
