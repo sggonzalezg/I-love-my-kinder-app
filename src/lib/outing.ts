@@ -1,4 +1,4 @@
-export type OutingDecision = 'authorized' | 'declined' | 'withdrawn';
+export type OutingDecision = 'pending' | 'authorized' | 'declined' | 'withdrawn';
 export type PermissionStatus = 'pending' | 'authorized' | 'declined';
 
 export type OutingAnswer = {
@@ -8,12 +8,15 @@ export type OutingAnswer = {
   permission_version: number;
   signer_name: string;
   signer_relationship: string;
+  signed_by: string | null;
 };
 
-/** One answer per child: the latest record of the current version, from any guardian. */
+const isAnswer = (row: OutingAnswer) => row.decision !== 'pending';
+
+/** One answer per child: the latest record of the current version, from any guardian. The nursery's 'pending' rows are the request, not an answer. */
 export function permissionStatus(rows: OutingAnswer[], childId: string, version: number) {
   const latest = rows
-    .filter((r) => r.child_id === childId && r.permission_version === version)
+    .filter((r) => r.child_id === childId && r.permission_version === version && isAnswer(r))
     .sort((a, b) => b.created_at.localeCompare(a.created_at))[0];
   if (!latest) return { status: 'pending' as PermissionStatus, answer: null };
   const status: PermissionStatus = latest.decision === 'authorized' ? 'authorized' : 'declined';
