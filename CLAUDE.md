@@ -36,6 +36,20 @@ This document establishes mandatory coding standards for the i-love-my-kinder mo
 - Hooks at the top, unconditionally
 - Prop destructuring in function signature
 
+## Component State
+
+- Component state uses `useReducer`, never `useState`
+- Action types are named constants (`const COUNTER_ACTIONS = { INCREMENTED: 'incremented' } as const`)
+- The reducer is a pure function outside the component (or in its own file) with its own tests
+
+## Styles
+
+- UI is split into reusable components; shared ones live in `src/components/`
+- No inline styles and no `style` objects in the markup
+- Each component's styles live in its own `<Component>.styles.ts` with `StyleSheet.create`; no SCSS transformer
+- Styles that depend on the color scheme use `createThemedStyles((colors) => ({ ... }))` from `src/theme/themed-styles.ts`
+- A value only known at runtime (a safe-area inset) comes from a small function exported by the same `.styles.ts`
+
 ## Animations and Gestures
 
 - Use Reanimated 4 and Gesture Handler
@@ -79,6 +93,6 @@ Only comment the **why**, not the **what**. Code shows what it does; comments ex
 
 **Ask First:** Adding external dependencies, changing file structure, adding new animation/gesture patterns, adding telemetry
 
-**Never:** Commit secrets/API keys, remove failing tests without documenting why, use `console.log` in production, commit commented code, disable ESLint rules without reason, animate layout properties, setState in gestures
+**Never:** Commit secrets/API keys, remove failing tests without documenting why, use `console.log` in production, commit commented code, disable ESLint rules without reason, animate layout properties, setState in gestures, `useState` in components, inline styles or `style` objects in the markup
 
 See `docs/CODING_STANDARDS.md` for detailed examples and context.
