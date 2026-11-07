@@ -1,6 +1,7 @@
 import { View } from 'react-native';
+
+import { styles } from './empty-state.styles';
 import { Text } from './text';
-import { useTheme } from '@/theme/use-theme';
 
 interface EmptyStateProps {
   title: string;
@@ -8,35 +9,12 @@ interface EmptyStateProps {
 }
 
 export function EmptyState({ title, description }: EmptyStateProps) {
-  const { colors, spacing } = useTheme();
-
   return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: 'center',
-        alignItems: 'center',
-        paddingHorizontal: spacing.lg,
-      }}
-    >
-      <Text
-        style={{
-          fontSize: 16,
-          fontWeight: '600',
-          color: colors.onSurface,
-          textAlign: 'center',
-        }}
-      >
+    <View style={styles.container}>
+      <Text tone="ink" style={styles.title}>
         {title}
       </Text>
-      <Text
-        style={{
-          fontSize: 14,
-          color: colors.onSurfaceVariant,
-          textAlign: 'center',
-          marginTop: spacing.sm,
-        }}
-      >
+      <Text tone="muted" style={styles.description}>
         {description}
       </Text>
     </View>

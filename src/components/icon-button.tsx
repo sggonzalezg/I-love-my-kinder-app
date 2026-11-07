@@ -1,10 +1,11 @@
 import type { LucideIcon } from 'lucide-react-native';
-import { StyleSheet, View } from 'react-native';
+import { View } from 'react-native';
 
 import { badgeText } from '@/lib/format';
-import { fonts, radius, size, tabular } from '@/theme/tokens';
+import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { useColors } from '@/theme/use-theme';
 
+import { ICON_BUTTON_ICON_SIZE, styles } from './icon-button.styles';
 import { PressableScale } from './pressable-scale';
 import { Text } from './text';
 
@@ -18,11 +19,12 @@ type Props = {
 };
 
 export function IconButton({ icon: Icon, label, onPress, ghost, badge = 0, disabled }: Props) {
-  const c = useColors();
+  const colors = useColors();
+  const backgroundStyles = useBackgroundColorStyles();
   const count = badgeText(badge);
   const background = (pressed: boolean) => {
-    if (ghost) return 'transparent';
-    return pressed ? c.raised : c.surface;
+    if (ghost) return backgroundStyles.transparent;
+    return pressed ? backgroundStyles.raised : backgroundStyles.surface;
   };
   return (
     <PressableScale
@@ -30,19 +32,15 @@ export function IconButton({ icon: Icon, label, onPress, ghost, badge = 0, disab
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={label}
-      style={({ pressed }) => [styles.base, { backgroundColor: background(pressed) }]}>
-      <Icon size={24} color={disabled ? c.muted : c.ink} strokeWidth={1.8} />
+      style={({ pressed }) => [styles.base, background(pressed)]}>
+      <Icon size={ICON_BUTTON_ICON_SIZE} color={disabled ? colors.muted : colors.ink} strokeWidth={1.8} />
       {count && (
-        <View style={[styles.badge, { backgroundColor: c.red }]} importantForAccessibility="no">
-          <Text style={[styles.badgeText, { color: c.onRed }]}>{count}</Text>
+        <View style={[styles.badge, backgroundStyles.red]} importantForAccessibility="no">
+          <Text tone="onRed" style={styles.badgeText}>
+            {count}
+          </Text>
         </View>
       )}
     </PressableScale>
   );
 }
-
-const styles = StyleSheet.create({
-  base: { width: size.touch, height: size.touch, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
-  badge: { position: 'absolute', top: 2, right: 0, minWidth: 18, height: 18, paddingHorizontal: 5, borderRadius: 9, alignItems: 'center', justifyContent: 'center' },
-  badgeText: { fontFamily: fonts.text700, fontSize: 11, lineHeight: 18, ...tabular },
-});
