@@ -1,4 +1,4 @@
-import { badgeText, bellLabel, initials, relationshipLabel, senderLabel } from '../format';
+import { badgeText, bellLabel, initials, relationshipLabel, relationshipWord, senderLabel } from '../format';
 
 describe('small UI formatters', () => {
   it('caps the badge at 9+', () => {
@@ -20,6 +20,12 @@ describe('small UI formatters', () => {
     expect(relationshipLabel('mother')).toBe('Madre');
     expect(relationshipLabel('grandmother')).toBe('Abuela');
     expect(relationshipLabel('Tía')).toBe('Tía');
+  });
+
+  it('names the relationship in a signature in lower case', () => {
+    expect(relationshipWord('mother')).toBe('madre');
+    expect(relationshipWord('father')).toBe('padre');
+    expect(relationshipWord('Tía')).toBe('tía');
   });
 
   it('names a family sender with the child only when visibility is authorized (legal 7.3)', () => {

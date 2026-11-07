@@ -4,6 +4,7 @@ import type { FamilyChild, RoomGroup } from '@/lib/room-groups';
 import type { ShiftName } from '@/lib/shift';
 import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 import { supabase } from './supabase';
+import { throwOnError } from './throw-on-error';
 
 export interface RosterChild {
   id: string;
@@ -37,12 +38,6 @@ interface EnrollmentRow {
 
 interface ChildLinkRow {
   children: { id: string; first_name: string; photo_path: string | null; enrollments: EnrollmentRow[] } | null;
-}
-
-// Without generated database types supabase-js guesses embedded rows as arrays; the select strings define the real shape.
-function throwOnError<T>(result: { data: unknown; error: { message: string } | null }): T {
-  if (result.error) throw new Error(result.error.message);
-  return result.data as T;
 }
 
 export async function fetchFamilyChildren(userId: string): Promise<FamilyChild[]> {

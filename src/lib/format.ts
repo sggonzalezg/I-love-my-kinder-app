@@ -11,16 +11,21 @@ export function initials(first: string, last = ''): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 }
 
-const RELATIONSHIPS: Record<string, { chip: string; short: string }> = {
-  mother: { chip: 'Madre', short: 'mamá' },
-  father: { chip: 'Padre', short: 'papá' },
-  tutor: { chip: 'Tutor', short: 'tutor' },
-  grandmother: { chip: 'Abuela', short: 'abuela' },
-  grandfather: { chip: 'Abuelo', short: 'abuelo' },
+const RELATIONSHIPS: Record<string, { chip: string; short: string; formal: string }> = {
+  mother: { chip: 'Madre', short: 'mamá', formal: 'madre' },
+  father: { chip: 'Padre', short: 'papá', formal: 'padre' },
+  tutor: { chip: 'Tutor', short: 'tutor', formal: 'tutor' },
+  grandmother: { chip: 'Abuela', short: 'abuela', formal: 'abuela' },
+  grandfather: { chip: 'Abuelo', short: 'abuelo', formal: 'abuelo' },
 };
 
 export function relationshipLabel(relationship: string): string {
   return RELATIONSHIPS[relationship]?.chip ?? relationship;
+}
+
+/** The word a signature uses: "Ana Rodríguez (madre)". */
+export function relationshipWord(relationship: string): string {
+  return RELATIONSHIPS[relationship]?.formal ?? relationship.toLowerCase();
 }
 
 type Sender =

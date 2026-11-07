@@ -6,12 +6,15 @@ import { EventTypeChip } from '@/components/event-type-chip';
 import { FactsCard } from '@/components/facts-card';
 import { Banner } from '@/components/banner';
 import { mockEvents } from '@/data/events';
+import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
+import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 import { space } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 export default function EventDetail() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const c = useColors();
+  const pendingRequest = useFamilyOutingRequests().find((request) => request.eventId === id && request.status === 'pending');
 
   // Find the event
   const event = mockEvents.find((e) => e.id === id);
@@ -60,6 +63,12 @@ export default function EventDetail() {
         >
           {event.title}
         </Text>
+
+        {pendingRequest && (
+          <View style={{ marginBottom: space.s4 }}>
+            <PermissionRequestCard request={pendingRequest} />
+          </View>
+        )}
 
         {/* Changed banner */}
         {event.changed_at && !isPast && (

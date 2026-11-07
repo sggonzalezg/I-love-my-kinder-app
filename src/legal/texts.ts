@@ -53,8 +53,9 @@ export const withdrawConfirm = (typeTitle: string, child: string) =>
 export const OUTING = {
   id: 'outing_authorization',
   version: '1.0',
-  text: (p: { signer: string; relationship: string; child: string; title: string; date: string; out: string; back: string; place: string; transport: string; notes?: string | null }) =>
-    `Yo, ${p.signer} (${p.relationship}), autorizo a que ${p.child} salga del Jardín para ${p.title} el ${p.date}, de ${p.out} a ${p.back}, a ${p.place}, en ${p.transport}, acompañado por el personal del Jardín.${p.notes ? ` ${p.notes}` : ''} Puedo cambiar o retirar esta autorización hasta que empiece la salida. Tocar "Autorizo" y confirmar equivale a mi firma.`,
+  // "en [transporte]" is filled as a whole clause because a walking outing reads "a pie" (approved F12 mockup), not "en a pie".
+  text: (p: { signer: string; relationship: string; child: string; title: string; date: string; out: string; back: string; place: string; transportClause: string; notes?: string | null }) =>
+    `Yo, ${p.signer} (${p.relationship}), autorizo a que ${p.child} salga del Jardín para ${p.title} el ${p.date}, de ${p.out} a ${p.back}, a ${p.place}, ${p.transportClause}, acompañado por el personal del Jardín.${p.notes ? ` ${p.notes}` : ''} Puedo cambiar o retirar esta autorización hasta que empiece la salida. Tocar "Autorizo" y confirmar equivale a mi firma.`,
   confirmYes: (child: string, title: string, date: string) => `¿Confirmás que autorizás a ${child} a ir a ${title} el ${date}?`,
   confirmNo: (child: string, title: string, date: string) => `¿Confirmás que ${child} no va a ${title} el ${date}?`,
   signed: (name: string, date: string, time: string) => `Autorizado por ${name} el ${date} a las ${time}`,

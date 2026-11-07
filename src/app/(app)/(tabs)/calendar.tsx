@@ -12,6 +12,7 @@ import { EventRow } from '@/components/event-row';
 import { monthTitle } from '@/lib/calendar';
 import { getEventsByDate, getPastEvents, mockEvents, type Event } from '@/data/events';
 import { useEventsForMonth } from '@/data/use-events-query';
+import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { space } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
@@ -21,6 +22,7 @@ export default function CalendarTab() {
   const [year, setYear] = useState(new Date().getFullYear());
   const [selectedDay, setSelectedDay] = useState<number | null>(null);
   const reduced = useReducedMotion();
+  const outingRequests = useFamilyOutingRequests();
 
   const today = new Date();
   const isCurrentMonth = year === today.getFullYear() && month === today.getMonth();
@@ -188,7 +190,13 @@ export default function CalendarTab() {
         {listEvents.length > 0 ? (
           <>
             {listEvents.map((event, index) => (
-              <EventRow key={event.id} event={event} onPress={handleEventPress} index={index} />
+              <EventRow
+                key={event.id}
+                event={event}
+                onPress={handleEventPress}
+                index={index}
+                permissionStatus={outingRequests.find((request) => request.eventId === event.id)?.status}
+              />
             ))}
 
             {selectedDay && pastEventsCount > 0 && (
