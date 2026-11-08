@@ -29,11 +29,19 @@ export interface GalleryGroup extends ChildGroup {
 
 export type GalleryMediaType = 'photo' | 'video';
 
+export interface MediaUploader {
+  label: string;
+  initials: string;
+  photoPath: string | null;
+}
+
 export interface GalleryMedia {
   id: string;
   type: GalleryMediaType;
   createdAt: string;
   url: string | null;
+  filePath: string;
+  uploader: MediaUploader | null;
 }
 
 export interface MediaDaySection {

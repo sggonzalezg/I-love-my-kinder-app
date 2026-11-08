@@ -23,11 +23,13 @@ import {
   withdrawnBanner,
   type GalleryGroup,
 } from '@/lib/gallery';
+import { groupLabel } from '@/lib/shift';
 
 import { styles, SKELETON_TILE_HEIGHT, SKELETON_TILE_ROWS } from './family-gallery-screen.styles';
 import { GALLERY_COPY } from './gallery-copy';
 import { GALLERY_SELECTION_ACTIONS, INITIAL_GALLERY_SELECTION, gallerySelectionReducer } from './gallery-selection-reducer';
 import { MediaDaySection } from './media-day-section';
+import { StoryViewer } from './story-viewer';
 
 const JOINED_ILLUSTRATION = require('@/assets/images/blocks-markus-spiske.jpg');
 const EMPTY_ILLUSTRATION = require('@/assets/images/crayons-stephen-andrews.jpg');
@@ -69,7 +71,10 @@ export function FamilyGalleryScreen() {
     <GalleryGroupView
       group={group}
       groups={groups}
+      openMediaId={selection.openMediaId}
       onSelectGroup={(key) => dispatch({ type: GALLERY_SELECTION_ACTIONS.GROUP_SELECTED, key })}
+      onOpenMedia={(mediaId) => dispatch({ type: GALLERY_SELECTION_ACTIONS.STORY_OPENED, mediaId })}
+      onCloseStory={() => dispatch({ type: GALLERY_SELECTION_ACTIONS.STORY_CLOSED })}
     />
   );
 }
@@ -77,10 +82,13 @@ export function FamilyGalleryScreen() {
 interface GalleryGroupViewProps {
   group: GalleryGroup;
   groups: GalleryGroup[];
+  openMediaId: string | null;
   onSelectGroup: (key: string) => void;
+  onOpenMedia: (mediaId: string) => void;
+  onCloseStory: () => void;
 }
 
-function GalleryGroupView({ group, groups, onSelectGroup }: GalleryGroupViewProps) {
+function GalleryGroupView({ group, groups, openMediaId, onSelectGroup, onOpenMedia, onCloseStory }: GalleryGroupViewProps) {
   const media = useAsync(() => fetchGroupMedia(group), group.key);
   const now = new Date();
   const familyEnrolled = isFamilyEnrolled(groups);
@@ -113,12 +121,15 @@ function GalleryGroupView({ group, groups, onSelectGroup }: GalleryGroupViewProp
       {sections.length > 0 ? (
         <View style={styles.sections}>
           {sections.map((section, index) => (
-            <MediaDaySection key={section.key} section={section} index={index} onMissingUrlRetry={media.reload} />
+            <MediaDaySection key={section.key} section={section} index={index} onMissingUrlRetry={media.reload} onOpenMedia={onOpenMedia} />
           ))}
           <Text variant="small" color="muted" style={styles.footer}>
             {galleryFooter(group, groups, now)}
           </Text>
         </View>
+      ) : null}
+      {openMediaId && sections.length > 0 ? (
+        <StoryViewer sections={sections} groupLabel={groupLabel(group.roomName, group.shift)} startMediaId={openMediaId} onClose={onCloseStory} />
       ) : null}
     </Screen>
   );

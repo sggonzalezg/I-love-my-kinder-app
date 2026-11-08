@@ -34,7 +34,19 @@
           "backgroundColor": "#FFFFFF",
           "image": "./assets/images/logo-client.jpg",
           "imageWidth": 200,
-          "dark": { "backgroundColor": "#FFFFFF", "image": "./assets/images/logo-client.jpg" }
+          "dark": {
+            "backgroundColor": "#FFFFFF",
+            "image": "./assets/images/logo-client.jpg"
+          }
+        }
+      ],
+      "expo-video",
+      [
+        "expo-media-library",
+        {
+          "photosPermission": false,
+          "savePhotosPermission": "Para guardar en tu galería las fotos y videos que elijas. Solo agregamos lo que vos guardás. Nunca vemos ni leemos tus fotos.",
+          "granularPermissions": ["photo", "video"]
         }
       ]
     ],

@@ -1,0 +1,26 @@
+export const STORY_COPY = {
+  close: 'Cerrar',
+  previous: 'Anterior',
+  next: 'Siguiente',
+  soundOn: 'Activar sonido',
+  soundOff: 'Silenciar',
+  save: 'Guardar',
+  saved: 'Guardado',
+  savedToast: 'Guardado en tu galería',
+  saveFailedToast: 'No pudimos guardar. Probá de nuevo.',
+  videoFailedTitle: 'No pudimos cargar este video',
+  photoFailedTitle: 'No pudimos cargar esta foto',
+  failedBody: 'Revisá tu conexión. Si sigue sin cargar, probá más tarde.',
+  retry: 'Reintentar',
+  cancel: 'Cancelar',
+  permissionTitle: 'Necesitamos permiso para guardar',
+  permissionBody: 'Para guardar esta foto en tu teléfono, permití que I love my kinder agregue fotos a tu galería.',
+  permissionNote: 'Solo agregamos lo que vos guardás. Nunca vemos ni leemos tus fotos.',
+  openSettings: 'Abrir Ajustes',
+  notNow: 'Ahora no',
+  photoLabel: 'Foto de la sala',
+  videoLabel: 'Video de la sala',
+  position: (current: number, total: number) => `${current} de ${total}`,
+} as const;
+
+export const STORY_SCREEN = 'F7b';

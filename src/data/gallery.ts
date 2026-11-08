@@ -1,7 +1,10 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
 import { GALLERY_BUCKET } from '@/constants/storage';
-import type { GalleryChild, GalleryGroup, GalleryMedia } from '@/lib/gallery';
+import { SAVE_MEDIA_NOTICE } from '@/legal/texts';
+import { initials } from '@/lib/format';
+import type { GalleryChild, GalleryGroup, GalleryMedia, MediaUploader } from '@/lib/gallery';
 import type { ShiftName } from '@/lib/shift';
+import { saveNoticeNeeded, uploaderLabel, type NoticeRecord } from '@/lib/story';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -23,6 +26,15 @@ interface MediaRow {
   file_path: string;
   file_type: string;
   created_at: string;
+  uploaded_by: string;
+}
+
+interface UploaderRow {
+  user_id: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  photo_path: string | null;
 }
 
 export async function fetchFamilyGalleryChildren(userId: string): Promise<GalleryChild[]> {
@@ -64,16 +76,17 @@ export async function fetchGroupMedia(group: GalleryGroup): Promise<GalleryMedia
   const rows = throwOnError<MediaRow[]>(
     await supabase
       .from('media')
-      .select('id, file_path, file_type, created_at')
+      .select('id, file_path, file_type, created_at, uploaded_by')
       .eq('room_id', group.roomId)
       .eq('shift_id', group.shiftId)
       .order('created_at', { ascending: false }),
   );
   if (rows.length === 0) return [];
 
-  const { data: signed, error } = await supabase.storage
-    .from(GALLERY_BUCKET)
-    .createSignedUrls(rows.map((row) => row.file_path), SIGNED_URL_EXPIRY_SECONDS);
+  const [{ data: signed, error }, uploaders] = await Promise.all([
+    supabase.storage.from(GALLERY_BUCKET).createSignedUrls(rows.map((row) => row.file_path), SIGNED_URL_EXPIRY_SECONDS),
+    fetchUploaders([...new Set(rows.map((row) => row.uploaded_by))]),
+  ]);
   if (error) throw new Error(error.message);
   const urlByPath = new Map((signed ?? []).map((entry) => [entry.path, entry.signedUrl]));
 
@@ -82,5 +95,33 @@ export async function fetchGroupMedia(group: GalleryGroup): Promise<GalleryMedia
     type: row.file_type === 'video' ? 'video' : 'photo',
     createdAt: row.created_at,
     url: urlByPath.get(row.file_path) ?? null,
+    filePath: row.file_path,
+    uploader: uploaders.get(row.uploaded_by) ?? null,
   }));
+}
+
+// RLS hides teachers who left the nursery, so their media shows no uploader.
+async function fetchUploaders(userIds: string[]): Promise<Map<string, MediaUploader>> {
+  const rows = throwOnError<UploaderRow[]>(
+    await supabase.from('teachers').select('user_id, first_name, last_name, role, photo_path').in('user_id', userIds),
+  );
+  return new Map(
+    rows.map((row) => [
+      row.user_id,
+      { label: uploaderLabel({ role: row.role, firstName: row.first_name }), initials: initials(row.first_name, row.last_name), photoPath: row.photo_path },
+    ]),
+  );
+}
+
+export async function fetchSaveNoticeNeeded(userId: string): Promise<boolean> {
+  const records = throwOnError<NoticeRecord[]>(
+    await supabase
+      .from('consent_records')
+      .select('document_version, accepted')
+      .eq('user_id', userId)
+      .eq('document_type', SAVE_MEDIA_NOTICE.id)
+      .order('created_at', { ascending: false })
+      .limit(1),
+  );
+  return saveNoticeNeeded(records, SAVE_MEDIA_NOTICE.version);
 }

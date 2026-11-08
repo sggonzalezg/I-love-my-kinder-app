@@ -25,9 +25,10 @@ interface MediaDaySectionProps {
   section: Section;
   index: number;
   onMissingUrlRetry: () => void;
+  onOpenMedia: (mediaId: string) => void;
 }
 
-export function MediaDaySection({ section, index, onMissingUrlRetry }: MediaDaySectionProps) {
+export function MediaDaySection({ section, index, onMissingUrlRetry, onOpenMedia }: MediaDaySectionProps) {
   const reduced = useReducedMotion();
   const entering =
     reduced || index >= STAGGERED_SECTIONS
@@ -54,7 +55,7 @@ export function MediaDaySection({ section, index, onMissingUrlRetry }: MediaDayS
           <View key={rowIndex} style={styles.row}>
             {row.map((media, column) =>
               media ? (
-                <MediaTile key={media.id} media={media} onMissingUrlRetry={onMissingUrlRetry} />
+                <MediaTile key={media.id} media={media} onMissingUrlRetry={onMissingUrlRetry} onOpen={onOpenMedia} />
               ) : (
                 <View key={`filler-${column}`} style={styles.filler} />
               ),
