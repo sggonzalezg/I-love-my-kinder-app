@@ -3,6 +3,7 @@ import type { ChatMessage, ChatRead, ChatSenderRole, WorkHours } from '@/lib/cha
 import type { ChildGroup } from '@/lib/room-groups';
 import { groupLabel, type ShiftName } from '@/lib/shift';
 
+import { fetchRoomRoster, type RoomRoster } from './family-room';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -115,6 +116,11 @@ export async function fetchChatThreadSummaries(userId: string): Promise<ChatThre
   return summaries.sort((first, second) => (second.latest?.createdAt ?? '').localeCompare(first.latest?.createdAt ?? '') || first.thread.label.localeCompare(second.thread.label));
 }
 
+export async function fetchThreadRosters(threads: ChatThread[]): Promise<Map<string, RoomRoster>> {
+  const rosters = await Promise.all(threads.map((thread) => fetchRoomRoster(thread)));
+  return new Map(threads.map((thread, index) => [thread.id, rosters[index]]));
+}
+
 export async function fetchUnreadChatCount(userId: string): Promise<number> {
   const summaries = await fetchChatThreadSummaries(userId);
   return summaries.filter((summary) => summary.unread > 0).length;
@@ -139,8 +145,22 @@ export async function fetchThreadReads(threadId: string): Promise<ChatRead[]> {
 }
 
 // The client id makes a retry idempotent: a second insert hits the unique key and the first row is the result.
-export async function sendChatMessage({ threadId, body, clientId }: { threadId: string; body: string; clientId: string }): Promise<ChatMessage> {
-  const { data, error } = await supabase.from('chat_messages').insert({ thread_id: threadId, body, client_id: clientId }).select(MESSAGE_COLUMNS).single();
+export async function sendChatMessage({
+  threadId,
+  body,
+  imagePath,
+  clientId,
+}: {
+  threadId: string;
+  body: string | null;
+  imagePath: string | null;
+  clientId: string;
+}): Promise<ChatMessage> {
+  const { data, error } = await supabase
+    .from('chat_messages')
+    .insert({ thread_id: threadId, body, image_path: imagePath, client_id: clientId })
+    .select(MESSAGE_COLUMNS)
+    .single();
   if (error?.code === POSTGRES_UNIQUE_VIOLATION) {
     return toMessage(throwOnError<MessageRow>(await supabase.from('chat_messages').select(MESSAGE_COLUMNS).eq('client_id', clientId).single()));
   }

@@ -4,8 +4,7 @@ import { View } from 'react-native';
 import { PressableScale } from '@/components/pressable-scale';
 import { Text } from '@/components/text';
 import type { ChatThreadSummary } from '@/data/chat';
-import { fetchRoomRoster } from '@/data/family-room';
-import { useAsync } from '@/data/use-async';
+import type { RoomRoster } from '@/data/family-room';
 import { messagePreview, threadListMeta, threadTimeLabel } from '@/lib/chat';
 import type { Role } from '@/lib/role';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
@@ -16,6 +15,7 @@ import { GROUP_ICON_SIZE, styles } from './chat-thread-row.styles';
 
 interface ChatThreadRowProps {
   summary: ChatThreadSummary;
+  roster: RoomRoster | null;
   userId: string;
   viewer: Role;
   childNames: string[];
@@ -23,15 +23,14 @@ interface ChatThreadRowProps {
   onOpen: () => void;
 }
 
-export function ChatThreadRow({ summary, userId, viewer, childNames, now, onOpen }: ChatThreadRowProps) {
+export function ChatThreadRow({ summary, roster, userId, viewer, childNames, now, onOpen }: ChatThreadRowProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   const { thread, latest, unread } = summary;
-  const roster = useAsync(() => fetchRoomRoster(thread), thread.id);
-  const meta = roster.data
+  const meta = roster
     ? threadListMeta({
-        familyCount: roster.data.children.length,
-        teacherFirstNames: roster.data.teachers.map((teacher) => teacher.first_name),
+        familyCount: roster.children.length,
+        teacherFirstNames: roster.teachers.map((teacher) => teacher.first_name),
         childNames,
         viewer,
       })
@@ -60,7 +59,7 @@ export function ChatThreadRow({ summary, userId, viewer, childNames, now, onOpen
           ) : null}
         </View>
         {meta ? (
-          <Text variant="caption" color={viewer === 'director' && roster.data?.teachers.length === 0 ? 'red' : 'muted'}>
+          <Text variant="caption" color={viewer === 'director' && roster?.teachers.length === 0 ? 'red' : 'muted'}>
             {meta}
           </Text>
         ) : null}

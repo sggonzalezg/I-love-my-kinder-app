@@ -5,7 +5,7 @@ import { AppState } from 'react-native';
 import { fetchThreadMessages, fetchThreadReads, markThreadRead, newClientId, sendChatMessage, subscribeToThreadMessages } from '@/data/chat';
 import { useAsync } from '@/data/use-async';
 
-import { CHAT_THREAD_ACTIONS, INITIAL_CHAT_THREAD_STATE, chatThreadReducer } from './chat-thread-reducer';
+import { CHAT_THREAD_ACTIONS, INITIAL_CHAT_THREAD_STATE, canSend, chatThreadReducer, type PendingMessage } from './chat-thread-reducer';
 
 function markRead(threadId: string, userId: string) {
   markThreadRead(threadId, userId).catch((error: unknown) => console.warn('Marking the chat as read failed:', error));
@@ -46,9 +46,9 @@ export function useChatThread(threadId: string, userId: string) {
     return () => subscription.remove();
   }, [threadId, userId, reloadMessages, reloadReads]);
 
-  async function deliver(clientId: string, body: string) {
+  async function deliver({ clientId, body, imagePath }: Pick<PendingMessage, 'clientId' | 'body' | 'imagePath'>) {
     try {
-      const saved = await sendChatMessage({ threadId, body, clientId });
+      const saved = await sendChatMessage({ threadId, body, imagePath, clientId });
       dispatch({ type: CHAT_THREAD_ACTIONS.SEND_SUCCEEDED, message: saved });
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       markRead(threadId, userId);
@@ -61,18 +61,18 @@ export function useChatThread(threadId: string, userId: string) {
   }
 
   function send() {
+    if (!canSend(state)) return;
     const body = state.draft.trim();
-    if (!body) return;
     const clientId = newClientId(userId);
     dispatch({ type: CHAT_THREAD_ACTIONS.SEND_STARTED, clientId, body, createdAt: new Date().toISOString() });
-    deliver(clientId, body);
+    deliver({ clientId, body: body || null, imagePath: state.attachment?.path ?? null });
   }
 
   function retry(clientId: string) {
     const failed = state.pending.find((pending) => pending.clientId === clientId);
     if (!failed) return;
     dispatch({ type: CHAT_THREAD_ACTIONS.RETRY_STARTED, clientId });
-    deliver(clientId, failed.body);
+    deliver(failed);
   }
 
   return {

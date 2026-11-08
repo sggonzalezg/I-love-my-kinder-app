@@ -5,6 +5,7 @@ import Animated, { FadeInDown, ReduceMotion } from 'react-native-reanimated';
 import { Text } from '@/components/text';
 import { formatTime } from '@/lib/dates';
 import { senderLine } from '@/lib/chat';
+import type { ChatPhotoVisibility } from '@/lib/chat-photo';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { duration, easeOut, messageRise } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
@@ -12,6 +13,7 @@ import { useColors } from '@/theme/use-theme';
 import { CHAT_COPY } from './chat-copy';
 import type { DisplayedMessage } from './chat-thread-reducer';
 import { RETRY_ICON_SIZE, SEEN_ICON_SIZE, styles, useFailedOutlineStyles } from './message-bubble.styles';
+import { MessagePhoto } from './message-photo';
 
 const ENTERING = FadeInDown.duration(duration.base)
   .easing(easeOut)
@@ -23,10 +25,12 @@ interface MessageBubbleProps {
   own: boolean;
   seenBy: number;
   animateEntry: boolean;
+  photoVisibility: ChatPhotoVisibility;
   onRetry: (clientId: string) => void;
+  onOpenPhoto: () => void;
 }
 
-export function MessageBubble({ message, own, seenBy, animateEntry, onRetry }: MessageBubbleProps) {
+export function MessageBubble({ message, own, seenBy, animateEntry, photoVisibility, onRetry, onOpenPhoto }: MessageBubbleProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   const failedStyles = useFailedOutlineStyles();
@@ -41,7 +45,12 @@ export function MessageBubble({ message, own, seenBy, animateEntry, onRetry }: M
         </Text>
       )}
       <View style={[styles.bubble, own ? [styles.ownBubble, backgroundStyles.blue100] : backgroundStyles.surface, message.status === 'failed' && failedStyles.failed]}>
-        <Text>{message.body}</Text>
+        {message.imagePath ? (
+          <View style={message.body ? styles.photoWithText : null}>
+            <MessagePhoto message={message} visibility={photoVisibility} onOpen={onOpenPhoto} />
+          </View>
+        ) : null}
+        {message.body ? <Text>{message.body}</Text> : null}
       </View>
       {message.status === 'failed' && message.clientId ? (
         <Pressable accessibilityRole="button" onPress={() => onRetry(message.clientId!)} style={styles.retry}>

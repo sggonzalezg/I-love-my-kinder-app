@@ -4,11 +4,15 @@ import { radius, size, space, type } from '@/theme/tokens';
 import { createThemedStyles } from '@/theme/themed-styles';
 
 const INPUT_MAX_HEIGHT = 120;
-export const SEND_ICON_SIZE = 22;
+export const COMPOSER_ICON_SIZE = 22;
+export const DENIED_ICON_SIZE = 16;
 
 export const styles = StyleSheet.create({
-  composer: { flexDirection: 'row', alignItems: 'flex-end', gap: space.s2, paddingTop: space.s2, paddingHorizontal: space.s3 },
-  send: { width: size.touch, height: size.touch, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+  composer: { paddingTop: space.s2, paddingHorizontal: space.s3 },
+  row: { flexDirection: 'row', alignItems: 'flex-end', gap: space.s2 },
+  roundButton: { width: size.touch, height: size.touch, borderRadius: radius.full, alignItems: 'center', justifyContent: 'center' },
+  denied: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: size.touch, marginHorizontal: space.s1 },
+  deniedText: { flex: 1 },
 });
 
 export const useComposerInputStyles = createThemedStyles((colors) => ({

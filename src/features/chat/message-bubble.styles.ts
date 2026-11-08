@@ -16,6 +16,7 @@ export const styles = StyleSheet.create({
   bubble: { borderRadius: radius.lg, borderBottomLeftRadius: BUBBLE_TAIL_RADIUS, paddingVertical: 9, paddingHorizontal: 13 },
   ownBubble: { borderBottomLeftRadius: radius.lg, borderBottomRightRadius: BUBBLE_TAIL_RADIUS },
   footer: { flexDirection: 'row', alignItems: 'center', gap: space.s1, marginHorizontal: space.s1 },
+  photoWithText: { marginBottom: 6 },
   retry: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: size.touch },
 });
 
