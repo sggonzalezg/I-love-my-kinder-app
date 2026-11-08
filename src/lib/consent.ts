@@ -28,3 +28,15 @@ export function getDocumentsToAccept(records: ConsentRecord[]): string[] {
 
   return needAccept;
 }
+
+export interface NoticeRecord {
+  document_version: string;
+  accepted: boolean;
+}
+
+// record-consent stores the version as a number ("1" for "1.0"), so versions are compared as numbers.
+/** One-time notices (save media, chat): `records` come newest first and the latest one decides. */
+export function noticeNeeded(records: NoticeRecord[], currentVersion: string): boolean {
+  const latest = records[0];
+  return !latest || !latest.accepted || Number(latest.document_version) !== Number(currentVersion);
+}

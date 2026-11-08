@@ -1,31 +1,11 @@
-import { Pressable } from 'react-native';
+import { router } from 'expo-router';
 import { MessageSquare } from 'lucide-react-native';
-import { useTheme } from '@/theme/use-theme';
-import { Link } from 'expo-router';
 
-interface ChatIconProps {
-  onPress?: () => void;
-  href?: string;
-}
+import { CHAT_LIST_ROUTE } from '@/constants/chat';
+import { chatIconLabel } from '@/lib/format';
 
-export function ChatIcon({ onPress, href = '/chat' }: ChatIconProps) {
-  const { colors } = useTheme();
+import { IconButton } from './icon-button';
 
-  const icon = <MessageSquare size={24} color={colors.onSurface} />;
-
-  if (onPress) {
-    return (
-      <Pressable onPress={onPress} hitSlop={8}>
-        {icon}
-      </Pressable>
-    );
-  }
-
-  return (
-    <Link href={href as any} asChild>
-      <Pressable hitSlop={8}>
-        {icon}
-      </Pressable>
-    </Link>
-  );
+export function ChatIcon({ unreadThreads = 0 }: { unreadThreads?: number }) {
+  return <IconButton icon={MessageSquare} label={chatIconLabel(unreadThreads)} badge={unreadThreads} onPress={() => router.push(CHAT_LIST_ROUTE)} />;
 }

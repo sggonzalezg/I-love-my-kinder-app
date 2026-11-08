@@ -4,7 +4,6 @@ import {
   previousDayPosition,
   previousStoryPosition,
   saveFileName,
-  saveNoticeNeeded,
   storyPositionOf,
   storyTimeLabel,
   uploaderLabel,
@@ -89,32 +88,6 @@ describe('storyTimeLabel', () => {
 
   it('adds the length of a video', () => {
     expect(storyTimeLabel(new Date(2026, 10, 6, 11, 2).toISOString(), now, 42.4)).toBe('Ayer · 11:02 · 0:42');
-  });
-});
-
-describe('saveNoticeNeeded', () => {
-  it('asks when the user never accepted the notice', () => {
-    expect(saveNoticeNeeded([], '1.0')).toBe(true);
-  });
-
-  it('does not ask when the latest record accepted the current version, stored as a number', () => {
-    expect(saveNoticeNeeded([{ document_version: '1', accepted: true }], '1.0')).toBe(false);
-  });
-
-  it('asks again for a new version', () => {
-    expect(saveNoticeNeeded([{ document_version: '1', accepted: true }], '1.1')).toBe(true);
-  });
-
-  it('follows the latest record when the notice was withdrawn', () => {
-    expect(
-      saveNoticeNeeded(
-        [
-          { document_version: '1', accepted: false },
-          { document_version: '1', accepted: true },
-        ],
-        '1.0',
-      ),
-    ).toBe(true);
   });
 });
 

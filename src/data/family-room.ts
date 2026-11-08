@@ -1,6 +1,6 @@
 import type { AuthorizationRecord } from '@/lib/authorizations';
 import { AUTHORIZATION_KEYS } from '@/lib/authorizations';
-import type { FamilyChild, RoomGroup } from '@/lib/room-groups';
+import type { ChildGroup, FamilyChild } from '@/lib/room-groups';
 import type { ShiftName } from '@/lib/shift';
 import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 import { supabase } from './supabase';
@@ -69,7 +69,7 @@ export async function fetchFamilyChildren(userId: string): Promise<FamilyChild[]
   );
 }
 
-export async function fetchRoomRoster(group: RoomGroup): Promise<RoomRoster> {
+export async function fetchRoomRoster(group: Pick<ChildGroup, 'roomId' | 'shiftId'>): Promise<RoomRoster> {
   const roster = throwOnError<{ children: RosterChild[] | null; teachers: RosterTeacher[] | null }>(
     await supabase.rpc('get_room_roster', { room_id: group.roomId, shift_id: group.shiftId }),
   );

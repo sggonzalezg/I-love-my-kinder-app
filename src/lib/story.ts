@@ -50,18 +50,6 @@ export function storyTimeLabel(createdAt: string, now: Date, videoSeconds: numbe
   return parts.join(' · ');
 }
 
-export interface NoticeRecord {
-  document_version: string;
-  accepted: boolean;
-}
-
-// record-consent stores the version as a number ("1" for "1.0"), so versions are compared as numbers.
-/** `records` come newest first; the latest one decides. */
-export function saveNoticeNeeded(records: NoticeRecord[], currentVersion: string): boolean {
-  const latest = records[0];
-  return !latest || !latest.accepted || Number(latest.document_version) !== Number(currentVersion);
-}
-
 const FALLBACK_EXTENSION: Record<GalleryMedia['type'], string> = { photo: 'jpg', video: 'mp4' };
 
 export function saveFileName({ id, type, filePath }: Pick<GalleryMedia, 'id' | 'type' | 'filePath'>): string {
