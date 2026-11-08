@@ -12,14 +12,16 @@ import { MEDIA_TILE_ACTIONS, initialMediaTileState, mediaTileReducer } from './m
 import { Text } from './text';
 
 const MEDIA_LABEL = { photo: 'Foto de la sala', video: 'Video de la sala' } as const;
+const OPEN_HINT = 'Abre las fotos y videos del día';
 
 interface MediaTileProps {
   media: GalleryMedia;
   onMissingUrlRetry: () => void;
+  onOpen: (mediaId: string) => void;
 }
 
 // Videos have no poster yet (the media table stores none), so they show a dark tile with the play badge.
-export function MediaTile({ media, onMissingUrlRetry }: MediaTileProps) {
+export function MediaTile({ media, onMissingUrlRetry, onOpen }: MediaTileProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   const [state, dispatch] = useReducer(mediaTileReducer, media.url, initialMediaTileState);
@@ -29,13 +31,20 @@ export function MediaTile({ media, onMissingUrlRetry }: MediaTileProps) {
     else onMissingUrlRetry();
   }
 
+  const open = () => onOpen(media.id);
+
   if (media.type === 'video') {
     return (
-      <View style={[styles.tile, backgroundStyles.black]} accessible accessibilityLabel={MEDIA_LABEL.video}>
+      <Pressable
+        style={[styles.tile, backgroundStyles.black]}
+        onPress={open}
+        accessibilityRole="button"
+        accessibilityLabel={MEDIA_LABEL.video}
+        accessibilityHint={OPEN_HINT}>
         <View style={styles.badge}>
           <Play size={BADGE_ICON_SIZE} color={colors.white} fill={colors.white} />
         </View>
-      </View>
+      </Pressable>
     );
   }
 
@@ -53,15 +62,19 @@ export function MediaTile({ media, onMissingUrlRetry }: MediaTileProps) {
   }
 
   return (
-    <View style={[styles.tile, backgroundStyles.blue100]}>
+    <Pressable
+      style={[styles.tile, backgroundStyles.blue100]}
+      onPress={open}
+      accessibilityRole="button"
+      accessibilityLabel={MEDIA_LABEL.photo}
+      accessibilityHint={OPEN_HINT}>
       <Image
         key={state.attempt}
         source={{ uri: media.url ?? undefined }}
         style={styles.image}
         contentFit="cover"
-        accessibilityLabel={MEDIA_LABEL.photo}
         onError={() => dispatch({ type: MEDIA_TILE_ACTIONS.FAILED })}
       />
-    </View>
+    </Pressable>
   );
 }

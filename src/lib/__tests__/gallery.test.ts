@@ -48,7 +48,7 @@ const ENROLLED_MATEO: GalleryChild = {
 };
 
 function media(id: string, type: GalleryMedia['type'], createdAt: Date): GalleryMedia {
-  return { id, type, createdAt: createdAt.toISOString(), url: `https://example.test/${id}` };
+  return { id, type, createdAt: createdAt.toISOString(), url: `https://example.test/${id}`, filePath: `room/${id}.jpg`, uploader: null };
 }
 
 describe('galleryGroupsOf', () => {
