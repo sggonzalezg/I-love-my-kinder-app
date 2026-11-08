@@ -1,4 +1,4 @@
-import { cubicBezier, Easing } from 'react-native-reanimated';
+import { cubicBezier, Easing, FadeInDown } from 'react-native-reanimated';
 
 export const duration = { fast: 120, base: 220, slow: 320, exitBase: 150, beat: 900 } as const;
 
@@ -13,3 +13,15 @@ export const signedRecord = { enter: 320, checkDraw: 420, checkDelay: 160, start
 
 export const listStagger = 40;
 export const listRise = 12;
+
+export const listStaggeredItems = 6;
+export const messageRise = 8;
+
+/** List entrance: the first rows rise and fade in with a stagger, once per load; nothing with reduced motion. */
+export function listEntering(index: number, reduced: boolean) {
+  if (reduced || index >= listStaggeredItems) return undefined;
+  return FadeInDown.duration(duration.slow)
+    .delay(index * listStagger)
+    .easing(easeOut)
+    .withInitialValues({ transform: [{ translateY: listRise }] });
+}

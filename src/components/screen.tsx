@@ -8,9 +8,10 @@ import { useIsDark } from '@/theme/use-theme';
 
 import { styles, topInsetStyle } from './screen.styles';
 
-type Props = { children: ReactNode; header?: ReactNode; scroll?: boolean };
+/** `bleed` hands the whole area to the children, with no scroll and no margins (chat). */
+type Props = { children: ReactNode; header?: ReactNode; scroll?: boolean; bleed?: boolean };
 
-export function Screen({ children, header, scroll = true }: Props) {
+export function Screen({ children, header, scroll = true, bleed = false }: Props) {
   const backgroundStyles = useBackgroundColorStyles();
   const dark = useIsDark();
   const insets = useSafeAreaInsets();
@@ -18,13 +19,13 @@ export function Screen({ children, header, scroll = true }: Props) {
     <View style={[styles.root, backgroundStyles.ground, topInsetStyle(insets.top)]}>
       <StatusBar style={dark ? 'light' : 'dark'} />
       {header}
-      {scroll ? (
+      {bleed ? <View style={styles.root}>{children}</View> : null}
+      {!bleed && scroll ? (
         <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
           {children}
         </ScrollView>
-      ) : (
-        <View style={[styles.content, styles.root]}>{children}</View>
-      )}
+      ) : null}
+      {!bleed && !scroll ? <View style={[styles.content, styles.root]}>{children}</View> : null}
     </View>
   );
 }

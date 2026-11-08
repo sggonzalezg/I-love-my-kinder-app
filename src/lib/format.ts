@@ -7,6 +7,10 @@ export function bellLabel(unread: number): string {
   return unread > 0 ? `Avisos, ${unread} sin leer` : 'Avisos';
 }
 
+export function chatIconLabel(unreadThreads: number): string {
+  return unreadThreads > 0 ? `Chat, ${unreadThreads} con mensajes sin leer` : 'Chat';
+}
+
 export function initials(first: string, last = ''): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 }

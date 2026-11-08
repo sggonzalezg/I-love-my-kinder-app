@@ -1,4 +1,4 @@
-import { badgeText, bellLabel, initials, relationshipLabel, relationshipWord, senderLabel } from '../format';
+import { badgeText, bellLabel, chatIconLabel, initials, relationshipLabel, relationshipWord, senderLabel } from '../format';
 
 describe('small UI formatters', () => {
   it('caps the badge at 9+', () => {
@@ -10,6 +10,11 @@ describe('small UI formatters', () => {
   it('labels the bell for screen readers', () => {
     expect(bellLabel(2)).toBe('Avisos, 2 sin leer');
     expect(bellLabel(0)).toBe('Avisos');
+  });
+
+  it('says how many room chats have unread messages on the chat icon', () => {
+    expect(chatIconLabel(2)).toBe('Chat, 2 con mensajes sin leer');
+    expect(chatIconLabel(0)).toBe('Chat');
   });
 
   it('builds initials from first and last name', () => {

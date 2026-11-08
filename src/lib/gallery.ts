@@ -1,4 +1,4 @@
-import { dayChipLabel, formatLongDate, MONTHS, sameDay } from './dates';
+import { dayKey, daySectionTitle, MONTHS, sameDay } from './dates';
 import type { ChildGroup } from './room-groups';
 import { groupLabel } from './shift';
 
@@ -174,23 +174,16 @@ export function mediaCountLabel(items: GalleryMedia[]): string {
     .join(' · ');
 }
 
-function dayTitle(day: Date, now: Date): string {
-  const relative = dayChipLabel(day, now);
-  if (relative === 'Hoy' || relative === 'Ayer') return relative;
-  const long = formatLongDate(day);
-  return day.getFullYear() === now.getFullYear() ? long : `${long} de ${day.getFullYear()}`;
-}
-
 /** Days as sections, newest first; only the first one carries the photo and video count (design F7a). */
 export function mediaDaySections(items: GalleryMedia[], now: Date): MediaDaySection[] {
   const sorted = [...items].sort((first, second) => second.createdAt.localeCompare(first.createdAt));
   const sections: MediaDaySection[] = [];
   for (const item of sorted) {
     const day = new Date(item.createdAt);
-    const key = `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+    const key = dayKey(day);
     const last = sections[sections.length - 1];
     if (last?.key === key) last.items.push(item);
-    else sections.push({ key, title: dayTitle(day, now), countLabel: null, items: [item] });
+    else sections.push({ key, title: daySectionTitle(day, now), countLabel: null, items: [item] });
   }
   return sections.map((section, index) => ({ ...section, countLabel: index === 0 ? mediaCountLabel(section.items) : null }));
 }

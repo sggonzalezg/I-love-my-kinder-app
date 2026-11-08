@@ -9,12 +9,16 @@ import { ChildCard } from '@/components/child-card';
 import { Banner } from '@/components/banner';
 import { useTheme } from '@/theme/use-theme';
 import { getChildrenForFamily } from '@/data/queries';
+import { useSession } from '@/data/session';
+import { useUnreadChatThreads } from '@/features/chat/use-unread-chat-threads';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 
 export default function IndexTab() {
   const [refreshing, setRefreshing] = useState(false);
   const { colors, spacing } = useTheme();
+  const { session } = useSession();
+  const unreadChats = useUnreadChatThreads(session?.user_id ?? null);
   const children = getChildrenForFamily();
   const pendingRequests = useFamilyOutingRequests().filter((request) => request.status === 'pending');
 
@@ -31,7 +35,7 @@ export default function IndexTab() {
         title="Hola, Ana"
         right={
           <View style={{ flexDirection: 'row', gap: spacing.sm }}>
-            <ChatIcon href="/chat" />
+            <ChatIcon unreadThreads={unreadChats} />
             <Bell count={unreadAnnouncements} href="/notices" />
           </View>
         }

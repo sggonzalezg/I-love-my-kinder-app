@@ -1,10 +1,9 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
 import { GALLERY_BUCKET } from '@/constants/storage';
-import { SAVE_MEDIA_NOTICE } from '@/legal/texts';
 import { initials } from '@/lib/format';
 import type { GalleryChild, GalleryGroup, GalleryMedia, MediaUploader } from '@/lib/gallery';
 import type { ShiftName } from '@/lib/shift';
-import { saveNoticeNeeded, uploaderLabel, type NoticeRecord } from '@/lib/story';
+import { uploaderLabel } from '@/lib/story';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -111,17 +110,4 @@ async function fetchUploaders(userIds: string[]): Promise<Map<string, MediaUploa
       { label: uploaderLabel({ role: row.role, firstName: row.first_name }), initials: initials(row.first_name, row.last_name), photoPath: row.photo_path },
     ]),
   );
-}
-
-export async function fetchSaveNoticeNeeded(userId: string): Promise<boolean> {
-  const records = throwOnError<NoticeRecord[]>(
-    await supabase
-      .from('consent_records')
-      .select('document_version, accepted')
-      .eq('user_id', userId)
-      .eq('document_type', SAVE_MEDIA_NOTICE.id)
-      .order('created_at', { ascending: false })
-      .limit(1),
-  );
-  return saveNoticeNeeded(records, SAVE_MEDIA_NOTICE.version);
 }

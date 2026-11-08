@@ -35,6 +35,18 @@ export function dayChipLabel(day: Date, today: Date): string {
   return `${WEEKDAYS_SHORT[day.getDay()]} ${day.getDate()}`;
 }
 
+export function dayKey(day: Date): string {
+  return `${day.getFullYear()}-${day.getMonth()}-${day.getDate()}`;
+}
+
+/** "Hoy", "Ayer", "Martes 14 de octubre", with the year when it is not the current one. */
+export function daySectionTitle(day: Date, now: Date): string {
+  const relative = dayChipLabel(day, now);
+  if (relative === 'Hoy' || relative === 'Ayer') return relative;
+  const long = formatLongDate(day);
+  return day.getFullYear() === now.getFullYear() ? long : `${long} de ${day.getFullYear()}`;
+}
+
 export function formatCountdown(seconds: number): string {
   return `${Math.floor(seconds / 60)}:${String(seconds % 60).padStart(2, '0')}`;
 }

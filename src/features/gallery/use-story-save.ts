@@ -2,8 +2,7 @@ import * as Haptics from 'expo-haptics';
 import type { Dispatch } from 'react';
 import { Linking } from 'react-native';
 
-import { recordConsent } from '@/data/consent';
-import { fetchSaveNoticeNeeded } from '@/data/gallery';
+import { fetchNoticeNeeded, recordConsent } from '@/data/consent';
 import { saveMediaToDevice } from '@/data/save-media';
 import { useSession } from '@/data/session';
 import { useAsync } from '@/data/use-async';
@@ -23,7 +22,7 @@ function failed(dispatch: Dispatch<StoryViewerAction>, error: unknown) {
 export function useStorySave(media: GalleryMedia, state: StoryViewerState, dispatch: Dispatch<StoryViewerAction>) {
   const { session } = useSession();
   const userId = session?.user_id ?? null;
-  const notice = useAsync(() => fetchSaveNoticeNeeded(userId!), userId);
+  const notice = useAsync(() => fetchNoticeNeeded(userId!, SAVE_MEDIA_NOTICE), userId);
   // Until the check answers (or if it fails), the notice shows: asking twice is safer than not asking.
   const noticeNeeded = !state.noticeRecorded && notice.data !== false;
 
