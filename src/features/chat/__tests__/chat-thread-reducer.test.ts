@@ -1,6 +1,6 @@
 import type { ChatMessage } from '@/lib/chat';
 
-import { CHAT_THREAD_ACTIONS, INITIAL_CHAT_THREAD_STATE, chatThreadReducer, displayedMessages, isNewSinceOpen } from '../chat-thread-reducer';
+import { CHAT_THREAD_ACTIONS, INITIAL_CHAT_THREAD_STATE, canSend, chatThreadReducer, displayedMessages, isNewSinceOpen } from '../chat-thread-reducer';
 
 const ME = 'user-me';
 
@@ -99,5 +99,90 @@ describe('chatThreadReducer', () => {
     const closed = chatThreadReducer(opened, { type: CHAT_THREAD_ACTIONS.MEMBERS_CLOSED });
 
     expect([opened.membersOpen, closed.membersOpen]).toEqual([true, false]);
+  });
+});
+
+describe('chatThreadReducer with a photo', () => {
+  const picked = { type: CHAT_THREAD_ACTIONS.ATTACHMENT_PICKED, localUri: 'file:///photo.jpg', path: 'n1/t1/f1.jpg' } as const;
+  const uploaded = { type: CHAT_THREAD_ACTIONS.ATTACHMENT_UPLOADED, path: 'n1/t1/f1.jpg' } as const;
+
+  it('starts uploading a picked photo and closes the source sheet', () => {
+    const opened = chatThreadReducer(INITIAL_CHAT_THREAD_STATE, { type: CHAT_THREAD_ACTIONS.PHOTO_SOURCE_OPENED });
+    const state = chatThreadReducer(opened, picked);
+
+    expect([state.attachment, state.photoSourceOpen]).toEqual([{ localUri: 'file:///photo.jpg', path: 'n1/t1/f1.jpg', progress: 0, status: 'uploading' }, false]);
+  });
+
+  it('follows the upload progress of the current photo only', () => {
+    const progressed = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), {
+      type: CHAT_THREAD_ACTIONS.ATTACHMENT_PROGRESS,
+      path: 'n1/t1/f1.jpg',
+      progress: 0.6,
+    });
+    const stale = chatThreadReducer(progressed, { type: CHAT_THREAD_ACTIONS.ATTACHMENT_PROGRESS, path: 'n1/t1/old.jpg', progress: 0.9 });
+
+    expect(stale.attachment?.progress).toBe(0.6);
+  });
+
+  it('does not let a message go while the photo uploads', () => {
+    const typed = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), { type: CHAT_THREAD_ACTIONS.DRAFT_CHANGED, text: 'Hola' });
+
+    expect(canSend(typed)).toBe(false);
+  });
+
+  it('lets an uploaded photo go without text', () => {
+    const state = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), uploaded);
+
+    expect(canSend(state)).toBe(true);
+  });
+
+  it('does not let a message go with a photo that failed to upload', () => {
+    const state = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), { type: CHAT_THREAD_ACTIONS.ATTACHMENT_FAILED, path: 'n1/t1/f1.jpg' });
+
+    expect([state.attachment?.status, canSend(state)]).toEqual(['failed', false]);
+  });
+
+  it('uploads a failed photo again from zero', () => {
+    const failed = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), { type: CHAT_THREAD_ACTIONS.ATTACHMENT_FAILED, path: 'n1/t1/f1.jpg' });
+    const state = chatThreadReducer(failed, { type: CHAT_THREAD_ACTIONS.ATTACHMENT_RETRIED });
+
+    expect([state.attachment?.status, state.attachment?.progress]).toEqual(['uploading', 0]);
+  });
+
+  it('removes the photo', () => {
+    const state = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), { type: CHAT_THREAD_ACTIONS.ATTACHMENT_REMOVED });
+
+    expect(state.attachment).toBeNull();
+  });
+
+  it('sends the photo in the bubble at once and clears the composer', () => {
+    const ready = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), uploaded);
+    const state = chatThreadReducer(ready, { ...sending, body: '' });
+
+    expect([state.attachment, displayedMessages(state, ME)[0]]).toEqual([
+      null,
+      expect.objectContaining({ body: null, imagePath: 'n1/t1/f1.jpg', localImageUri: 'file:///photo.jpg', status: 'sending' }),
+    ]);
+  });
+
+  it('keeps the photo of a message that failed so the retry sends it', () => {
+    const ready = chatThreadReducer(chatThreadReducer(INITIAL_CHAT_THREAD_STATE, picked), uploaded);
+    const failed = chatThreadReducer(chatThreadReducer(ready, sending), { type: CHAT_THREAD_ACTIONS.SEND_FAILED, clientId: 'c1' });
+
+    expect(failed.pending[0]).toEqual(expect.objectContaining({ imagePath: 'n1/t1/f1.jpg', status: 'failed' }));
+  });
+
+  it('remembers a refused camera until the next pick', () => {
+    const denied = chatThreadReducer(INITIAL_CHAT_THREAD_STATE, { type: CHAT_THREAD_ACTIONS.CAMERA_DENIED });
+    const state = chatThreadReducer(denied, picked);
+
+    expect([denied.cameraDenied, state.cameraDenied]).toEqual([true, false]);
+  });
+
+  it('opens and closes the photo viewer', () => {
+    const opened = chatThreadReducer(INITIAL_CHAT_THREAD_STATE, { type: CHAT_THREAD_ACTIONS.VIEWER_OPENED, key: 'm1' });
+    const closed = chatThreadReducer(opened, { type: CHAT_THREAD_ACTIONS.VIEWER_CLOSED });
+
+    expect([opened.viewerKey, closed.viewerKey]).toEqual(['m1', null]);
   });
 });

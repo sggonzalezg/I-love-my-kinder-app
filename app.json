@@ -42,6 +42,14 @@
       ],
       "expo-video",
       [
+        "expo-image-picker",
+        {
+          "photosPermission": false,
+          "cameraPermission": "Para sacar una foto y mandarla al chat de la sala.",
+          "microphonePermission": false
+        }
+      ],
+      [
         "expo-media-library",
         {
           "photosPermission": false,

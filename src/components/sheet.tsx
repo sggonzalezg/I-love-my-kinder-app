@@ -13,15 +13,17 @@ const GRAB_HEIGHT = 5;
 interface SheetProps {
   visible: boolean;
   onClose: () => void;
+  /** iOS only: fires once the sheet is gone, the first moment another modal (a picker) can open. */
+  onDismiss?: () => void;
   children: ReactNode;
 }
 
-export function Sheet({ visible, onClose, children }: SheetProps) {
+export function Sheet({ visible, onClose, onDismiss, children }: SheetProps) {
   const c = useColors();
   const insets = useSafeAreaInsets();
 
   return (
-    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} statusBarTranslucent>
+    <Modal visible={visible} transparent animationType="none" onRequestClose={onClose} onDismiss={onDismiss} statusBarTranslucent>
       <Animated.View entering={FadeIn.duration(duration.base)} style={[StyleSheet.absoluteFill, { backgroundColor: c.scrim }]}>
         <Pressable style={StyleSheet.absoluteFill} onPress={onClose} accessibilityRole="button" accessibilityLabel="Cerrar" />
       </Animated.View>
