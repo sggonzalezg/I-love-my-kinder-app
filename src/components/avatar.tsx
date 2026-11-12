@@ -6,7 +6,7 @@ import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { avatarFrameStyle, initialsFontStyle, styles } from './avatar.styles';
 import { Text } from './text';
 
-export const AVATAR_SIZE = { md: 44, lg: 64, xl: 96 } as const;
+export const AVATAR_SIZE = { md: 44, lg: 64, xl: 88 } as const;
 
 interface AvatarProps {
   photoPath: string | null;
