@@ -1,5 +1,5 @@
 import type { ReactNode } from 'react';
-import { Modal, Pressable, StyleSheet, View } from 'react-native';
+import { Modal, Pressable, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { FadeIn, ReduceMotion, SlideInDown } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -15,10 +15,12 @@ interface SheetProps {
   onClose: () => void;
   /** iOS only: fires once the sheet is gone, the first moment another modal (a picker) can open. */
   onDismiss?: () => void;
+  /** Height rules of the sheet itself (a list that keeps its height while it filters). */
+  sheetStyle?: StyleProp<ViewStyle>;
   children: ReactNode;
 }
 
-export function Sheet({ visible, onClose, onDismiss, children }: SheetProps) {
+export function Sheet({ visible, onClose, onDismiss, sheetStyle, children }: SheetProps) {
   const c = useColors();
   const insets = useSafeAreaInsets();
 
@@ -30,7 +32,7 @@ export function Sheet({ visible, onClose, onDismiss, children }: SheetProps) {
       <View style={styles.anchor} pointerEvents="box-none">
         <Animated.View
           entering={SlideInDown.duration(duration.slow).easing(easeOut).reduceMotion(ReduceMotion.System)}
-          style={[styles.sheet, shadow.sheet, { backgroundColor: c.surface, paddingBottom: insets.bottom + space.s5 }]}>
+          style={[styles.sheet, shadow.sheet, { backgroundColor: c.surface, paddingBottom: insets.bottom + space.s5 }, sheetStyle]}>
           <View style={[styles.grab, { backgroundColor: c.border }]} />
           {children}
         </Animated.View>
