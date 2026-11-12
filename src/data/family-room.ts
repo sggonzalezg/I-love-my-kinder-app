@@ -13,6 +13,7 @@ export interface RosterChild {
   last_name: string | null;
   birth_date: string | null;
   photo_path: string | null;
+  allergies: string | null;
 }
 
 export interface RosterTeacher {

@@ -13,8 +13,15 @@ import { useSession } from '@/data/session';
 import { useUnreadChatThreads } from '@/features/chat/use-unread-chat-threads';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
+import { TeacherTodayScreen } from '@/features/teacher-day/screens/TeacherTodayScreen';
 
 export default function IndexTab() {
+  const { session } = useSession();
+  if (session?.active_role === 'teacher') return <TeacherTodayScreen />;
+  return <FamilyToday />;
+}
+
+function FamilyToday() {
   const [refreshing, setRefreshing] = useState(false);
   const { colors, spacing } = useTheme();
   const { session } = useSession();
