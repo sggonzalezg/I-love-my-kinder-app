@@ -49,21 +49,58 @@ export function removeHygiene(draft: RoutineDraft, index: number): RoutineDraft 
   return { ...draft, hygiene: draft.hygiene.filter((_, i) => i !== index) };
 }
 
-type Target = { childId: string; roomId: string; shiftId: string };
+export type RoutineTarget = { childId: string; roomId: string; shiftId: string; routineDate: string };
 
-// shortcut: the backend has one `meals` column and no 'dry' hygiene type; we send the main meal
-// (last of the shift) plus `mealDetails`, and drop 'dry'. Upgrade when backend stores meals per item.
-export function toSavePayload(draft: RoutineDraft, target: Target) {
-  const keys = mealsForShift(draft.shift);
-  const main = keys[keys.length - 1];
+export type SaveRoutinePayload = RoutineTarget & {
+  meals: Partial<Record<MealKey, MealAmount>>;
+  rest: { start: string | null; end: string | null; noSleep: boolean };
+  hygiene: HygieneEntry[];
+  notes: string | null;
+};
+
+export interface SavedRoutine {
+  meals: Partial<Record<MealKey, MealAmount>> | null;
+  rest_start_time: string | null;
+  rest_end_time: string | null;
+  no_sleep: boolean | null;
+  hygiene_entries: HygieneEntry[] | null;
+  notes: string | null;
+}
+
+export function toSavePayload(draft: RoutineDraft, target: RoutineTarget): SaveRoutinePayload {
   return {
     ...target,
-    meals: draft.meals[main] ?? 'all',
-    mealDetails: draft.meals,
-    restStart: draft.noRest ? null : draft.restStart,
-    restEnd: draft.noRest ? null : draft.restEnd,
-    hygiene: draft.hygiene.filter((h) => h.type !== 'dry'),
+    meals: draft.meals,
+    rest: { start: draft.noRest ? null : draft.restStart, end: draft.noRest ? null : draft.restEnd, noSleep: draft.noRest },
+    hygiene: draft.hygiene,
     notes: draft.notes.trim() || null,
+  };
+}
+
+export function hasRestRangeError(draft: RoutineDraft): boolean {
+  if (draft.noRest || !draft.restStart || !draft.restEnd) return false;
+  return draft.restEnd <= draft.restStart;
+}
+
+function toHourMinute(time: string | null): string | null {
+  return time ? time.slice(0, 5) : null;
+}
+
+export function lastHygieneKind(entries: HygieneEntry[]): HygieneKind | null {
+  return entries.length ? entries[entries.length - 1].kind : null;
+}
+
+export function draftFromRoutine(routine: SavedRoutine, shift: ShiftName): RoutineDraft {
+  const hygiene = routine.hygiene_entries ?? [];
+  return {
+    shift,
+    meals: routine.meals ?? {},
+    restStart: toHourMinute(routine.rest_start_time),
+    restEnd: toHourMinute(routine.rest_end_time),
+    noRest: routine.no_sleep ?? false,
+    hygieneKind: lastHygieneKind(hygiene) ?? 'diaper',
+    hygiene,
+    notes: routine.notes ?? '',
   };
 }
 
