@@ -19,6 +19,7 @@ const DOCS = {
 /** Drops internal lines (draft banner, HTML comments, ids) and keeps only "Versión x · fecha" of the version line. */
 export function clean(md) {
   return md
+    .replace(/\r\n/g, '\n')
     .replace(/<!--[\s\S]*?-->/g, '')
     .split('\n')
     .filter((l) => !l.startsWith('> **BORRADOR') && !l.startsWith('Identificador en `legal_documents`'))
@@ -30,6 +31,7 @@ export function clean(md) {
 }
 
 assert.equal(clean('> **BORRADOR x**\n\n# T\n\n**Versión 1.9 · 04/11/2026** (cambios)\nIdentificador en `legal_documents`: `terms`\n\nHola'), 'Versión 1.9 · 04/11/2026\n\nHola');
+assert.equal(clean('> **BORRADOR x**\r\n\r\n# T\r\n\r\n<!-- v -->\r\n\r\nHola\r\n'), 'Hola');
 
 if (!existsSync(legalDir)) {
   console.error(`Legal folder not found: ${legalDir}`);
