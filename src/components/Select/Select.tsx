@@ -19,6 +19,8 @@ import {
 import { Sheet } from '@/components/sheet';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
+import { useSheetAccessibilityFocus } from '@/lib/accessibility-focus';
+import { iconStroke } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 import { LOADING_BAR_COUNT, LOADING_BAR_HEIGHT, SEARCH_ICON_SIZE, styles, useSearchColorStyles } from './Select.styles';
@@ -70,6 +72,7 @@ export function Select({
   const selectedOption = options.find((option) => option.value === value);
   const hasSearch = shouldShowSearch(options, searchable);
   const rows = buildSelectRows(options, state.query);
+  const { titleRef, triggerRef, focusTitle } = useSheetAccessibilityFocus(state.isOpen);
   const close = () => dispatch({ type: SELECT_ACTIONS.CLOSED });
 
   function choose(option: SelectOption) {
@@ -110,6 +113,7 @@ export function Select({
   return (
     <>
       <SelectTrigger
+        ref={triggerRef}
         variant={variant}
         label={label}
         valueLabel={selectedOption?.label}
@@ -122,13 +126,13 @@ export function Select({
         disabledHelp={disabledHelp}
         onPress={() => dispatch({ type: SELECT_ACTIONS.OPENED })}
       />
-      <Sheet visible={state.isOpen} onClose={close} sheetStyle={hasSearch ? styles.searchSheet : styles.shortSheet}>
-        <Text style={styles.title} accessibilityRole="header">
+      <Sheet visible={state.isOpen} onClose={close} onShow={focusTitle} sheetStyle={hasSearch ? styles.searchSheet : styles.shortSheet}>
+        <Text ref={titleRef} variant="sheetTitle" style={styles.title} accessibilityRole="header">
           {sheetTitle}
         </Text>
         {hasSearch ? (
           <View style={[styles.search, searchColorStyles.box]}>
-            <Search size={SEARCH_ICON_SIZE} color={colors.muted} strokeWidth={1.8} />
+            <Search size={SEARCH_ICON_SIZE} color={colors.muted} strokeWidth={iconStroke} />
             <TextInput
               value={state.query}
               onChangeText={(query) => dispatch({ type: SELECT_ACTIONS.QUERY_CHANGED, query })}

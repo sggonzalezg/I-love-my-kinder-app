@@ -1,13 +1,14 @@
 import { Image } from 'expo-image';
 import { ChevronDown, CircleAlert } from 'lucide-react-native';
-import { View } from 'react-native';
+import type { Ref } from 'react';
+import { View, type HostInstance } from 'react-native';
 import Animated, { FadeIn, LayoutAnimationConfig, useReducedMotion } from 'react-native-reanimated';
 
 import { PressableScale } from '@/components/pressable-scale';
 import { SELECT_COPY } from '@/components/Select/select-copy';
 import { Text } from '@/components/text';
 import { duration } from '@/theme/motion';
-import type { ColorName } from '@/theme/tokens';
+import { iconStroke, type ColorName } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 import { CHEVRON_SIZE, ERROR_ICON_SIZE, TRIGGER_PRESSED_SCALE, chevronTransition, styles, useTriggerColorStyles } from './SelectTrigger.styles';
@@ -26,6 +27,7 @@ interface SelectTriggerProps {
   disabled?: boolean;
   disabledHelp?: string;
   onPress: () => void;
+  ref?: Ref<HostInstance>;
 }
 
 type TriggerTone = 'idle' | 'open' | 'error' | 'disabled' | 'filtering' | 'roomSwitch';
@@ -48,7 +50,7 @@ const TEXT_TONES: Record<TriggerTone, ColorName> = {
 };
 
 export function SelectTrigger(props: SelectTriggerProps) {
-  const { variant, label, valueLabel, valueImageUrl, placeholder, isOpen, error, disabled, disabledHelp, onPress } = props;
+  const { variant, label, valueLabel, valueImageUrl, placeholder, isOpen, error, disabled, disabledHelp, onPress, ref } = props;
   const colors = useColors();
   const colorStyles = useTriggerColorStyles();
   const reduced = useReducedMotion();
@@ -67,6 +69,7 @@ export function SelectTrigger(props: SelectTriggerProps) {
         </Text>
       ) : null}
       <PressableScale
+        ref={ref}
         haptic="selection"
         pressedScale={TRIGGER_PRESSED_SCALE}
         disabled={disabled}
@@ -79,18 +82,18 @@ export function SelectTrigger(props: SelectTriggerProps) {
         {isField && valueImageUrl ? <Image source={{ uri: valueImageUrl }} style={styles.photo} accessibilityIgnoresInvertColors /> : null}
         <LayoutAnimationConfig skipEntering>
           <Animated.View key={valueLabel ?? ''} style={isField && styles.value} entering={reduced ? undefined : FadeIn.duration(duration.fast)}>
-            <Text tone={valueTone} style={!isField && styles.pillValue} numberOfLines={1}>
+            <Text variant={isField ? 'body' : 'label'} tone={valueTone} numberOfLines={1}>
               {valueLabel ?? placeholder}
             </Text>
           </Animated.View>
         </LayoutAnimationConfig>
         <Animated.View style={[isOpen ? styles.chevronOpen : styles.chevronClosed, !reduced && chevronTransition]}>
-          <ChevronDown size={CHEVRON_SIZE} color={chevronColor} strokeWidth={1.8} />
+          <ChevronDown size={CHEVRON_SIZE} color={chevronColor} strokeWidth={iconStroke} />
         </Animated.View>
       </PressableScale>
       {showError ? (
         <View style={styles.messageRow} accessibilityRole="alert">
-          <CircleAlert size={ERROR_ICON_SIZE} color={colors.red} strokeWidth={1.8} />
+          <CircleAlert size={ERROR_ICON_SIZE} color={colors.red} strokeWidth={iconStroke} />
           <Text variant="smallStrong" tone="red">
             {error}
           </Text>

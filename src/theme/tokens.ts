@@ -80,8 +80,10 @@ export const fonts = {
 export const type = {
   display: { fontFamily: fonts.display900, fontSize: 32, lineHeight: 35, letterSpacing: -0.64 },
   title: { fontFamily: fonts.display800, fontSize: 24, lineHeight: 29, letterSpacing: -0.24 },
+  sheetTitle: { fontFamily: fonts.display800, fontSize: 22, lineHeight: 27 },
   section: { fontFamily: fonts.display800, fontSize: 18, lineHeight: 23 },
   childName: { fontFamily: fonts.display800, fontSize: 24, lineHeight: 28 },
+  option: { fontFamily: fonts.text400, fontSize: 17, lineHeight: 24 },
   body: { fontFamily: fonts.text400, fontSize: 16, lineHeight: 24 },
   bodyStrong: { fontFamily: fonts.text600, fontSize: 16, lineHeight: 24 },
   button: { fontFamily: fonts.text700, fontSize: 16, lineHeight: 20 },
@@ -92,7 +94,9 @@ export const type = {
   tab: { fontFamily: fonts.text600, fontSize: 12, lineHeight: 14 },
 } as const;
 
-export const tabular = { fontVariant: ['tabular-nums' as const] };
+export const iconStroke = 1.8;
+
+export const tabular ={ fontVariant: ['tabular-nums' as const] };
 
 export const shadow = {
   sheet: { shadowColor: '#0D1426', shadowOpacity: 0.18, shadowRadius: 16, shadowOffset: { width: 0, height: -8 }, elevation: 12 },

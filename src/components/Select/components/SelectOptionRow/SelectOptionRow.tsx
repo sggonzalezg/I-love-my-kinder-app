@@ -30,7 +30,7 @@ export function SelectOptionRow({ option, selected, onChoose }: SelectOptionRowP
       style={({ pressed }) => [styles.row, selected ? rowColorStyles.selected : pressed ? rowColorStyles.pressed : rowColorStyles.idle]}>
       {option.imageUrl ? <Image source={{ uri: option.imageUrl }} style={styles.photo} accessibilityIgnoresInvertColors /> : null}
       <View style={styles.texts}>
-        <Text tone={labelTone} style={[styles.label, selected && styles.selectedLabel]} numberOfLines={1}>
+        <Text variant="option" tone={labelTone} style={selected && styles.selectedLabel} numberOfLines={1}>
           {option.label}
         </Text>
         {secondLine ? (

@@ -52,7 +52,6 @@ function matchesQuery(option: SelectOption, foldedQuery: string): boolean {
   return foldForSearch(`${option.label} ${option.description ?? ''}`).includes(foldedQuery);
 }
 
-/** Options that match the query, with each group's name before its first remaining option. */
 export function buildSelectRows(options: SelectOption[], query: string): SelectRow[] {
   const foldedQuery = foldForSearch(query.trim());
   const rows: SelectRow[] = [];

@@ -3,7 +3,7 @@ import type { CSSTransitionProperties } from 'react-native-reanimated';
 
 import { cssEaseOut, duration } from '@/theme/motion';
 import { createThemedStyles } from '@/theme/themed-styles';
-import { fonts, radius, size, space } from '@/theme/tokens';
+import { radius, size, space } from '@/theme/tokens';
 
 export const CHEVRON_SIZE = 18;
 export const ERROR_ICON_SIZE = 18;
@@ -19,6 +19,7 @@ const FIELD_PHOTO_SIZE = 24;
 const BORDER_WIDTH = 1.5;
 const RING_WIDTH = 2;
 const PILL_HEIGHT = size.touch;
+const FIELD_PADDING_RIGHT = 14;
 
 export const styles = StyleSheet.create({
   wrapper: { gap: space.s2 },
@@ -28,7 +29,7 @@ export const styles = StyleSheet.create({
     gap: space.s3,
     height: size.input,
     paddingLeft: space.s4,
-    paddingRight: 14,
+    paddingRight: FIELD_PADDING_RIGHT,
     borderRadius: radius.md,
     borderWidth: BORDER_WIDTH,
   },
@@ -43,7 +44,6 @@ export const styles = StyleSheet.create({
     borderWidth: BORDER_WIDTH,
   },
   value: { flex: 1 },
-  pillValue: { fontFamily: fonts.text600, fontSize: 15, lineHeight: 20 },
   photo: { width: FIELD_PHOTO_SIZE, height: FIELD_PHOTO_SIZE, borderRadius: radius.full },
   messageRow: { flexDirection: 'row', alignItems: 'center', gap: space.s2 },
   ring: { borderWidth: RING_WIDTH },

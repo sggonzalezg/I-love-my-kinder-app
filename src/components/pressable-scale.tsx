@@ -1,5 +1,6 @@
 import * as Haptics from 'expo-haptics';
-import { Pressable, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
+import type { Ref } from 'react';
+import { Pressable, type HostInstance, type PressableProps, type StyleProp, type ViewStyle } from 'react-native';
 import Animated, { useAnimatedStyle, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
 
 import { duration, easeOut } from '@/theme/motion';
@@ -9,6 +10,7 @@ type Props = PressableProps & {
   containerStyle?: StyleProp<ViewStyle>;
   pressedScale?: number;
   haptic?: 'selection' | 'light' | null;
+  ref?: Ref<HostInstance>;
 };
 
 /** Only the scale lives here; the caller draws the pressed colour from `pressed` in its style function. */

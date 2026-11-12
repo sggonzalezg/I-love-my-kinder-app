@@ -20,7 +20,6 @@ export const styles = StyleSheet.create({
     borderRadius: radius.md,
   },
   texts: { flex: 1 },
-  label: { fontFamily: fonts.text400, fontSize: 17, lineHeight: 24 },
   selectedLabel: { fontFamily: fonts.text700 },
   photo: { width: ROW_PHOTO_SIZE, height: ROW_PHOTO_SIZE, borderRadius: radius.full },
   check: { width: CHECK_SIZE, height: CHECK_SIZE },
