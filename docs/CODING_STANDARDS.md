@@ -28,6 +28,27 @@ src/
 └── app/                # Expo Router routes
 ```
 
+### Folder structure for UI
+
+Every screen has its own `components/` folder, with one folder per component holding the component and its styles. A component used by several screens goes in the shared `src/components/` with the same layout.
+
+```
+src/features/chat/
+├── screens/
+│   └── ChatThreadScreen.tsx
+└── components/
+    └── MessageBubble/
+        ├── MessageBubble.tsx
+        └── MessageBubble.styles.ts   # StyleSheet.create
+
+src/components/
+└── PrimaryButton/
+    ├── PrimaryButton.tsx
+    └── PrimaryButton.styles.ts
+```
+
+Imports go through the `@/` aliases (`@/components/PrimaryButton/PrimaryButton`), never relative chains like `../../../`. Existing code moves to this layout only in refactor PRs that change no behavior and keep every existing test green.
+
 ## Naming Conventions
 
 - **camelCase** for variables and functions
@@ -168,16 +189,16 @@ describe('calculateDaysUntilDeadline', () => {
 
 - Use **named exports** for functions, components, types, constants
 - Group imports: React/Expo → third-party → local (blank lines between groups)
-- Use absolute imports: `import { X } from '@lib/api'` (via tsconfig paths)
+- Use the `@/` aliases from tsconfig paths, never `../../../`: `import { X } from '@/lib/api'`
 
 ```typescript
-import React, { useState } from 'react';
+import React, { useReducer } from 'react';
 import { View } from 'react-native';
 import Reanimated from 'react-native-reanimated';
 
-import { fetchClass } from '@lib/api';
-import { BUTTON_HEIGHT } from '@constants/sizes';
-import { ClassCard } from './ClassCard';
+import { fetchClass } from '@/lib/api';
+import { BUTTON_HEIGHT } from '@/constants/sizes';
+import { ClassCard } from '@/features/classes/components/ClassCard/ClassCard';
 ```
 
 ## TypeScript

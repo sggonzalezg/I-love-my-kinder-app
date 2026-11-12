@@ -21,6 +21,13 @@ This document establishes mandatory coding standards for the i-love-my-kinder mo
 - Global types in `src/types/`
 - Expo Router routes in `src/app/`
 
+## Folder Structure for UI
+
+- Every screen has its own `components/` folder, with one folder per component holding `<Component>.tsx` and `<Component>.styles.ts` (`StyleSheet.create`)
+- A component used by several screens goes in the shared `src/components/` with the same layout: `src/components/<Component>/<Component>.tsx` + `<Component>.styles.ts`
+- Imports go through the `@/` aliases from tsconfig (`@/components/...`, `@/theme/...`), never relative chains like `../../../`
+- Existing code moves to this layout only in refactor PRs that change no behavior and keep every test green
+
 ## Naming Conventions
 
 - **camelCase** for variables and functions
@@ -75,7 +82,7 @@ This document establishes mandatory coding standards for the i-love-my-kinder mo
 
 - Use named exports
 - Group imports: React/Expo → third-party → local
-- Use absolute imports via tsconfig paths
+- Use the `@/` aliases from tsconfig paths, never `../../../`
 
 ## TypeScript
 
