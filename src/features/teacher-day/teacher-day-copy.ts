@@ -2,6 +2,7 @@ import type { ChildSyncStatus } from '@/lib/routine-queue';
 
 export const TEACHER_DAY_COPY = {
   readyOf: (total: number) => `de ${total} listos`,
+  roomSwitch: 'Elegí la sala',
   toLog: (total: number) => `Hoy hay ${total} niños para registrar`,
   unsent: (count: number) => `${count} sin enviar`,
   allSynced: 'Todo sincronizado',

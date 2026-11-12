@@ -1,4 +1,4 @@
-import { router } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { Bell, Check, Clock } from 'lucide-react-native';
 import { Fragment } from 'react';
 import { View } from 'react-native';
@@ -10,6 +10,7 @@ import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
 import { IconButton } from '@/components/icon-button';
 import { Screen } from '@/components/screen';
+import { Select } from '@/components/Select/Select';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { routineLogHref } from '@/constants/routine';
@@ -21,6 +22,7 @@ import { RoomDaySeal } from '@/features/teacher-day/components/RoomDaySeal/RoomD
 import { TodayProgress } from '@/features/teacher-day/components/TodayProgress/TodayProgress';
 import { TEACHER_DAY_COPY } from '@/features/teacher-day/teacher-day-copy';
 import { groupKeyOf, useGroupDay, type GroupDayChild } from '@/features/teacher-day/use-group-day';
+import { useRoomSwitchOptions } from '@/features/teacher-day/use-room-switch-options';
 import { formatTime } from '@/lib/dates';
 import { pendingCount } from '@/lib/routine-queue';
 import { groupLabel } from '@/lib/shift';
@@ -38,12 +40,14 @@ function latestSave(children: GroupDayChild[]): string {
 export function TeacherTodayScreen() {
   const reduced = useReducedMotion();
   const themed = useTeacherTodayStyles();
-  const { group, hasNoGroup, children, queue, loading, failed, reload } = useGroupDay(null);
+  const params = useLocalSearchParams<{ group?: string }>();
+  const { groups, group, hasNoGroup, children, queue, loading, failed, reload } = useGroupDay(params.group ?? null);
   useReloadOnRefocus(reload);
 
   const statuses = children.map((child) => child.status);
   const ready = readyCount(statuses);
   const total = children.length;
+  const roomOptions = useRoomSwitchOptions(groups, group, { childCount: total, readyCount: ready });
   const complete = total > 0 && ready === total;
   const unsent = group ? pendingCount(queue.items, group) : 0;
   const hasRejected = queue.items.some((item) => item.status === 'rejected');
@@ -53,9 +57,23 @@ export function TeacherTodayScreen() {
     router.push(routineLogHref(groupKeyOf(group), childIndex));
   };
 
+  function renderGroupControl() {
+    if (!group) return <View />;
+    if (!roomOptions) return <GroupPill label={groupLabel(group.roomName, group.shift)} />;
+    return (
+      <Select
+        variant="roomSwitch"
+        label={TEACHER_DAY_COPY.roomSwitch}
+        options={roomOptions}
+        value={groupKeyOf(group)}
+        onChange={(groupKey) => router.setParams({ group: groupKey })}
+      />
+    );
+  }
+
   const header = (
     <View style={styles.topBar}>
-      {group ? <GroupPill label={groupLabel(group.roomName, group.shift)} /> : <View />}
+      {renderGroupControl()}
       <IconButton icon={Bell} label={TEACHER_DAY_COPY.bell} onPress={() => router.push(NOTICES_ROUTE)} />
     </View>
   );

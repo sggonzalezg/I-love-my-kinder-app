@@ -4,7 +4,7 @@ import { LAST_HYGIENE_LOOKBACK_DAYS } from '@/constants/routine';
 import { fetchRoomRoster } from '@/data/family-room';
 import { useRoutineQueue, type RoutineQueueState } from '@/data/routine-queue-store';
 import { useSession } from '@/data/session';
-import { fetchGroupRoutines, fetchTeacherGroups, type GroupRoutine } from '@/data/teacher-day';
+import { fetchGroupRoutines, fetchTeacherGroups, type GroupRoutine, type TeacherGroup } from '@/data/teacher-day';
 import { useAsync } from '@/data/use-async';
 import { toIsoDate } from '@/lib/dates';
 import type { ChildGroup } from '@/lib/room-groups';
@@ -26,7 +26,8 @@ export interface GroupDayChild {
 }
 
 export interface GroupDay {
-  group: ChildGroup | null;
+  groups: TeacherGroup[];
+  group: TeacherGroup | null;
   hasNoGroup: boolean;
   children: GroupDayChild[];
   queue: RoutineQueueState;
@@ -71,6 +72,7 @@ export function useGroupDay(requestedGroupKey: string | null): GroupDay {
   }, [reloadGroups, reloadDay]);
 
   return {
+    groups: groupList,
     group,
     hasNoGroup: groups.data !== null && groupList.length === 0,
     children,
