@@ -31,6 +31,23 @@ export function defaultGroupIndex(groups: { shift: ShiftName }[], now: Date): nu
   );
 }
 
+export interface GroupSummary {
+  childCount: number;
+  readyCount: number;
+  /** As the backend stores it, "13:00:00". */
+  shiftStartTime: string;
+}
+
+function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
+export function roomSwitchMeta({ childCount, readyCount: ready, shiftStartTime }: GroupSummary, now: Date): string {
+  const children = countLabel(childCount, 'niño', 'niños');
+  const startTime = shiftStartTime.slice(0, 'HH:MM'.length);
+  return isFutureTime(startTime, now) ? `${children} · empieza ${startTime}` : `${children} · ${countLabel(ready, 'listo', 'listos')}`;
+}
+
 function pad(value: number): string {
   return String(value).padStart(2, '0');
 }
