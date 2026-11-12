@@ -49,7 +49,7 @@ export default function PushPrimerScreen() {
             }}
           >
             <Image
-              source={require('@/../../assets/images/nap-hessam-nabavi.jpg')}
+              source={require('@/assets/images/nap-hessam-nabavi.jpg')}
               style={{ width: '100%', height: '100%' }}
             />
 
