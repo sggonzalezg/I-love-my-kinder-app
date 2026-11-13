@@ -31,6 +31,11 @@ export function relationshipLabel(relationship: string): string {
   return RELATIONSHIPS[relationship]?.chip ?? relationship;
 }
 
+/** The everyday word: "mamá", "papá". */
+export function relationshipShortWord(relationship: string): string {
+  return RELATIONSHIPS[relationship]?.short ?? relationship.toLowerCase();
+}
+
 /** The word a signature uses: "Ana Rodríguez (madre)". */
 export function relationshipWord(relationship: string): string {
   return RELATIONSHIPS[relationship]?.formal ?? relationship.toLowerCase();
@@ -51,8 +56,7 @@ export function senderLabel(sender: Sender): string {
       return `${sender.name} · Asistente`;
     case 'family': {
       if (!sender.childVisible) return `${sender.name}, familia`;
-      const short = RELATIONSHIPS[sender.relationship]?.short ?? sender.relationship.toLowerCase();
-      return `${sender.name}, ${short} de ${sender.childFirstName}`;
+      return `${sender.name}, ${relationshipShortWord(sender.relationship)} de ${sender.childFirstName}`;
     }
   }
 }

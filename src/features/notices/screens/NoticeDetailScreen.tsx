@@ -13,7 +13,9 @@ import { TopBar } from '@/components/top-bar';
 import { CALENDAR_ROUTE } from '@/constants/routes';
 import { CancelledEventDetails } from '@/features/notices/components/CancelledEventDetails/CancelledEventDetails';
 import { NoticeImage } from '@/features/notices/components/NoticeImage/NoticeImage';
+import { NoticeSeenSheet } from '@/features/notices/components/NoticeSeenSheet/NoticeSeenSheet';
 import { NoticeSender } from '@/features/notices/components/NoticeSender/NoticeSender';
+import { SeenByChip } from '@/features/notices/components/SeenByChip/SeenByChip';
 import { INITIAL_NOTICE_DETAIL_STATE, NOTICE_DETAIL_ACTIONS, noticeDetailReducer } from '@/features/notices/notice-detail-reducer';
 import { NOTICES_COPY } from '@/features/notices/notices-copy';
 import { useNoticeDetail } from '@/features/notices/use-notice-detail';
@@ -25,7 +27,7 @@ export function NoticeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const themed = useNoticeDetailScreenStyles();
   const [state, dispatch] = useReducer(noticeDetailReducer, INITIAL_NOTICE_DETAIL_STATE);
-  const { notice, userId, isFamily, audienceChildren, imageUrl, imageUrlFailed, loading, failed, reload } = useNoticeDetail(id, state.attempt);
+  const { notice, userId, isFamily, senderLabels, audienceChildren, imageUrl, imageUrlFailed, loading, failed, reload } = useNoticeDetail(id, state.attempt);
   const header = <TopBar backLabel={NOTICES_COPY.backToNotices} />;
 
   if (loading) {
@@ -50,7 +52,7 @@ export function NoticeDetailScreen() {
     );
   }
 
-  const sender = noticeSender(notice, userId);
+  const sender = noticeSender(notice, userId, senderLabels);
   const paragraphs = bodyParagraphs(notice.body);
 
   return (
@@ -83,6 +85,7 @@ export function NoticeDetailScreen() {
               ))}
             </View>
           ) : null}
+          {notice.seen ? <SeenByChip summary={notice.seen} onPress={() => dispatch({ type: NOTICE_DETAIL_ACTIONS.SEEN_SHEET_OPENED })} /> : null}
           {isFamily && notice.cancelledEvent ? (
             <View style={styles.calendarButton}>
               <Button label={NOTICES_COPY.seeCalendar} icon={Calendar} variant="soft" block onPress={() => router.navigate(CALENDAR_ROUTE)} />
@@ -92,6 +95,14 @@ export function NoticeDetailScreen() {
       </Screen>
       {state.viewerOpen && imageUrl ? (
         <ImageViewer imageUrl={imageUrl} title={notice.title} onClose={() => dispatch({ type: NOTICE_DETAIL_ACTIONS.VIEWER_CLOSED })} />
+      ) : null}
+      {notice.seen ? (
+        <NoticeSeenSheet
+          noticeId={notice.id}
+          summary={notice.seen}
+          visible={state.seenSheetOpen}
+          onClose={() => dispatch({ type: NOTICE_DETAIL_ACTIONS.SEEN_SHEET_CLOSED })}
+        />
       ) : null}
     </>
   );

@@ -15,5 +15,8 @@ export const NOTICES_COPY = {
   reasonLabel: 'Motivo:',
   voidPermissionHint: 'No tenés que hacer nada. Si se hace otro día, te pedimos permiso de nuevo.',
   seeCalendar: 'Ver el calendario',
+  calendar: 'Calendario',
+  seenSheetHint: 'Muestra quién lo vio',
+  viewersLoadError: 'No pudimos cargar quién lo vio.',
   rowLabel: (title: string, sender: string, time: string, unread: boolean) => `${unread ? 'No leído. ' : ''}${title}, de ${sender}, ${time}`,
 } as const;
