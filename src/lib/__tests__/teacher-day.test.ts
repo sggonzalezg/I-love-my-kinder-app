@@ -8,10 +8,27 @@ import {
   logButtonLabel,
   minutesBefore,
   readyCount,
+  roomSwitchMeta,
   stepTime,
   syncedLabel,
   toTimeValue,
 } from '../teacher-day';
+
+describe('room switch rows', () => {
+  const morning = new Date(2026, 10, 12, 10, 30);
+
+  it('shows the children and how many are ready once the shift started', () => {
+    expect(roomSwitchMeta({ childCount: 15, readyCount: 7, shiftStartTime: '08:00:00' }, morning)).toBe('15 niños · 7 listos');
+  });
+
+  it('shows when a shift that has not started begins', () => {
+    expect(roomSwitchMeta({ childCount: 12, readyCount: 0, shiftStartTime: '13:00:00' }, morning)).toBe('12 niños · empieza 13:00');
+  });
+
+  it('says "1 niño" and "1 listo" in the singular', () => {
+    expect(roomSwitchMeta({ childCount: 1, readyCount: 1, shiftStartTime: '08:00:00' }, morning)).toBe('1 niño · 1 listo');
+  });
+});
 
 describe('teacher day (T2 and T4)', () => {
   it('counts a child as ready once her day is saved, sent or not', () => {

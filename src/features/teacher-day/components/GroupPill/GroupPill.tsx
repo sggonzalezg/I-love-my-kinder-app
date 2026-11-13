@@ -5,7 +5,7 @@ import { useBackgroundColorStyles } from '@/theme/color-styles';
 
 import { styles } from './GroupPill.styles';
 
-/** The group label in the room-switch pill; picking another group comes with the shared Select (step SEL). */
+/** A teacher with one group sees it as a plain pill; two or more get the room switch Select. */
 export function GroupPill({ label }: { label: string }) {
   const backgroundStyles = useBackgroundColorStyles();
   return (
