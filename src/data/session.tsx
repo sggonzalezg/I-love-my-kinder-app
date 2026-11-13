@@ -4,6 +4,7 @@ import type { AuthError, AuthSession } from './types';
 import { supabase, invoke } from './supabase';
 import { SESSION_ACTIONS, initialSessionState, sessionReducer } from './session-reducer';
 import { resolveRoles, getActiveRole, type Role } from '@/lib/role';
+import { SESSION_STORAGE_KEY } from '@/constants/storage';
 
 const SessionContext = createContext<{
   session: AuthSession | null;
@@ -23,7 +24,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   async function setActiveRole(role: Role) {
     if (!session) return;
     dispatch({ type: SESSION_ACTIONS.ROLE_CHANGED, role });
-    await AsyncStorage.setItem('session', JSON.stringify({ ...session, active_role: role }));
+    await AsyncStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ ...session, active_role: role }));
   }
 
   useEffect(() => {
@@ -32,7 +33,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const restoreSession = async () => {
       let restored: AuthSession | null = null;
       try {
-        const cached = await AsyncStorage.getItem('session');
+        const cached = await AsyncStorage.getItem(SESSION_STORAGE_KEY);
         if (cached) restored = JSON.parse(cached);
       } catch (err) {
         console.error('Failed to restore session:', err);
@@ -46,7 +47,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
     const { data } = supabase.auth.onAuthStateChange(async (event) => {
       if (event === 'SIGNED_OUT' && isMounted) {
         dispatch({ type: SESSION_ACTIONS.ENDED });
-        await AsyncStorage.removeItem('session');
+        await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
       }
     });
 
@@ -137,7 +138,7 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
       profile_photo: familyData?.photo_path || teacherData?.photo_path,
     };
 
-    await AsyncStorage.setItem('session', JSON.stringify(session));
+    await AsyncStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session));
     return session;
   } catch (err) {
     const authError = err as AuthError;
@@ -149,10 +150,10 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
 // Sign out.
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
-  await AsyncStorage.removeItem('session');
+  await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
 }
 
 /** After the account is deleted the "deleted" screen stays until "Listo", but a restart must open the login. */
 export async function forgetStoredSession(): Promise<void> {
-  await AsyncStorage.removeItem('session');
+  await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
 }
