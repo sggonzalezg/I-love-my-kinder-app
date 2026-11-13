@@ -2,10 +2,11 @@ import { StyleSheet } from 'react-native';
 
 import { radius, type ColorName } from '@/theme/tokens';
 
-export type BannerKind = 'offline' | 'info' | 'error';
+export type BannerKind = 'offline' | 'warning' | 'info' | 'error';
 
 export const BANNER_PALETTES: Record<BannerKind, { background: ColorName; icon: ColorName }> = {
   offline: { background: 'wait50', icon: 'wait' },
+  warning: { background: 'wait50', icon: 'wait' },
   info: { background: 'blue50', icon: 'blue' },
   error: { background: 'red50', icon: 'red' },
 };
