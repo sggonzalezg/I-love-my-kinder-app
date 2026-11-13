@@ -1,4 +1,4 @@
-import { eventAudienceLabel, familyGreeting, kidDayStatus, loadWithSavedFallback, nextEventLine, nextEventWindowEnd } from '../family-today';
+import { eventAudienceLabel, familyGreeting, kidDayStatus, loadWithSavedFallback, nextEventLine, nextEventWindowEnd, onlyKidWithDay } from '../family-today';
 import type { FamilyChild } from '../room-groups';
 
 const SALA_2_MORNING = { roomId: 'r2', roomName: 'Sala 2', shiftId: 's-am', shift: 'morning' as const };
@@ -97,5 +97,21 @@ describe('loadWithSavedFallback', () => {
   it('rethrows a failure that is not a network failure', async () => {
     const serverFailure = () => Promise.reject(Object.assign(new Error('permission denied'), { status: 403 }));
     await expect(loadWithSavedFallback(serverFailure, () => Promise.resolve('saved'), () => Promise.resolve())).rejects.toThrow('permission denied');
+  });
+});
+
+describe('onlyKidWithDay', () => {
+  const kid = (id: string, dayStatus: 'ready' | 'notYet' | 'readOnly') => ({ ...child([SALA_2_MORNING]), id, dayStatus });
+
+  it('is the child when the family has one child in the nursery', () => {
+    expect(onlyKidWithDay([kid('mateo', 'notYet')])?.id).toBe('mateo');
+  });
+
+  it('is null with several children', () => {
+    expect(onlyKidWithDay([kid('mateo', 'ready'), kid('lucia', 'notYet')])).toBeNull();
+  });
+
+  it('is null when the only child is read only', () => {
+    expect(onlyKidWithDay([kid('lucia', 'readOnly')])).toBeNull();
   });
 });

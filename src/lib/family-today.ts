@@ -32,6 +32,11 @@ export function kidDayStatus(child: FamilyChild, todayRoutines: TodayRoutineKey[
   return savedForEveryGroup ? 'ready' : 'notYet';
 }
 
+/** Design F2: with one child in the nursery, Hoy goes straight to that child's day (F6). */
+export function onlyKidWithDay<Kid extends { dayStatus: KidDayStatus }>(kids: Kid[]): Kid | null {
+  return kids.length === 1 && kids[0].dayStatus !== 'readOnly' ? kids[0] : null;
+}
+
 export function familyGreeting(firstName: string): string {
   return firstName ? `Hola, ${firstName}` : 'Hola';
 }
