@@ -11,7 +11,6 @@ export async function sendDeletionCode(): Promise<void> {
   await invoke(DELETE_ACCOUNT_FUNCTION, { action: 'send_code' });
 }
 
-/** Deletes the account on the server; returns when it happened (ISO). */
 export async function confirmDeletion(code: string): Promise<string> {
   const { deletedAt } = await invoke<{ deletedAt: string }>(DELETE_ACCOUNT_FUNCTION, { action: 'confirm', code });
   return deletedAt;

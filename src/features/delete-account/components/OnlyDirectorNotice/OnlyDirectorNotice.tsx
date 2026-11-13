@@ -5,6 +5,7 @@ import { Button } from '@/components/button';
 import { Text } from '@/components/text';
 import { DELETE_ACCOUNT_COPY } from '@/features/delete-account/delete-account-copy';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
+import { iconStroke } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 import { ALERT_GLYPH_SIZE, styles } from './OnlyDirectorNotice.styles';
@@ -20,7 +21,7 @@ export function OnlyDirectorNotice({ nurseryName, onClose }: OnlyDirectorNoticeP
   return (
     <View>
       <View style={[styles.statusIcon, backgroundStyles.wait50]}>
-        <CircleAlert size={ALERT_GLYPH_SIZE} color={colors.wait} strokeWidth={1.8} />
+        <CircleAlert size={ALERT_GLYPH_SIZE} color={colors.wait} strokeWidth={iconStroke.regular} />
       </View>
       <Text variant="title" accessibilityRole="header" style={styles.title}>
         {DELETE_ACCOUNT_COPY.onlyDirectorTitle}

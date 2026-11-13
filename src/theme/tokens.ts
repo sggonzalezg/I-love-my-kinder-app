@@ -55,6 +55,7 @@ export const darkColors: Colors = {
 
 export const space = { s1: 4, s2: 8, s3: 12, s4: 16, s5: 20, s6: 24, s8: 32, s10: 40, s12: 48 } as const;
 export const screenMargin = 20;
+export const iconStroke = { regular: 1.8, bold: 2 } as const;
 
 export const radius = { sm: 8, md: 12, lg: 16, xl: 24, full: 999, sheet: 28 } as const;
 

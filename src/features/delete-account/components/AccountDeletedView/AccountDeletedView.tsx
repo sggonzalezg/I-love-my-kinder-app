@@ -8,6 +8,7 @@ import { DELETE_ACCOUNT_COPY } from '@/features/delete-account/delete-account-co
 import { deletedOnLine } from '@/lib/account-deletion';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { duration, easeOut } from '@/theme/motion';
+import { iconStroke } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 import { CHECK_GLYPH_SIZE, styles } from './AccountDeletedView.styles';
@@ -23,7 +24,7 @@ export function AccountDeletedView({ deletedAt, onDone }: AccountDeletedViewProp
   return (
     <Animated.View entering={FadeIn.duration(duration.slow).easing(easeOut)} style={[styles.root, backgroundStyles.ground]}>
       <View style={[styles.successIcon, backgroundStyles.ok50]}>
-        <Check size={CHECK_GLYPH_SIZE} color={colors.ok} strokeWidth={2} />
+        <Check size={CHECK_GLYPH_SIZE} color={colors.ok} strokeWidth={iconStroke.bold} />
       </View>
       <Text variant="title" accessibilityRole="header" style={styles.centered}>
         {DELETE_ACCOUNT_COPY.deletedTitle}

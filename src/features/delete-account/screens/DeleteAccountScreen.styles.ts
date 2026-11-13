@@ -2,8 +2,6 @@ import { StyleSheet } from 'react-native';
 
 import { space } from '@/theme/tokens';
 
-export const RESEND_TICK_MS = 1000;
-
 export const styles = StyleSheet.create({
   otp: { marginTop: space.s6, marginBottom: space.s3 },
   actionsRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.s3 },

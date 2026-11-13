@@ -1,18 +1,15 @@
 import { router } from 'expo-router';
-import { Trash2 } from 'lucide-react-native';
 import { useEffect, useReducer } from 'react';
 
-import { Button } from '@/components/button';
 import { Sheet } from '@/components/sheet';
-import { Text } from '@/components/text';
 import { DELETE_ACCOUNT_ROUTE } from '@/constants/routes';
 import { isOnlyDirector } from '@/data/account-deletion';
 import { fetchFamilyChildren } from '@/data/family-room';
 import type { FunctionError } from '@/data/supabase';
 import { useAsync } from '@/data/use-async';
+import { DeleteAccountRow } from '@/features/delete-account/components/DeleteAccountRow/DeleteAccountRow';
 import { DeletionSummary } from '@/features/delete-account/components/DeletionSummary/DeletionSummary';
 import { OnlyDirectorNotice } from '@/features/delete-account/components/OnlyDirectorNotice/OnlyDirectorNotice';
-import { DELETE_ACCOUNT_COPY } from '@/features/delete-account/delete-account-copy';
 import {
   DELETE_ACCOUNT_START_ACTIONS,
   deleteAccountStartReducer,
@@ -60,16 +57,7 @@ export function DeleteAccountEntry({ userId, role, nurseryName }: DeleteAccountE
 
   return (
     <>
-      <Button
-        label={DELETE_ACCOUNT_COPY.profileRow}
-        icon={Trash2}
-        variant="danger-soft"
-        block
-        onPress={() => dispatch({ type: DELETE_ACCOUNT_START_ACTIONS.OPENED, needsCheck: role === 'director' })}
-      />
-      <Text variant="small" tone="red" style={styles.meta}>
-        {DELETE_ACCOUNT_COPY.profileRowMeta}
-      </Text>
+      <DeleteAccountRow onPress={() => dispatch({ type: DELETE_ACCOUNT_START_ACTIONS.OPENED, needsCheck: role === 'director' })} />
       <Sheet visible={state.open} onClose={close} sheetStyle={styles.sheet}>
         {state.onlyDirector ? (
           <OnlyDirectorNotice nurseryName={nurseryName} onClose={close} />
