@@ -47,9 +47,9 @@ export async function invoke<T>(name: string, body: object): Promise<T> {
 
 export const MEDIA_BUCKET = 'media';
 
-export async function signedUrl(path: string | null | undefined): Promise<string | null> {
+export async function signedUrl(path: string | null | undefined, bucket = MEDIA_BUCKET): Promise<string | null> {
   if (!path) return null;
   if (path.startsWith('http')) return path;
-  const { data } = await supabase.storage.from(MEDIA_BUCKET).createSignedUrl(path, SIGNED_URL_EXPIRY_SECONDS);
+  const { data } = await supabase.storage.from(bucket).createSignedUrl(path, SIGNED_URL_EXPIRY_SECONDS);
   return data?.signedUrl ?? null;
 }
