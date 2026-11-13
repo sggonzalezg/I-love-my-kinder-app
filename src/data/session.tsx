@@ -3,6 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthError, AuthSession } from './types';
 import { supabase, invoke } from './supabase';
 import { resolveRoles, getActiveRole, type Role } from '@/lib/role';
+import { FAMILY_TODAY_STORAGE_KEY_PREFIX } from '@/constants/cache';
 
 const SessionContext = createContext<{
   session: AuthSession | null;
@@ -145,6 +146,12 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   await AsyncStorage.removeItem('session');
+  await forgetSavedFamilyToday();
+}
+
+async function forgetSavedFamilyToday(): Promise<void> {
+  const keys = await AsyncStorage.getAllKeys();
+  await AsyncStorage.multiRemove(keys.filter((key) => key.startsWith(FAMILY_TODAY_STORAGE_KEY_PREFIX)));
 }
 
 /** After the account is deleted the "deleted" screen stays until "Listo", but a restart must open the login. */

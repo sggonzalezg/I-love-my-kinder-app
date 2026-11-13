@@ -38,14 +38,14 @@ interface EnrollmentRow {
 }
 
 interface ChildLinkRow {
-  children: { id: string; first_name: string; photo_path: string | null; enrollments: EnrollmentRow[] } | null;
+  children: { id: string; first_name: string; last_name: string; photo_path: string | null; enrollments: EnrollmentRow[] } | null;
 }
 
 export async function fetchFamilyChildren(userId: string): Promise<FamilyChild[]> {
   const rows = throwOnError<ChildLinkRow[]>(
     await supabase
       .from('family_member_children')
-      .select('children(id, first_name, photo_path, enrollments(room_id, shift_id, ended_at, rooms(name), shifts(name))), family_members!inner(user_id)')
+      .select('children(id, first_name, last_name, photo_path, enrollments(room_id, shift_id, ended_at, rooms(name), shifts(name))), family_members!inner(user_id)')
       .eq('family_members.user_id', userId),
   );
 
@@ -55,6 +55,7 @@ export async function fetchFamilyChildren(userId: string): Promise<FamilyChild[]
           {
             id: child.id,
             firstName: child.first_name,
+            lastName: child.last_name,
             photoPath: child.photo_path,
             groups: child.enrollments
               .filter((enrollment) => !enrollment.ended_at && enrollment.rooms && enrollment.shifts)

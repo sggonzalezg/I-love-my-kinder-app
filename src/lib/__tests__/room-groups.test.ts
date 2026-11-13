@@ -7,8 +7,8 @@ const SALA_1_MORNING = { roomId: 'sala-1', roomName: 'Sala 1', shiftId: 'morning
 describe('roomGroupsOf', () => {
   it('gives siblings in the same room and shift one group', () => {
     const children = [
-      { id: 'mateo', firstName: 'Mateo', photoPath: null, groups: [SALA_2_MORNING] },
-      { id: 'lucia', firstName: 'Lucía', photoPath: null, groups: [SALA_2_MORNING] },
+      { id: 'mateo', firstName: 'Mateo', lastName: '', photoPath: null, groups: [SALA_2_MORNING] },
+      { id: 'lucia', firstName: 'Lucía', lastName: '', photoPath: null, groups: [SALA_2_MORNING] },
     ];
 
     expect(roomGroupsOf(children)).toHaveLength(1);
@@ -16,8 +16,8 @@ describe('roomGroupsOf', () => {
 
   it('lists each room and shift a child attends', () => {
     const children = [
-      { id: 'mateo', firstName: 'Mateo', photoPath: null, groups: [SALA_2_MORNING, SALA_2_AFTERNOON] },
-      { id: 'lucia', firstName: 'Lucía', photoPath: null, groups: [SALA_1_MORNING] },
+      { id: 'mateo', firstName: 'Mateo', lastName: '', photoPath: null, groups: [SALA_2_MORNING, SALA_2_AFTERNOON] },
+      { id: 'lucia', firstName: 'Lucía', lastName: '', photoPath: null, groups: [SALA_1_MORNING] },
     ];
 
     expect(roomGroupsOf(children).map((group) => group.key)).toEqual([
@@ -28,7 +28,7 @@ describe('roomGroupsOf', () => {
   });
 
   it('has no group for a child with no current enrollment', () => {
-    const children = [{ id: 'mateo', firstName: 'Mateo', photoPath: null, groups: [] }];
+    const children = [{ id: 'mateo', firstName: 'Mateo', lastName: '', photoPath: null, groups: [] }];
 
     expect(roomGroupsOf(children)).toEqual([]);
   });
