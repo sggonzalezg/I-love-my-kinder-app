@@ -1,6 +1,8 @@
-import type { CancelledEvent, Notice } from '@/lib/notices';
-import { mergeNotices } from '@/lib/notices';
+import type { CancelledEvent, Notice, NoticeViewer } from '@/lib/notices';
+import { guardianLine, mergeNotices, seenSummary } from '@/lib/notices';
 import type { ShiftName } from '@/lib/shift';
+
+import { uploaderLabel } from '@/lib/story';
 
 import { signedUrl, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
@@ -9,6 +11,8 @@ const NOTICE_IMAGES_BUCKET = 'announcement-images';
 // shortcut: staff read the newest notices only; add paging when a nursery keeps more than this.
 const STAFF_NOTICES_LIMIT = 100;
 const NOTICE_COLUMNS = 'id, title, body, image_path, created_at, created_by, room_id, cancelled_event, rooms(name), shifts(name)';
+// RLS returns recipient rows only to the notice's sender and to the direction.
+const STAFF_NOTICE_COLUMNS = `${NOTICE_COLUMNS}, announcement_recipients(seen_at)`;
 
 interface CancelledEventRow {
   title: string;
@@ -31,6 +35,17 @@ interface NoticeRow {
   cancelled_event: CancelledEventRow | null;
   rooms: { name: string } | null;
   shifts: { name: ShiftName } | null;
+  announcement_recipients?: { seen_at: string | null }[];
+}
+
+interface ViewerRow {
+  id: string;
+  seen_at: string | null;
+  family_members: {
+    first_name: string;
+    last_name: string;
+    family_member_children: { relationship: string; children: { first_name: string } | null }[];
+  } | null;
 }
 
 function toCancelledEvent(row: CancelledEventRow | null): CancelledEvent | null {
@@ -59,6 +74,7 @@ function toNotice(row: NoticeRow, unread: boolean): Notice {
     shift: row.shifts?.name ?? null,
     cancelledEvent: toCancelledEvent(row.cancelled_event),
     unread,
+    seen: seenSummary((row.announcement_recipients ?? []).map((recipient) => ({ seenAt: recipient.seen_at }))),
   };
 }
 
@@ -75,13 +91,15 @@ export async function fetchFamilyNotices(userId: string): Promise<Notice[]> {
 
 export async function fetchStaffNotices(): Promise<Notice[]> {
   const rows = throwOnError<NoticeRow[]>(
-    await supabase.from('announcements').select(NOTICE_COLUMNS).order('created_at', { ascending: false }).limit(STAFF_NOTICES_LIMIT),
+    await supabase.from('announcements').select(STAFF_NOTICE_COLUMNS).order('created_at', { ascending: false }).limit(STAFF_NOTICES_LIMIT),
   );
   return rows.map((row) => toNotice(row, false));
 }
 
-export async function fetchNotice(noticeId: string): Promise<Notice | null> {
-  const row = throwOnError<NoticeRow | null>(await supabase.from('announcements').select(NOTICE_COLUMNS).eq('id', noticeId).maybeSingle());
+/** A family's own recipient rows must not count as the notice's audience, so only staff read them. */
+export async function fetchNotice(noticeId: string, isStaff: boolean): Promise<Notice | null> {
+  const columns = isStaff ? STAFF_NOTICE_COLUMNS : NOTICE_COLUMNS;
+  const row = throwOnError<NoticeRow | null>(await supabase.from('announcements').select(columns).eq('id', noticeId).maybeSingle());
   return row ? toNotice(row, false) : null;
 }
 
@@ -100,4 +118,30 @@ export async function fetchNoticeImageUrl(imagePath: string): Promise<string> {
   const url = await signedUrl(imagePath, NOTICE_IMAGES_BUCKET);
   if (!url) throw new Error(`No signed URL for notice image ${imagePath}`);
   return url;
+}
+
+export async function fetchNoticeViewers(noticeId: string): Promise<NoticeViewer[]> {
+  const rows = throwOnError<ViewerRow[]>(
+    await supabase
+      .from('announcement_recipients')
+      .select('id, seen_at, family_members(first_name, last_name, family_member_children(relationship, children(first_name)))')
+      .eq('announcement_id', noticeId),
+  );
+  return rows.flatMap((row) => {
+    const member = row.family_members;
+    if (!member) return [];
+    const links = member.family_member_children.flatMap((link) =>
+      link.children ? [{ relationship: link.relationship, childFirstName: link.children.first_name }] : [],
+    );
+    return [{ id: row.id, name: `${member.first_name} ${member.last_name}`, relation: guardianLine(links), seenAt: row.seen_at }];
+  });
+}
+
+/** Only the direction may read teachers, so only she gets the senders' names. */
+export async function fetchSenderLabels(userIds: string[]): Promise<Map<string, string>> {
+  if (userIds.length === 0) return new Map();
+  const rows = throwOnError<{ user_id: string; first_name: string; role: string }[]>(
+    await supabase.from('teachers').select('user_id, first_name, role').in('user_id', userIds),
+  );
+  return new Map(rows.map((row) => [row.user_id, uploaderLabel({ role: row.role, firstName: row.first_name })]));
 }

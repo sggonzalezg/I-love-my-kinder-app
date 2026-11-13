@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
   titleLine: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', gap: space.s3 },
   title: { flexShrink: 1 },
   senderLine: { flexDirection: 'row', alignItems: 'center', flexWrap: 'wrap', gap: space.s2 },
+  seenChip: { flexDirection: 'row', marginTop: space.s2 },
   thumbnail: { width: THUMBNAIL_SIZE, height: THUMBNAIL_SIZE, borderRadius: radius.md },
 });
 

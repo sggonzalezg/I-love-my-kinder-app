@@ -1,8 +1,9 @@
 import { StyleSheet } from 'react-native';
 
 import { createThemedStyles } from '@/theme/themed-styles';
-import { radius, space } from '@/theme/tokens';
+import { radius, size, space } from '@/theme/tokens';
 
+export const CALENDAR_BUTTON_HEIGHT = size.touch;
 export const EMPTY_ILLUSTRATION = require('@/assets/images/alphabet-puzzle-nhn.jpg');
 export const SKELETON_ROW_HEIGHT = 88;
 export const SKELETON_ROWS = 4;

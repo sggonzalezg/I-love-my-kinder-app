@@ -1,5 +1,6 @@
 import { eventTypeLabel } from '@/lib/calendar';
 import { dayChipLabel, formatLongDate, formatTime, MONTHS_SHORT, sameDay, WEEKDAYS } from '@/lib/dates';
+import { relationshipShortWord } from '@/lib/format';
 import type { FamilyChild } from '@/lib/room-groups';
 import { groupLabel, type ShiftName } from '@/lib/shift';
 
@@ -25,7 +26,28 @@ export interface Notice {
   shift: ShiftName | null;
   cancelledEvent: CancelledEvent | null;
   unread: boolean;
+  /** Only for the notices whose recipients the user may read: the sender's own, and every notice for the direction. */
+  seen: SeenSummary | null;
 }
+
+export interface SeenSummary {
+  seen: number;
+  total: number;
+}
+
+export interface GuardianLink {
+  relationship: string;
+  childFirstName: string;
+}
+
+export interface NoticeViewer {
+  id: string;
+  name: string;
+  relation: string;
+  seenAt: string | null;
+}
+
+export const NO_SENDER_LABELS: ReadonlyMap<string, string> = new Map();
 
 const DAYS_SHOWN_AS_WEEKDAY = 7;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -51,8 +73,10 @@ export function noticeTimeLabel(sentAt: Date, now: Date): string {
 }
 
 // shortcut: announcements store no sender name and families cannot read teachers (SDD gap 21); use a stored label once backend adds it.
-export function noticeSender(notice: Notice, userId: string | null): string {
+export function noticeSender(notice: Notice, userId: string | null, senderLabels = NO_SENDER_LABELS): string {
   if (notice.createdBy !== null && notice.createdBy === userId) return 'Vos';
+  const knownSender = notice.createdBy === null ? undefined : senderLabels.get(notice.createdBy);
+  if (knownSender) return knownSender;
   return notice.roomId === null ? 'Dirección' : 'La maestra';
 }
 
@@ -127,4 +151,38 @@ export function childrenInAudience(children: FamilyChild[], notice: Notice): str
         child.groups.some((group) => group.roomId === notice.roomId && (notice.shift === null || group.shift === notice.shift)),
     )
     .map((child) => child.firstName);
+}
+
+export function seenSummary(recipients: { seenAt: string | null }[]): SeenSummary | null {
+  if (recipients.length === 0) return null;
+  return { seen: recipients.filter((recipient) => recipient.seenAt !== null).length, total: recipients.length };
+}
+
+export function seenByLabel({ seen, total }: SeenSummary): string {
+  return `Visto por ${seen} de ${total}`;
+}
+
+export function seenShare({ seen, total }: SeenSummary): number {
+  return total === 0 ? 0 : seen / total;
+}
+
+/** "Mamá de Mateo": the relationship of the first link names every child of the guardian. */
+export function guardianLine(links: GuardianLink[]): string {
+  if (links.length === 0) return 'Familia';
+  const word = relationshipShortWord(links[0].relationship);
+  const capitalized = word.charAt(0).toUpperCase() + word.slice(1);
+  return `${capitalized} de ${joinNames(links.map((link) => link.childFirstName))}`;
+}
+
+export function viewerSeenLabel(seenAt: string | null, now: Date): string {
+  return seenAt === null ? 'Sin ver' : `Visto ${noticeTimeLabel(new Date(seenAt), now)}`;
+}
+
+export function sortViewers(viewers: NoticeViewer[]): NoticeViewer[] {
+  return [...viewers].sort((first, second) => {
+    if (first.seenAt !== null && second.seenAt !== null) return first.seenAt.localeCompare(second.seenAt);
+    if (first.seenAt !== null) return -1;
+    if (second.seenAt !== null) return 1;
+    return first.name.localeCompare(second.name, 'es');
+  });
 }

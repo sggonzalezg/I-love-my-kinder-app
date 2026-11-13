@@ -2,7 +2,7 @@ import { INITIAL_NOTICE_DETAIL_STATE, NOTICE_DETAIL_ACTIONS, noticeDetailReducer
 
 describe('noticeDetailReducer', () => {
   it('starts loading the image with the viewer closed', () => {
-    expect(INITIAL_NOTICE_DETAIL_STATE).toEqual({ image: 'loading', attempt: 0, viewerOpen: false });
+    expect(INITIAL_NOTICE_DETAIL_STATE).toEqual({ image: 'loading', attempt: 0, viewerOpen: false, seenSheetOpen: false });
   });
 
   it('marks the image loaded', () => {
@@ -22,7 +22,7 @@ describe('noticeDetailReducer', () => {
 
     const state = noticeDetailReducer(failed, { type: NOTICE_DETAIL_ACTIONS.IMAGE_RETRIED });
 
-    expect(state).toEqual({ image: 'loading', attempt: 1, viewerOpen: false });
+    expect(state).toEqual({ image: 'loading', attempt: 1, viewerOpen: false, seenSheetOpen: false });
   });
 
   it('opens the viewer once the image is loaded', () => {
@@ -40,10 +40,24 @@ describe('noticeDetailReducer', () => {
   });
 
   it('closes the viewer', () => {
-    const open = { image: 'loaded' as const, attempt: 0, viewerOpen: true };
+    const open = { ...INITIAL_NOTICE_DETAIL_STATE, image: 'loaded' as const, viewerOpen: true };
 
     const state = noticeDetailReducer(open, { type: NOTICE_DETAIL_ACTIONS.VIEWER_CLOSED });
 
     expect(state.viewerOpen).toBe(false);
+  });
+
+  it('opens the sheet of who saw the notice', () => {
+    const state = noticeDetailReducer(INITIAL_NOTICE_DETAIL_STATE, { type: NOTICE_DETAIL_ACTIONS.SEEN_SHEET_OPENED });
+
+    expect(state.seenSheetOpen).toBe(true);
+  });
+
+  it('closes the sheet of who saw the notice', () => {
+    const open = { ...INITIAL_NOTICE_DETAIL_STATE, seenSheetOpen: true };
+
+    const state = noticeDetailReducer(open, { type: NOTICE_DETAIL_ACTIONS.SEEN_SHEET_CLOSED });
+
+    expect(state.seenSheetOpen).toBe(false);
   });
 });

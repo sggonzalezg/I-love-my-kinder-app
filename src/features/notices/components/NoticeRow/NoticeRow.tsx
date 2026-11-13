@@ -6,6 +6,7 @@ import { Chip } from '@/components/chip';
 import { Text } from '@/components/text';
 import { fetchNoticeImageUrl } from '@/data/notices';
 import { useAsync } from '@/data/use-async';
+import { SeenByChip } from '@/features/notices/components/SeenByChip/SeenByChip';
 import { NOTICES_COPY } from '@/features/notices/notices-copy';
 import { cancelledPreview, noticeAudience, noticeSender, noticeTimeLabel, type Notice } from '@/lib/notices';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
@@ -15,16 +16,17 @@ import { PREVIEW_LINES, styles, useNoticeRowStyles } from './NoticeRow.styles';
 interface NoticeRowProps {
   notice: Notice;
   userId: string | null;
+  senderLabels: ReadonlyMap<string, string>;
   now: Date;
   onPress: () => void;
 }
 
-export function NoticeRow({ notice, userId, now, onPress }: NoticeRowProps) {
+export function NoticeRow({ notice, userId, senderLabels, now, onPress }: NoticeRowProps) {
   const themed = useNoticeRowStyles();
   const backgroundStyles = useBackgroundColorStyles();
   const thumbnail = useAsync(() => fetchNoticeImageUrl(notice.imagePath!), notice.imagePath);
 
-  const sender = noticeSender(notice, userId);
+  const sender = noticeSender(notice, userId, senderLabels);
   const time = noticeTimeLabel(new Date(notice.createdAt), now);
   const audience = noticeAudience(notice);
   const preview = notice.cancelledEvent ? cancelledPreview(notice.cancelledEvent) : notice.body;
@@ -56,6 +58,11 @@ export function NoticeRow({ notice, userId, now, onPress }: NoticeRowProps) {
           <Text variant="small" tone="muted" numberOfLines={PREVIEW_LINES}>
             {preview}
           </Text>
+        ) : null}
+        {notice.seen ? (
+          <View style={styles.seenChip}>
+            <SeenByChip summary={notice.seen} />
+          </View>
         ) : null}
       </View>
       {thumbnail.data ? (
