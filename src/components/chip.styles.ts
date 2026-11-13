@@ -13,8 +13,13 @@ export const CHIP_PALETTES: Record<ChipVariant, { background: ColorName; foregro
 };
 
 export const CHIP_ICON_SIZE = 18;
+export const COMPACT_CHIP_ICON_SIZE = 14;
+const COMPACT_CHIP_HEIGHT = 22;
+const COMPACT_CHIP_FONT_SIZE = 12;
 
 export const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, height: 28, paddingHorizontal: 10, borderRadius: radius.full, alignSelf: 'flex-start' },
   label: { fontFamily: fonts.text600 },
+  compact: { height: COMPACT_CHIP_HEIGHT, paddingHorizontal: 8, gap: 4 },
+  compactLabel: { fontSize: COMPACT_CHIP_FONT_SIZE, lineHeight: 16 },
 });
