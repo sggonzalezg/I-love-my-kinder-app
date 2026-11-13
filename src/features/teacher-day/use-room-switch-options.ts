@@ -8,7 +8,7 @@ import { roomSwitchMeta } from '@/lib/teacher-day';
 
 import { groupKeyOf } from './use-group-day';
 
-const MIN_GROUPS_TO_SWITCH = 2;
+export const MIN_GROUPS_TO_SWITCH = 2;
 
 interface ShownGroupCounts {
   childCount: number;
