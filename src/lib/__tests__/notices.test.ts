@@ -273,8 +273,8 @@ describe('mergeNotices', () => {
 
 describe('childrenInAudience', () => {
   const children: FamilyChild[] = [
-    { id: 'mateo', firstName: 'Mateo', photoPath: null, groups: [{ roomId: 'room-2', roomName: 'Sala 2', shiftId: 'am', shift: 'morning' }] },
-    { id: 'lucia', firstName: 'Lucía', photoPath: null, groups: [{ roomId: 'room-1', roomName: 'Sala 1', shiftId: 'pm', shift: 'afternoon' }] },
+    { id: 'mateo', firstName: 'Mateo', lastName: '', photoPath: null, groups: [{ roomId: 'room-2', roomName: 'Sala 2', shiftId: 'am', shift: 'morning' }] },
+    { id: 'lucia', firstName: 'Lucía', lastName: '', photoPath: null, groups: [{ roomId: 'room-1', roomName: 'Sala 1', shiftId: 'pm', shift: 'afternoon' }] },
   ];
 
   it('names the children of the notice room and shift', () => {

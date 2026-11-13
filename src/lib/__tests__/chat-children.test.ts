@@ -2,8 +2,8 @@ import { childNamesInGroup } from '../chat';
 
 describe('childNamesInGroup', () => {
   const children = [
-    { id: 'c1', firstName: 'Mateo', photoPath: null, groups: [{ roomId: 'r2', roomName: 'Sala 2', shiftId: 'morning', shift: 'morning' as const }] },
-    { id: 'c2', firstName: 'Lucía', photoPath: null, groups: [{ roomId: 'r1', roomName: 'Sala 1', shiftId: 'afternoon', shift: 'afternoon' as const }] },
+    { id: 'c1', firstName: 'Mateo', lastName: '', photoPath: null, groups: [{ roomId: 'r2', roomName: 'Sala 2', shiftId: 'morning', shift: 'morning' as const }] },
+    { id: 'c2', firstName: 'Lucía', lastName: '', photoPath: null, groups: [{ roomId: 'r1', roomName: 'Sala 1', shiftId: 'afternoon', shift: 'afternoon' as const }] },
   ];
 
   it('names only the children enrolled in that room and shift', () => {

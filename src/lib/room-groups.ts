@@ -10,6 +10,7 @@ export interface ChildGroup {
 export interface FamilyChild {
   id: string;
   firstName: string;
+  lastName: string;
   photoPath: string | null;
   groups: ChildGroup[];
 }

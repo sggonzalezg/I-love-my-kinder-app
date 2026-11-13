@@ -4,6 +4,7 @@ import type { AuthError, AuthSession } from './types';
 import { supabase, invoke } from './supabase';
 import { SESSION_ACTIONS, initialSessionState, sessionReducer } from './session-reducer';
 import { resolveRoles, getActiveRole, type Role } from '@/lib/role';
+import { FAMILY_TODAY_STORAGE_KEY_PREFIX } from '@/constants/cache';
 import { SESSION_STORAGE_KEY } from '@/constants/storage';
 
 const SessionContext = createContext<{
@@ -151,6 +152,12 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
+  await forgetSavedFamilyToday();
+}
+
+async function forgetSavedFamilyToday(): Promise<void> {
+  const keys = await AsyncStorage.getAllKeys();
+  await AsyncStorage.multiRemove(keys.filter((key) => key.startsWith(FAMILY_TODAY_STORAGE_KEY_PREFIX)));
 }
 
 /** After the account is deleted the "deleted" screen stays until "Listo", but a restart must open the login. */
