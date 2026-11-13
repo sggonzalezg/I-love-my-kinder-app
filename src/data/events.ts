@@ -1,131 +1,75 @@
-import type { EventType } from '@/lib/calendar';
+import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
+import { eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
 
-export interface Event {
-  id: string;
-  type: EventType;
-  title: string;
-  date: string; // ISO date
-  time_start?: string; // HH:mm or null for all-day
-  time_end?: string; // HH:mm or null for all-day
-  place?: string;
-  description?: string;
-  image_url?: string;
-  audience: string; // e.g. "Sala 2 · Matutino"
-  created_by?: string; // e.g. "Maestra Sofía" or "Dirección"
-  reminder_at?: string; // ISO datetime for reminder
-  changed_at?: string; // ISO datetime if changed in the last 3 days
-  changed_previous_time?: string; // Previous time HH:mm if changed
+import { signedUrl, supabase } from './supabase';
+import { throwOnError } from './throw-on-error';
+
+export type { Event } from '@/lib/calendar';
+
+interface StoredEventRow extends EventRow {
+  image_path: string | null;
+  created_by: string | null;
 }
 
-// Mock events for development
-export const mockEvents: Event[] = [
-  {
-    id: '1',
-    type: 'workshop',
-    title: 'Taller de pintura',
-    date: '2026-11-10',
-    time_start: '09:30',
-    time_end: '11:00',
-    place: 'Aula de arte',
-    description: 'Los niños van a pintar con acuarelas.',
-    audience: 'Sala 2 · Matutino',
-    created_by: 'Maestra Sofía',
-    reminder_at: '2026-11-09T18:00:00Z',
-  },
-  {
-    id: '2',
-    type: 'meeting',
-    title: 'Reunión informativa',
-    date: '2026-11-12',
-    time_start: '10:00',
-    time_end: '11:30',
-    place: 'Sala de reuniones',
-    description: 'Información sobre el proyecto del semestre.',
-    audience: 'Sala 1 · Vespertino',
-    created_by: 'Dirección',
-  },
-  {
-    id: '3',
-    type: 'outing',
-    title: 'Salida al Parque Rodó',
-    date: '2026-11-15',
-    time_start: '14:00',
-    time_end: '15:30',
-    place: 'Parque Rodó',
-    audience: 'Sala 2 · Matutino',
-    created_by: 'Maestra Sofía',
-  },
-  {
-    id: '4',
-    type: 'no_classes',
-    title: 'Sin clases',
-    date: '2026-11-20',
-    audience: 'Todo el jardín',
-    created_by: 'Dirección',
-  },
-  {
-    id: '5',
-    type: 'celebration',
-    title: 'Fiesta de fin de año',
-    date: '2026-12-19',
-    time_start: '15:00',
-    time_end: '17:00',
-    place: 'Jardín',
-    description: 'Celebración de fin de año con familias.',
-    audience: 'Todo el jardín',
-    created_by: 'Dirección',
-  },
-];
-
-export function getEventsForMonth(year: number, month: number): Event[] {
-  return mockEvents.filter((event) => {
-    const eventDate = new Date(event.date);
-    return eventDate.getUTCFullYear() === year && eventDate.getUTCMonth() === month;
-  });
+interface AuthorRow {
+  user_id: string;
+  first_name: string;
+  role: string;
 }
 
-export function getEventsByDate(date: string): Event[] {
-  return mockEvents.filter((event) => event.date === date).sort((a, b) => {
-    const aTime = a.time_start || '00:00';
-    const bTime = b.time_start || '00:00';
-    return aTime.localeCompare(bTime);
-  });
+export const EVENT_IMAGES_BUCKET = 'event-images';
+const EVENT_COLUMNS =
+  'id, title, event_type, starts_at, ends_at, all_day, location, description, image_path, created_by, remind_day_before, changed_at, previous_values, rooms(name), shifts(name)';
+const UPCOMING_EVENTS_LIMIT = 30;
+
+async function signedImageUrls(paths: string[]): Promise<Map<string, string>> {
+  if (paths.length === 0) return new Map();
+  const { data } = await supabase.storage.from(EVENT_IMAGES_BUCKET).createSignedUrls(paths, SIGNED_URL_EXPIRY_SECONDS);
+  return new Map((data ?? []).flatMap((signed) => (signed.path && signed.signedUrl ? [[signed.path, signed.signedUrl]] : [])));
 }
 
-export function getUpcomingEvents(fromDate: string, daysAhead: number = 30): Event[] {
-  const from = new Date(fromDate);
-  const to = new Date(from);
-  to.setDate(to.getDate() + daysAhead);
-
-  return mockEvents
-    .filter((event) => {
-      const eventDate = new Date(event.date + 'T00:00:00Z');
-      return eventDate >= from && eventDate <= to;
-    })
-    .sort((a, b) => a.date.localeCompare(b.date));
+async function withImages(rows: StoredEventRow[], now: Date): Promise<Event[]> {
+  const imageUrls = await signedImageUrls(rows.flatMap((row) => (row.image_path ? [row.image_path] : [])));
+  return rows.map((row) => eventFromRow(row, { imageUrl: row.image_path ? (imageUrls.get(row.image_path) ?? null) : null, authorLine: null }, now));
 }
 
-export function getPastEvents(
-  upToDate: string,
-  daysBack: number = 30,
-  year?: number,
-  month?: number
-): Event[] {
-  const upTo = new Date(upToDate);
-  const from = new Date(upTo);
-  from.setDate(from.getDate() - daysBack);
+async function fetchHasAnyEvent(): Promise<boolean> {
+  const { count, error } = await supabase.from('events').select('id', { count: 'exact', head: true });
+  if (error) throw new Error(error.message);
+  return (count ?? 0) > 0;
+}
 
-  let filtered = mockEvents.filter((event) => {
-    const eventDate = new Date(event.date + 'T00:00:00Z');
-    return eventDate < upTo && eventDate >= from;
-  });
+/** RLS returns only the events the user received: the whole nursery's and those of its groups. */
+export async function fetchMonthEvents(year: number, month: number, now: Date): Promise<{ events: Event[]; hasAnyEvent: boolean }> {
+  const { start, end } = monthBounds(year, month);
+  const rows = throwOnError<StoredEventRow[]>(
+    await supabase.from('events').select(EVENT_COLUMNS).gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at'),
+  );
+  const events = await withImages(rows, now);
+  return { events, hasAnyEvent: events.length > 0 || (await fetchHasAnyEvent()) };
+}
 
-  if (year !== undefined && month !== undefined) {
-    filtered = filtered.filter((event) => {
-      const eventDate = new Date(event.date);
-      return eventDate.getUTCFullYear() === year && eventDate.getUTCMonth() === month;
-    });
-  }
+export async function fetchUpcomingEvents(now: Date): Promise<Event[]> {
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const rows = throwOnError<StoredEventRow[]>(
+    await supabase.from('events').select(EVENT_COLUMNS).gte('starts_at', startOfToday.toISOString()).order('starts_at').limit(UPCOMING_EVENTS_LIMIT),
+  );
+  return withImages(rows, now);
+}
 
-  return filtered.sort((a, b) => b.date.localeCompare(a.date));
+async function fetchAuthorLine(createdBy: string | null, userId: string): Promise<string | null> {
+  if (!createdBy) return null;
+  if (createdBy === userId) return eventAuthorLine(true, null);
+  const authors = throwOnError<AuthorRow[]>(await supabase.from('teachers').select('user_id, first_name, role').eq('user_id', createdBy).limit(1));
+  const author = authors[0];
+  return eventAuthorLine(false, author ? { role: author.role, firstName: author.first_name } : null);
+}
+
+/** Null when the event does not read: deleted, or not sent to this user. */
+export async function fetchEvent(eventId: string, userId: string, now: Date): Promise<Event | null> {
+  const rows = throwOnError<StoredEventRow[]>(await supabase.from('events').select(EVENT_COLUMNS).eq('id', eventId).limit(1));
+  const row = rows[0];
+  if (!row) return null;
+  const [imageUrl, authorLine] = await Promise.all([signedUrl(row.image_path, EVENT_IMAGES_BUCKET), fetchAuthorLine(row.created_by, userId)]);
+  return eventFromRow(row, { imageUrl, authorLine }, now);
 }

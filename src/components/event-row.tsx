@@ -8,7 +8,7 @@ import type { PermissionStatus } from '@/lib/outing';
 import { Text } from '@/components/text';
 import { space, radius } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
-import { formatShortDate } from '@/lib/dates';
+import { formatShortDate, fromIsoDate } from '@/lib/dates';
 
 interface EventRowProps {
   event: Event;
@@ -21,7 +21,7 @@ export function EventRow({ event, onPress, index = 0, permissionStatus }: EventR
   const c = useColors();
   const reduced = useReducedMotion();
 
-  const eventDate = new Date(event.date);
+  const eventDate = fromIsoDate(event.date);
   const dateStr = formatShortDate(eventDate);
   const timeStr = event.time_start
     ? `${event.time_start}${event.time_end ? ` a ${event.time_end}` : ''}`
