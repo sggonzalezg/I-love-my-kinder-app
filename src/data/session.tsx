@@ -71,7 +71,6 @@ export function useSession() {
   return ctx;
 }
 
-// Phone lookup: check if the number is registered.
 export async function lookupPhone(phone: string): Promise<{ user_id: string; name: string; inactive: boolean }> {
   try {
     const result = await invoke<{
@@ -88,7 +87,6 @@ export async function lookupPhone(phone: string): Promise<{ user_id: string; nam
   }
 }
 
-// Sign in with OTP.
 export async function signInWithPhone(phone: string): Promise<void> {
   try {
     const { error } = await supabase.auth.signInWithOtp({ phone });
@@ -98,7 +96,6 @@ export async function signInWithPhone(phone: string): Promise<void> {
   }
 }
 
-// Verify OTP and create session.
 export async function verifyPhoneCode(phone: string, code: string): Promise<AuthSession> {
   try {
     const { data, error } = await supabase.auth.verifyOtp({ phone, token: code, type: 'sms' });
@@ -110,7 +107,6 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
     const user = data.user;
     if (!user) throw { code: 'network', message: 'No pudimos verificar tu código. Probá de nuevo.' } as AuthError;
 
-    // Fetch profile and resolve roles.
     const { data: familyData } = await supabase.from('family_members').select('*').eq('user_id', user.id).maybeSingle();
     const { data: teacherData } = await supabase.from('teachers').select('*').eq('user_id', user.id).maybeSingle();
 
@@ -123,7 +119,6 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
     const roles = resolveRoles(profile);
     if (!roles.length) throw { code: 'unknown_number', message: 'Tu cuenta no tiene acceso' } as AuthError;
 
-    // Get nursery info.
     const nurseryId = familyData?.nursery_id || teacherData?.nursery_id;
     const { data: nursery } = await supabase.from('nurseries').select('*').eq('id', nurseryId).single();
 
@@ -148,7 +143,6 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
   }
 }
 
-// Sign out.
 export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
