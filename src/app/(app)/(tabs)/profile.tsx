@@ -1,9 +1,10 @@
 import { router } from 'expo-router';
-import { LogOut, Monitor, Trash2 } from 'lucide-react-native';
+import { LogOut, Monitor } from 'lucide-react-native';
 import { Linking, StyleSheet, View } from 'react-native';
 import { NURSERY_WHATSAPP_URL } from '@/constants/nursery';
 import { supabase } from '@/data/supabase';
 import { useSession } from '@/data/session';
+import { DeleteAccountEntry } from '@/features/delete-account/components/DeleteAccountEntry/DeleteAccountEntry';
 import { ChildAuthorizationLinks } from '@/features/family/child-authorization-links';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
@@ -135,16 +136,7 @@ export default function ProfileTab() {
 
       {/* Delete account */}
       <SectionHeader title="Privacidad" />
-      <Button
-        label="Eliminar mi cuenta"
-        icon={Trash2}
-        variant="danger-soft"
-        block
-        onPress={() => router.push('../delete-account')}
-      />
-      <Text variant="small" style={{ color: c.red, textAlign: 'center' }}>
-        No se puede deshacer. Se conservan los mensajes del chat.
-      </Text>
+      <DeleteAccountEntry userId={session.user_id} role={session.active_role} nurseryName={session.nursery_name} />
     </Screen>
   );
 }
