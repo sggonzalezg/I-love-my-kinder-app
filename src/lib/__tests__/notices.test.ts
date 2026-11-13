@@ -5,11 +5,17 @@ import {
   cancelledWhatLine,
   cancelledWhenLine,
   childrenInAudience,
+  guardianLine,
   mergeNotices,
   noticeAudience,
   noticeMetaLine,
   noticeSender,
   noticeTimeLabel,
+  seenByLabel,
+  seenShare,
+  seenSummary,
+  sortViewers,
+  viewerSeenLabel,
   voidPermissionTitle,
   withdrawnBannerText,
   type CancelledEvent,
@@ -31,6 +37,7 @@ function notice(overrides: Partial<Notice> = {}): Notice {
     shift: 'morning',
     cancelledEvent: null,
     unread: false,
+    seen: null,
     ...overrides,
   };
 }
@@ -78,6 +85,83 @@ describe('noticeSender', () => {
 
   it('says La maestra for a room notice', () => {
     expect(noticeSender(notice(), 'me')).toBe('La maestra');
+  });
+
+  it('uses the known name of the sender for the direction', () => {
+    const senderLabels = new Map([['teacher-user', 'Maestra Sofía']]);
+    expect(noticeSender(notice(), 'me', senderLabels)).toBe('Maestra Sofía');
+  });
+
+  it('still says Vos when the user is among the known senders', () => {
+    const senderLabels = new Map([['me', 'Dirección']]);
+    expect(noticeSender(notice({ createdBy: 'me' }), 'me', senderLabels)).toBe('Vos');
+  });
+});
+
+describe('seenSummary', () => {
+  it('counts the recipients who saw the notice', () => {
+    expect(seenSummary([{ seenAt: '2026-10-24T12:14:00Z' }, { seenAt: null }, { seenAt: '2026-10-24T12:40:00Z' }])).toEqual({ seen: 2, total: 3 });
+  });
+
+  it('is null when the user cannot see the recipients', () => {
+    expect(seenSummary([])).toBeNull();
+  });
+});
+
+describe('seenByLabel', () => {
+  it('reads as Visto por N de M', () => {
+    expect(seenByLabel({ seen: 18, total: 26 })).toBe('Visto por 18 de 26');
+  });
+});
+
+describe('seenShare', () => {
+  it('is the part of the recipients who saw it', () => {
+    expect(seenShare({ seen: 13, total: 26 })).toBe(0.5);
+  });
+});
+
+describe('guardianLine', () => {
+  it('names the relationship and the child', () => {
+    expect(guardianLine([{ relationship: 'mother', childFirstName: 'Mateo' }])).toBe('Mamá de Mateo');
+  });
+
+  it('names every child of the guardian', () => {
+    const links = [
+      { relationship: 'father', childFirstName: 'Bruno' },
+      { relationship: 'father', childFirstName: 'Lucía' },
+    ];
+    expect(guardianLine(links)).toBe('Papá de Bruno y Lucía');
+  });
+
+  it('keeps an unknown relationship as written', () => {
+    expect(guardianLine([{ relationship: 'Tía', childFirstName: 'Mateo' }])).toBe('Tía de Mateo');
+  });
+
+  it('says Familia when no child is linked', () => {
+    expect(guardianLine([])).toBe('Familia');
+  });
+});
+
+describe('viewerSeenLabel', () => {
+  it('shows the time for a notice seen today', () => {
+    expect(viewerSeenLabel(new Date(2026, 9, 24, 9, 14).toISOString(), NOW)).toBe('Visto 9:14');
+  });
+
+  it('says Sin ver when it was not seen', () => {
+    expect(viewerSeenLabel(null, NOW)).toBe('Sin ver');
+  });
+});
+
+describe('sortViewers', () => {
+  it('lists who saw it first, in the order they saw it, then the rest by name', () => {
+    const viewers = [
+      { id: 'pablo', name: 'Pablo García', relation: 'Papá de Bruno', seenAt: null },
+      { id: 'laura', name: 'Laura Méndez', relation: 'Mamá de Valentina', seenAt: '2026-10-24T12:40:00Z' },
+      { id: 'marina', name: 'Marina Rossi', relation: 'Mamá de Valentín', seenAt: null },
+      { id: 'ana', name: 'Ana Rodríguez', relation: 'Mamá de Mateo', seenAt: '2026-10-24T12:14:00Z' },
+      { id: 'alicia', name: 'Alicia Pérez', relation: 'Mamá de Juan', seenAt: null },
+    ];
+    expect(sortViewers(viewers).map((viewer) => viewer.id)).toEqual(['ana', 'laura', 'alicia', 'marina', 'pablo']);
   });
 });
 
