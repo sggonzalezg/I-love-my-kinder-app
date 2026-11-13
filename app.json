@@ -45,8 +45,8 @@
         "expo-image-picker",
         {
           "photosPermission": false,
-          "cameraPermission": "Para sacar una foto y mandarla al chat de la sala.",
-          "microphonePermission": false
+          "cameraPermission": "Para sacar fotos y videos para el chat y la galería de la sala.",
+          "microphonePermission": "Para grabar el sonido de los videos que subís a la galería de la sala."
         }
       ],
       [
@@ -56,7 +56,8 @@
           "savePhotosPermission": "Para guardar en tu galería las fotos y videos que elijas. Solo agregamos lo que vos guardás. Nunca vemos ni leemos tus fotos.",
           "granularPermissions": ["photo", "video"]
         }
-      ]
+      ],
+      "react-native-compressor"
     ],
     "experiments": {
       "typedRoutes": true,
