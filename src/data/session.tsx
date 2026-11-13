@@ -1,46 +1,51 @@
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useReducer } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthError, AuthSession } from './types';
 import { supabase, invoke } from './supabase';
+import { SESSION_ACTIONS, initialSessionState, sessionReducer } from './session-reducer';
 import { resolveRoles, getActiveRole, type Role } from '@/lib/role';
 
 const SessionContext = createContext<{
   session: AuthSession | null;
   loading: boolean;
   isSignedIn: boolean;
+  startSession: (session: AuthSession) => void;
   setActiveRole: (role: Role) => Promise<void>;
 } | null>(null);
 
 export function SessionProvider({ children }: { children: React.ReactNode }) {
-  const [session, setSession] = useState<AuthSession | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [{ session, loading }, dispatch] = useReducer(sessionReducer, initialSessionState);
+
+  function startSession(started: AuthSession) {
+    dispatch({ type: SESSION_ACTIONS.STARTED, session: started });
+  }
 
   async function setActiveRole(role: Role) {
     if (!session) return;
-    const updated = { ...session, active_role: role };
-    setSession(updated);
-    await AsyncStorage.setItem('session', JSON.stringify(updated));
+    dispatch({ type: SESSION_ACTIONS.ROLE_CHANGED, role });
+    await AsyncStorage.setItem('session', JSON.stringify({ ...session, active_role: role }));
   }
 
   useEffect(() => {
     let isMounted = true;
 
     const restoreSession = async () => {
+      let restored: AuthSession | null = null;
       try {
         const cached = await AsyncStorage.getItem('session');
-        if (isMounted && cached) setSession(JSON.parse(cached));
+        if (cached) restored = JSON.parse(cached);
       } catch (err) {
         console.error('Failed to restore session:', err);
       } finally {
-        if (isMounted) setLoading(false);
+        if (isMounted) dispatch({ type: SESSION_ACTIONS.RESTORED, session: restored });
       }
     };
 
     restoreSession();
 
-    const { data } = supabase.auth.onAuthStateChange(async (event, authSession) => {
+    const { data } = supabase.auth.onAuthStateChange(async (event) => {
       if (event === 'SIGNED_OUT' && isMounted) {
-        setSession(null);
+        dispatch({ type: SESSION_ACTIONS.ENDED });
         await AsyncStorage.removeItem('session');
       }
     });
@@ -52,7 +57,7 @@ export function SessionProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <SessionContext.Provider value={{ session, loading, isSignedIn: !!session, setActiveRole }}>
+    <SessionContext.Provider value={{ session, loading, isSignedIn: !!session, startSession, setActiveRole }}>
       {children}
     </SessionContext.Provider>
   );
