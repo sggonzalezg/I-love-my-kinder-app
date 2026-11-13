@@ -44,6 +44,18 @@ describe('deletionErrorMessage', () => {
     expect(deletionErrorMessage(DELETION_ERROR_CODES.RESEND_TOO_SOON)).toBe('Esperá un minuto para pedir otro código.');
   });
 
+  it('tells the only director to ask support for another direction person', () => {
+    expect(deletionErrorMessage(DELETION_ERROR_CODES.ONLY_DIRECTOR)).toBe(
+      'Sos la única cuenta de dirección. Pedile al soporte de la app que sume a otra persona de dirección con su e-mail.',
+    );
+  });
+
+  it('asks to retry when Apple did not revoke the login', () => {
+    expect(deletionErrorMessage(DELETION_ERROR_CODES.APPLE_REVOKE_FAILED)).toBe(
+      'No pudimos completar la eliminación. Probá de nuevo.',
+    );
+  });
+
   it('uses the design error for anything else', () => {
     expect(deletionErrorMessage('server_error')).toBe('No pudimos eliminar tu cuenta. Probá de nuevo.');
     expect(deletionErrorMessage(undefined)).toBe('No pudimos eliminar tu cuenta. Probá de nuevo.');

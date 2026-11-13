@@ -22,10 +22,10 @@ import {
   deleteAccountReducer,
   initialDeleteAccountState,
 } from '@/features/delete-account/delete-account-reducer';
-import { deletionErrorMessage, isCompleteDeletionCode } from '@/lib/account-deletion';
+import { RESEND_TICK_MS, deletionErrorMessage, isCompleteDeletionCode } from '@/lib/account-deletion';
 import { formatCountdown } from '@/lib/dates';
 
-import { RESEND_TICK_MS, styles } from './DeleteAccountScreen.styles';
+import { styles } from './DeleteAccountScreen.styles';
 
 const ACCOUNT_EMAIL_KEY = 'account-email';
 
