@@ -5,6 +5,7 @@ import { createThemedStyles } from '@/theme/themed-styles';
 import { fonts, radius, space } from '@/theme/tokens';
 
 export const CHECK_SIZE = 24;
+export const CHECK_STROKE = 2;
 
 const ROW_MIN_HEIGHT = 56;
 const ROW_PHOTO_SIZE = 40;

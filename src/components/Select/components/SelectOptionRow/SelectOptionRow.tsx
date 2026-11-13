@@ -6,7 +6,7 @@ import type { SelectOption } from '@/components/Select/select-reducer';
 import { Text } from '@/components/text';
 import { useColors } from '@/theme/use-theme';
 
-import { CHECK_SIZE, styles, useRowColorStyles } from './SelectOptionRow.styles';
+import { CHECK_SIZE, CHECK_STROKE, styles, useRowColorStyles } from './SelectOptionRow.styles';
 
 interface SelectOptionRowProps {
   option: SelectOption;
@@ -39,7 +39,7 @@ export function SelectOptionRow({ option, selected, onChoose }: SelectOptionRowP
           </Text>
         ) : null}
       </View>
-      <View style={styles.check}>{selected ? <Check size={CHECK_SIZE} color={colors.blue} strokeWidth={2} /> : null}</View>
+      <View style={styles.check}>{selected ? <Check size={CHECK_SIZE} color={colors.blue} strokeWidth={CHECK_STROKE} /> : null}</View>
     </Pressable>
   );
 }
