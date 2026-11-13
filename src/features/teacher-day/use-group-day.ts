@@ -40,6 +40,11 @@ export function groupKeyOf(group: Pick<ChildGroup, 'roomId' | 'shiftId'>): strin
   return `${group.roomId}:${group.shiftId}`;
 }
 
+/** The requested group, else the one of the current shift. */
+export function chooseGroup(groups: TeacherGroup[], requestedGroupKey: string | null, now: Date): TeacherGroup | null {
+  return groups.find((candidate) => groupKeyOf(candidate) === requestedGroupKey) ?? groups[defaultGroupIndex(groups, now)] ?? null;
+}
+
 function daysBefore(date: Date, days: number): Date {
   const earlier = new Date(date);
   earlier.setDate(date.getDate() - days);
@@ -56,7 +61,7 @@ export function useGroupDay(requestedGroupKey: string | null): GroupDay {
 
   const groups = useAsync(() => fetchTeacherGroups(userId!), userId);
   const groupList = groups.data ?? [];
-  const group = groupList.find((candidate) => groupKeyOf(candidate) === requestedGroupKey) ?? groupList[defaultGroupIndex(groupList, now)] ?? null;
+  const group = chooseGroup(groupList, requestedGroupKey, now);
 
   const day = useAsync(
     () => Promise.all([fetchRoomRoster(group!), fetchGroupRoutines(group!, toIsoDate(daysBefore(now, LAST_HYGIENE_LOOKBACK_DAYS)))]),

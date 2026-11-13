@@ -1,4 +1,6 @@
 import { formatTime, WEEKDAYS } from './dates';
+import { countLabel } from './format';
+import { childCountLabel } from './teacher-room';
 import type { HygieneKind } from './routine';
 import type { ChildSyncStatus } from './routine-queue';
 import { currentShift, type ShiftName } from './shift';
@@ -38,12 +40,8 @@ export interface GroupSummary {
   shiftStartTime: string;
 }
 
-function countLabel(count: number, singular: string, plural: string): string {
-  return `${count} ${count === 1 ? singular : plural}`;
-}
-
 export function roomSwitchMeta({ childCount, readyCount: ready, shiftStartTime }: GroupSummary, now: Date): string {
-  const children = countLabel(childCount, 'niño', 'niños');
+  const children = childCountLabel(childCount);
   const startTime = shiftStartTime.slice(0, 'HH:MM'.length);
   return isFutureTime(startTime, now) ? `${children} · empieza ${startTime}` : `${children} · ${countLabel(ready, 'listo', 'listos')}`;
 }

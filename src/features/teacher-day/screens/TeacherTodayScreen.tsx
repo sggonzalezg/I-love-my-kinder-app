@@ -10,14 +10,13 @@ import { Chip } from '@/components/chip';
 import { EmptyState } from '@/components/empty-state';
 import { IconButton } from '@/components/icon-button';
 import { Screen } from '@/components/screen';
-import { Select } from '@/components/Select/Select';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { routineLogHref } from '@/constants/routine';
 import { NOTICES_ROUTE } from '@/constants/routes';
 import { useReloadOnRefocus } from '@/data/use-reload-on-refocus';
 import { ChildStatusRow } from '@/features/teacher-day/components/ChildStatusRow/ChildStatusRow';
-import { GroupPill } from '@/features/teacher-day/components/GroupPill/GroupPill';
+import { GroupControl } from '@/features/teacher-day/components/GroupControl/GroupControl';
 import { RoomDaySeal } from '@/features/teacher-day/components/RoomDaySeal/RoomDaySeal';
 import { TodayProgress } from '@/features/teacher-day/components/TodayProgress/TodayProgress';
 import { TEACHER_DAY_COPY } from '@/features/teacher-day/teacher-day-copy';
@@ -25,7 +24,6 @@ import { groupKeyOf, useGroupDay, type GroupDayChild } from '@/features/teacher-
 import { useRoomSwitchOptions } from '@/features/teacher-day/use-room-switch-options';
 import { formatTime } from '@/lib/dates';
 import { pendingCount } from '@/lib/routine-queue';
-import { groupLabel } from '@/lib/shift';
 import { dayHeaderDate, firstToLogIndex, logButtonLabel, readyCount } from '@/lib/teacher-day';
 import { listEntering } from '@/theme/motion';
 import { size } from '@/theme/tokens';
@@ -57,23 +55,9 @@ export function TeacherTodayScreen() {
     router.push(routineLogHref(groupKeyOf(group), childIndex));
   };
 
-  function renderGroupControl() {
-    if (!group) return <View />;
-    if (!roomOptions) return <GroupPill label={groupLabel(group.roomName, group.shift)} />;
-    return (
-      <Select
-        variant="roomSwitch"
-        label={TEACHER_DAY_COPY.roomSwitch}
-        options={roomOptions}
-        value={groupKeyOf(group)}
-        onChange={(groupKey) => router.setParams({ group: groupKey })}
-      />
-    );
-  }
-
   const header = (
     <View style={styles.topBar}>
-      {renderGroupControl()}
+      <GroupControl group={group} options={roomOptions} />
       <IconButton icon={Bell} label={TEACHER_DAY_COPY.bell} onPress={() => router.push(NOTICES_ROUTE)} />
     </View>
   );

@@ -11,6 +11,10 @@ export function chatIconLabel(unreadThreads: number): string {
   return unreadThreads > 0 ? `Chat, ${unreadThreads} con mensajes sin leer` : 'Chat';
 }
 
+export function countLabel(count: number, singular: string, plural: string): string {
+  return `${count} ${count === 1 ? singular : plural}`;
+}
+
 export function initials(first: string, last = ''): string {
   return `${first.charAt(0)}${last.charAt(0)}`.toUpperCase();
 }
