@@ -13,5 +13,4 @@ export const styles = StyleSheet.create({
   logoPlate: { borderRadius: radius.lg, padding: LOGO_PLATE_PADDING },
   logo: { width: LOGO_WIDTH, height: LOGO_HEIGHT },
   greeting: { flex: 1, fontSize: GREETING_FONT_SIZE },
-  actions: { flexDirection: 'row', alignItems: 'center', gap: space.s1 },
 });

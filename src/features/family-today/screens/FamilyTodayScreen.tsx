@@ -12,13 +12,15 @@ import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import type { TodayKid } from '@/data/family-today';
 import { useUnreadChatThreads } from '@/features/chat/use-unread-chat-threads';
+import { ChildDayScreen } from '@/features/child-day/screens/ChildDayScreen';
 import { FamilyTodayTopBar } from '@/features/family-today/components/FamilyTodayTopBar/FamilyTodayTopBar';
 import { KidCard } from '@/features/family-today/components/KidCard/KidCard';
 import { NextEventRow } from '@/features/family-today/components/NextEventRow/NextEventRow';
+import { TodayActions } from '@/features/family-today/components/TodayActions/TodayActions';
 import { FAMILY_TODAY_COPY } from '@/features/family-today/family-today-copy';
 import { useFamilyToday } from '@/features/family-today/use-family-today';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
-import { familyGreeting } from '@/lib/family-today';
+import { familyGreeting, onlyKidWithDay } from '@/lib/family-today';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { listEntering } from '@/theme/motion';
 
@@ -52,9 +54,44 @@ export function FamilyTodayScreen() {
   const pendingRequests = useFamilyOutingRequests().filter((request) => request.status === 'pending');
   const { familyToday, offline, loading, failed, reload } = useFamilyToday();
 
-  const header = (
-    <FamilyTodayTopBar greeting={familyGreeting(familyToday?.firstName ?? '')} unreadNotices={familyToday?.unreadNotices ?? 0} unreadChats={unreadChats} />
-  );
+  const unreadNotices = familyToday?.unreadNotices ?? 0;
+  const nextEvent = familyToday?.nextEvent ?? null;
+  const permissionCards = pendingRequests.map((request) => <PermissionRequestCard key={request.eventId} request={request} />);
+  const nextEventSection = nextEvent ? (
+    <View>
+      <View style={styles.sectionHeader}>
+        <Text variant="section" accessibilityRole="header">
+          {FAMILY_TODAY_COPY.nextEvent}
+        </Text>
+        <Pressable onPress={() => router.push(CALENDAR_TAB_ROUTE)} accessibilityRole="link" style={styles.seeCalendar}>
+          <Text variant="smallStrong" tone="blue">
+            {FAMILY_TODAY_COPY.seeCalendar}
+          </Text>
+        </Pressable>
+      </View>
+      <NextEventRow event={nextEvent} onPress={() => router.push(eventHref(nextEvent.id))} />
+    </View>
+  ) : null;
+
+  const onlyKid = familyToday && !offline ? onlyKidWithDay(familyToday.kids) : null;
+  if (onlyKid) {
+    return (
+      <ChildDayScreen
+        childId={onlyKid.id}
+        home={{
+          actions: <TodayActions unreadNotices={unreadNotices} unreadChats={unreadChats} />,
+          footer: (
+            <>
+              {permissionCards}
+              {nextEventSection}
+            </>
+          ),
+        }}
+      />
+    );
+  }
+
+  const header = <FamilyTodayTopBar greeting={familyGreeting(familyToday?.firstName ?? '')} unreadNotices={unreadNotices} unreadChats={unreadChats} />;
 
   if (failed) {
     return (
@@ -70,9 +107,7 @@ export function FamilyTodayScreen() {
   return (
     <Screen header={header}>
       {offline ? <Banner kind="offline" text={FAMILY_TODAY_COPY.offline} /> : null}
-      {pendingRequests.map((request) => (
-        <PermissionRequestCard key={request.eventId} request={request} />
-      ))}
+      {permissionCards}
       {loading || !familyToday ? (
         <KidCardsSkeleton />
       ) : (
@@ -85,21 +120,7 @@ export function FamilyTodayScreen() {
           ))}
         </View>
       )}
-      {familyToday?.nextEvent ? (
-        <View>
-          <View style={styles.sectionHeader}>
-            <Text variant="section" accessibilityRole="header">
-              {FAMILY_TODAY_COPY.nextEvent}
-            </Text>
-            <Pressable onPress={() => router.push(CALENDAR_TAB_ROUTE)} accessibilityRole="link" style={styles.seeCalendar}>
-              <Text variant="smallStrong" tone="blue">
-                {FAMILY_TODAY_COPY.seeCalendar}
-              </Text>
-            </Pressable>
-          </View>
-          <NextEventRow event={familyToday.nextEvent} onPress={() => router.push(eventHref(familyToday.nextEvent!.id))} />
-        </View>
-      ) : null}
+      {nextEventSection}
     </Screen>
   );
 }

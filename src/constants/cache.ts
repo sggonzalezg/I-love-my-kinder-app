@@ -7,3 +7,4 @@ export const EVENTS_CACHE_DURATION_MS = HOURS_PER_DAY * SECONDS_PER_HOUR * MILLI
 export const SIGNED_URL_EXPIRY_SECONDS = SECONDS_PER_HOUR;
 
 export const FAMILY_TODAY_STORAGE_KEY_PREFIX = 'family_today_';
+export const DAY_BEAT_STORAGE_KEY_PREFIX = 'child_day_beat_';
