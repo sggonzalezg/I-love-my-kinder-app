@@ -1,0 +1,16 @@
+export const CHILD_FILE_COPY = {
+  back: 'Volver a la sala',
+  allergiesTitle: 'Alergias',
+  noHealthAuthorizationTitle: 'Sin autorización para datos de salud',
+  noHealthAuthorizationHint: 'La familia no autorizó compartir alergias. Consultá con dirección.',
+  noAllergies: 'Sin alergias registradas',
+  emergencyContacts: 'Contactos de emergencia',
+  pickupPeople: 'Personas autorizadas a retirar',
+  noPickupPeople: 'Pedile a dirección que cargue quién retira.',
+  nationalIdPrefix: 'CI',
+  call: (name: string) => `Llamar a ${name}`,
+  showNationalId: (name: string) => `Mostrar cédula de ${name}`,
+  hideNationalId: (name: string) => `Ocultar cédula de ${name}`,
+  loadError: 'No pudimos cargar la ficha.',
+  retry: 'Reintentar',
+} as const;

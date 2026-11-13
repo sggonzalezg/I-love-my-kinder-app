@@ -35,7 +35,7 @@ describe('upcomingBirthdays', () => {
 
     const [birthday] = upcomingBirthdays(children, TODAY);
 
-    expect(birthday).toMatchObject({ day: 28, monthShort: 'oct', weekday: 'Miércoles', isToday: false });
+    expect(birthday).toMatchObject({ day: 28, month: 'octubre', monthShort: 'oct', weekday: 'Miércoles', isToday: false });
   });
 
   it('leaves out children without a visible birthday', () => {

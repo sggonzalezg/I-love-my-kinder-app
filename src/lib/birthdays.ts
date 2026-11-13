@@ -13,6 +13,7 @@ export interface UpcomingBirthday {
   id: string;
   name: string;
   day: number;
+  month: string;
   monthShort: string;
   weekday: string;
   isToday: boolean;
@@ -43,6 +44,7 @@ export function upcomingBirthdays(children: BirthdayChild[], today: Date, window
         id: child.id,
         name: child.name,
         day: next.getDate(),
+        month: MONTHS[next.getMonth()],
         monthShort: MONTHS_SHORT[next.getMonth()],
         weekday: WEEKDAYS[next.getDay()],
         isToday: daysUntil === 0,

@@ -7,7 +7,7 @@ import { useColors } from '@/theme/use-theme';
 import { BANNER_ICON_SIZE, BANNER_PALETTES, styles, type BannerKind } from './banner.styles';
 import { Text } from './text';
 
-const ICONS: Record<BannerKind, LucideIcon> = { offline: CloudOff, info: Info, error: CircleAlert };
+const ICONS: Record<BannerKind, LucideIcon> = { offline: CloudOff, warning: CircleAlert, info: Info, error: CircleAlert };
 
 interface BannerProps {
   kind?: BannerKind;
