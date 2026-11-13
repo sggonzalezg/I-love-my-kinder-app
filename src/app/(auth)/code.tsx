@@ -16,7 +16,7 @@ import Screen from '@/components/screen';
 export default function CodeLoginScreen() {
   const router = useRouter();
   const params = useLocalSearchParams();
-  const { setActiveRole } = useSession();
+  const { startSession } = useSession();
   const c = useColors();
 
   const phone = params.phone as string;
@@ -41,7 +41,7 @@ export default function CodeLoginScreen() {
 
     try {
       const session = await verifyPhoneCode(toE164(phone), code);
-      if (setActiveRole) await setActiveRole(session.active_role);
+      startSession(session);
 
       // Check which login documents need acceptance.
       const { data: records } = await supabase

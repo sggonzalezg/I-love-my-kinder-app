@@ -7,14 +7,27 @@ interface AsyncState<T> {
   reload: () => void;
 }
 
-interface Settled<T> {
+export interface Settled<T> {
   requestId: string;
   data: T | null;
   failed: boolean;
 }
 
+interface AsyncOptions {
+  /** A reload of the same key keeps showing the last good data instead of nothing (no skeleton flash on refocus). */
+  keepDataOnReload?: boolean;
+}
+
+/** What to show for the current request: its own result, or with `keepDataOnReload` the last good result of the same key. */
+export function shownResult<T>(settled: Settled<T> | null, requestId: string | null, key: string | null, keepDataOnReload: boolean): Settled<T> | null {
+  if (settled === null || requestId === null) return null;
+  if (settled.requestId === requestId) return settled;
+  const isSameKey = settled.requestId.startsWith(`${key}#`);
+  return keepDataOnReload && isSameKey && !settled.failed ? settled : null;
+}
+
 /** Runs `load` whenever `key` changes (null waits); `reload` runs it again, for example after a failure. */
-export function useAsync<T>(load: () => Promise<T>, key: string | null): AsyncState<T> {
+export function useAsync<T>(load: () => Promise<T>, key: string | null, { keepDataOnReload = false }: AsyncOptions = {}): AsyncState<T> {
   const [attempt, setAttempt] = useState(0);
   const [settled, setSettled] = useState<Settled<T> | null>(null);
   const requestId = key === null ? null : `${key}#${attempt}`;
@@ -35,7 +48,8 @@ export function useAsync<T>(load: () => Promise<T>, key: string | null): AsyncSt
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [requestId]);
 
-  const current = settled?.requestId === requestId ? settled : null;
+  const shown = shownResult(settled, requestId, key, keepDataOnReload);
+  const isCurrent = settled !== null && settled.requestId === requestId;
   const reload = useCallback(() => setAttempt((count) => count + 1), []);
-  return { data: current?.data ?? null, loading: current === null, failed: current?.failed ?? false, reload };
+  return { data: shown?.data ?? null, loading: !isCurrent, failed: isCurrent && settled.failed, reload };
 }

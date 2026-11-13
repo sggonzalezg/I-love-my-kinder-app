@@ -16,20 +16,14 @@ SplashScreen.preventAutoHideAsync();
 function RootStackLayout() {
   const c = useColors();
   const reduced = useReducedMotion();
-  const { session, loading } = useSession();
+  const { loading } = useSession();
 
   if (loading) return null;
 
   return (
     <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: c.ground }, animation: reduced ? 'fade' : 'default' }}>
-      {!session ? (
-        <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
-      ) : (
-        <>
-          <Stack.Screen name="(app)" options={{ animation: 'none' }} />
-          <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
-        </>
-      )}
+      <Stack.Screen name="(app)" options={{ animation: 'none' }} />
+      <Stack.Screen name="(auth)" options={{ animation: 'none' }} />
     </Stack>
   );
 }
