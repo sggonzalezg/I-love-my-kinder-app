@@ -25,16 +25,21 @@ if (Platform.OS !== 'web') {
   });
 }
 
+export type FunctionError = Error & { status?: number; code?: string };
+
 export async function invoke<T>(name: string, body: object): Promise<T> {
   const { data, error } = await supabase.functions.invoke(name, { body });
   if (error) {
     let message = error.message;
+    let code: string | undefined;
     try {
       const payload = await (error as { context?: Response }).context?.json();
-      if (payload?.error) message = payload.error;
+      message = payload?.error ?? payload?.message ?? message;
+      code = payload?.code;
     } catch {}
-    const err = new Error(message) as Error & { status?: number };
+    const err = new Error(message) as FunctionError;
     err.status = (error as { context?: Response }).context?.status;
+    err.code = code;
     throw err;
   }
   return data as T;

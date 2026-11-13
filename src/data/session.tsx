@@ -146,3 +146,8 @@ export async function signOut(): Promise<void> {
   await supabase.auth.signOut();
   await AsyncStorage.removeItem('session');
 }
+
+/** After the account is deleted the "deleted" screen stays until "Listo", but a restart must open the login. */
+export async function forgetStoredSession(): Promise<void> {
+  await AsyncStorage.removeItem('session');
+}
