@@ -10,3 +10,5 @@ export const STORY_SWIPE_VELOCITY = 500;
 export const STORY_CLOSE_DISTANCE = 120;
 export const STORY_CLOSE_VELOCITY = 800;
 export const STORY_PAN_MIN_DISTANCE = 10;
+
+export const DIRECTOR_GALLERY_LIMIT = 300;
