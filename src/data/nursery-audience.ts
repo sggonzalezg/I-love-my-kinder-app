@@ -15,14 +15,15 @@ type GroupMemberRow = Record<MemberColumn, string> & {
 
 const GROUP_COLUMNS = 'room_id, shift_id, rooms(name), shifts(name)';
 
-/** RLS returns every row of the nursery only to the director; an assignment or enrollment is open until ended_at passes. */
+/** An assignment or enrollment is open until ended_at passes. */
+export function openAtFilter(now: Date): string {
+  return `ended_at.is.null,ended_at.gt.${now.toISOString()}`;
+}
+
+/** RLS returns every row of the nursery only to the director. */
 async function fetchOpenMembers(table: 'enrollments' | 'teacher_assignments', memberColumn: MemberColumn, nurseryId: string, now: Date): Promise<AudienceMember[]> {
   const rows = throwOnError<GroupMemberRow[]>(
-    await supabase
-      .from(table)
-      .select(`${memberColumn}, ${GROUP_COLUMNS}`)
-      .eq('nursery_id', nurseryId)
-      .or(`ended_at.is.null,ended_at.gt.${now.toISOString()}`),
+    await supabase.from(table).select(`${memberColumn}, ${GROUP_COLUMNS}`).eq('nursery_id', nurseryId).or(openAtFilter(now)),
   );
   return rows.flatMap((row) =>
     row.rooms && row.shifts

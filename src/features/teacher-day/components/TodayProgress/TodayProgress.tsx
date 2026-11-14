@@ -12,12 +12,13 @@ import { styles } from './TodayProgress.styles';
 interface TodayProgressProps {
   ready: number;
   total: number;
+  ofLabel?: string;
 }
 
-export function TodayProgress({ ready, total }: TodayProgressProps) {
+export function TodayProgress({ ready, total, ofLabel = TEACHER_DAY_COPY.readyOf(total) }: TodayProgressProps) {
   const complete = total > 0 && ready === total;
   return (
-    <View style={styles.block} accessible accessibilityLabel={`${ready} ${TEACHER_DAY_COPY.readyOf(total)}`}>
+    <View style={styles.block} accessible accessibilityLabel={`${ready} ${ofLabel}`}>
       <View style={styles.countRow}>
         <Animated.View key={complete ? 'complete' : 'counting'} entering={complete ? dayBeat : undefined}>
           <Text numeric style={styles.count}>
@@ -25,7 +26,7 @@ export function TodayProgress({ ready, total }: TodayProgressProps) {
           </Text>
         </Animated.View>
         <Text tone="muted" style={styles.of}>
-          {TEACHER_DAY_COPY.readyOf(total)}
+          {ofLabel}
         </Text>
       </View>
       <ProgressTrack fraction={total ? ready / total : 0} />
