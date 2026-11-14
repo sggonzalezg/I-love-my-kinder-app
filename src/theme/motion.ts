@@ -1,4 +1,4 @@
-import { cubicBezier, Easing, FadeInDown, Keyframe, ReduceMotion } from 'react-native-reanimated';
+import { cubicBezier, Easing, FadeInDown, Keyframe, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 
 export const duration = { fast: 120, base: 220, slow: 320, exitBase: 150, beat: 900 } as const;
 
@@ -32,6 +32,19 @@ export const dotPop = new Keyframe({
   .duration(DOT_POP_DURATION_MS)
   .delay(DOT_POP_DELAY_MS)
   .reduceMotion(ReduceMotion.System);
+
+const ATTACHMENT_ENTER_SCALE = 0.96;
+
+// Design section 7, "Image attached": scale .96 → 1 with a fade; appears with no travel under reduced motion.
+export const attachmentEntering = new Keyframe({
+  0: { opacity: 0, transform: [{ scale: ATTACHMENT_ENTER_SCALE }] },
+  100: { opacity: 1, transform: [{ scale: 1 }], easing: easeOut },
+})
+  .duration(duration.base)
+  .reduceMotion(ReduceMotion.System);
+
+/** The fields under an attached image move down with it instead of jumping. */
+export const formLayoutTransition = LinearTransition.duration(duration.base).easing(easeOut).reduceMotion(ReduceMotion.System);
 
 export const pressSpring ={ damping: 18, stiffness: 220 } as const;
 
