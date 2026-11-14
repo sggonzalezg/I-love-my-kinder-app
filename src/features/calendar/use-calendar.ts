@@ -18,9 +18,15 @@ export interface CalendarData {
 export function useCalendar(year: number, month: number): CalendarData {
   const { session } = useSession();
   const userId = session?.user_id ?? null;
+  const isStaff = session?.active_role !== 'family';
+  const viewerKey = userId ? `${userId}:${session?.active_role}` : null;
 
-  const monthLoad = useAsync(() => fetchMonthEvents(year, month, new Date()), userId ? `${userId}:${year}-${month}` : null, { keepDataOnReload: true });
-  const upcomingLoad = useAsync(() => fetchUpcomingEvents(new Date()), userId, { keepDataOnReload: true });
+  const monthLoad = useAsync(
+    () => fetchMonthEvents(year, month, { userId: userId!, isStaff }, new Date()),
+    viewerKey ? `${viewerKey}:${year}-${month}` : null,
+    { keepDataOnReload: true },
+  );
+  const upcomingLoad = useAsync(() => fetchUpcomingEvents({ userId: userId!, isStaff }, new Date()), viewerKey, { keepDataOnReload: true });
 
   const { reload: reloadMonth } = monthLoad;
   const { reload: reloadUpcoming } = upcomingLoad;

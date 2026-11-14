@@ -1,4 +1,4 @@
-import { monthHeading, reminderLine, selectedDayTitle, showPastLabel } from '../calendar-copy';
+import { deleteSheetTitle, monthHeading, reminderLine, selectedDayTitle, showPastLabel } from '../calendar-copy';
 
 describe('calendar copy', () => {
   it('titles a tapped day with its weekday and number', () => {
@@ -11,6 +11,10 @@ describe('calendar copy', () => {
 
   it('counts the past events of the month on the button', () => {
     expect(showPastLabel('octubre', 3)).toBe('Ver lo que ya pasó en octubre (3)');
+  });
+
+  it('names the event in the delete sheet title', () => {
+    expect(deleteSheetTitle('Salida al Parque Rodó')).toBe('¿Borrar "Salida al Parque Rodó"?');
   });
 });
 

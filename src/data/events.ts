@@ -1,6 +1,9 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
-import { eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
+import { eventAuthorLabel, eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
+import type { EventReach } from '@/lib/event-cancellation';
+import { uploaderLabel } from '@/lib/story';
 
+import { fetchRoomRoster } from './family-room';
 import { signedUrl, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -8,7 +11,12 @@ export type { Event } from '@/lib/calendar';
 
 interface StoredEventRow extends EventRow {
   image_path: string | null;
-  created_by: string | null;
+}
+
+/** Staff rows name the author ("Vos · Sala 2 · Matutino"); family rows do not. */
+export interface EventViewer {
+  userId: string;
+  isStaff: boolean;
 }
 
 interface AuthorRow {
@@ -19,7 +27,7 @@ interface AuthorRow {
 
 export const EVENT_IMAGES_BUCKET = 'event-images';
 const EVENT_COLUMNS =
-  'id, title, event_type, starts_at, ends_at, all_day, location, description, image_path, created_by, remind_day_before, changed_at, previous_values, rooms(name), shifts(name)';
+  'id, title, event_type, starts_at, ends_at, all_day, location, description, image_path, created_by, room_id, shift_id, remind_day_before, changed_at, previous_values, rooms(name), shifts(name)';
 const UPCOMING_EVENTS_LIMIT = 30;
 
 async function signedImageUrls(paths: string[]): Promise<Map<string, string>> {
@@ -28,9 +36,34 @@ async function signedImageUrls(paths: string[]): Promise<Map<string, string>> {
   return new Map((data ?? []).flatMap((signed) => (signed.path && signed.signedUrl ? [[signed.path, signed.signedUrl]] : [])));
 }
 
-async function withImages(rows: StoredEventRow[], now: Date): Promise<Event[]> {
-  const imageUrls = await signedImageUrls(rows.flatMap((row) => (row.image_path ? [row.image_path] : [])));
-  return rows.map((row) => eventFromRow(row, { imageUrl: row.image_path ? (imageUrls.get(row.image_path) ?? null) : null, authorLine: null }, now));
+/** RLS lets the director read every teacher and a teacher only her own row, so a teacher sees no author on the others' events. */
+async function fetchAuthorLabels(rows: StoredEventRow[], viewer: EventViewer): Promise<Map<string, string>> {
+  const labels = new Map<string, string>();
+  if (!viewer.isStaff) return labels;
+  const otherAuthorIds = [...new Set(rows.flatMap((row) => (row.created_by && row.created_by !== viewer.userId ? [row.created_by] : [])))];
+  if (rows.some((row) => row.created_by === viewer.userId)) labels.set(viewer.userId, eventAuthorLabel(true, null)!);
+  if (otherAuthorIds.length === 0) return labels;
+  const authors = throwOnError<AuthorRow[]>(await supabase.from('teachers').select('user_id, first_name, role').in('user_id', otherAuthorIds));
+  for (const author of authors) labels.set(author.user_id, eventAuthorLabel(false, { role: author.role, firstName: author.first_name })!);
+  return labels;
+}
+
+async function withImagesAndAuthors(rows: StoredEventRow[], viewer: EventViewer, now: Date): Promise<Event[]> {
+  const [imageUrls, authorLabels] = await Promise.all([
+    signedImageUrls(rows.flatMap((row) => (row.image_path ? [row.image_path] : []))),
+    fetchAuthorLabels(rows, viewer),
+  ]);
+  return rows.map((row) =>
+    eventFromRow(
+      row,
+      {
+        imageUrl: row.image_path ? (imageUrls.get(row.image_path) ?? null) : null,
+        authorLine: null,
+        authorLabel: row.created_by ? (authorLabels.get(row.created_by) ?? null) : null,
+      },
+      now,
+    ),
+  );
 }
 
 async function fetchHasAnyEvent(): Promise<boolean> {
@@ -40,21 +73,21 @@ async function fetchHasAnyEvent(): Promise<boolean> {
 }
 
 /** RLS returns only the events the user received: the whole nursery's and those of its groups. */
-export async function fetchMonthEvents(year: number, month: number, now: Date): Promise<{ events: Event[]; hasAnyEvent: boolean }> {
+export async function fetchMonthEvents(year: number, month: number, viewer: EventViewer, now: Date): Promise<{ events: Event[]; hasAnyEvent: boolean }> {
   const { start, end } = monthBounds(year, month);
   const rows = throwOnError<StoredEventRow[]>(
     await supabase.from('events').select(EVENT_COLUMNS).gte('starts_at', start.toISOString()).lt('starts_at', end.toISOString()).order('starts_at'),
   );
-  const events = await withImages(rows, now);
+  const events = await withImagesAndAuthors(rows, viewer, now);
   return { events, hasAnyEvent: events.length > 0 || (await fetchHasAnyEvent()) };
 }
 
-export async function fetchUpcomingEvents(now: Date): Promise<Event[]> {
+export async function fetchUpcomingEvents(viewer: EventViewer, now: Date): Promise<Event[]> {
   const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   const rows = throwOnError<StoredEventRow[]>(
     await supabase.from('events').select(EVENT_COLUMNS).gte('starts_at', startOfToday.toISOString()).order('starts_at').limit(UPCOMING_EVENTS_LIMIT),
   );
-  return withImages(rows, now);
+  return withImagesAndAuthors(rows, viewer, now);
 }
 
 async function fetchAuthorLine(createdBy: string | null, userId: string): Promise<string | null> {
@@ -72,4 +105,25 @@ export async function fetchEvent(eventId: string, userId: string, now: Date): Pr
   if (!row) return null;
   const [imageUrl, authorLine] = await Promise.all([signedUrl(row.image_path, EVENT_IMAGES_BUCKET), fetchAuthorLine(row.created_by, userId)]);
   return eventFromRow(row, { imageUrl, authorLine }, now);
+}
+
+export async function cancelEvent(eventId: string, reason: string): Promise<void> {
+  throwOnError(await supabase.rpc('cancel_event', { target_event_id: eventId, cancellation_reason: reason.trim() || null }));
+}
+
+async function fetchOwnTeacherId(userId: string): Promise<string | null> {
+  const rows = throwOnError<{ id: string }[]>(await supabase.from('teachers').select('id').eq('user_id', userId).limit(1));
+  return rows[0]?.id ?? null;
+}
+
+/** Only a room-and-shift event has one roster to count; the others are told in general words. */
+export async function fetchEventReach(event: Pick<Event, 'room_id' | 'shift_id'>, userId: string): Promise<EventReach | null> {
+  if (!event.room_id || !event.shift_id) return null;
+  const [roster, ownTeacherId] = await Promise.all([fetchRoomRoster({ roomId: event.room_id, shiftId: event.shift_id }), fetchOwnTeacherId(userId)]);
+  return {
+    familyCount: roster.children.length,
+    otherTeachers: roster.teachers
+      .filter((teacher) => teacher.id !== ownTeacherId)
+      .map((teacher) => uploaderLabel({ role: teacher.role, firstName: teacher.first_name })),
+  };
 }

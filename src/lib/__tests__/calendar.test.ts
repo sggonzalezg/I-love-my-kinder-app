@@ -1,9 +1,11 @@
 import {
   buildMonthGrid,
   calendarList,
+  eventAuthorLabel,
   eventAuthorLine,
   eventFromRow,
   eventTypeLabel,
+  eventRowMeta,
   eventsOnDate,
   markedDays,
   monthBounds,
@@ -57,6 +59,9 @@ function row(overrides: Partial<EventRow> = {}): EventRow {
     previous_values: null,
     rooms: { name: 'Sala 2' },
     shifts: { name: 'morning' },
+    room_id: 'room-2',
+    shift_id: 'morning-shift',
+    created_by: 'teacher-sofia',
     ...overrides,
   };
 }
@@ -124,6 +129,53 @@ describe('eventFromRow', () => {
   it('shows no change when the previous start is unknown', () => {
     const changed = row({ changed_at: new Date(2026, 9, 23, 12, 0).toISOString(), previous_values: {} });
     expect(eventFromRow(changed, NO_EXTRAS, NOW).changed_previous_time).toBeUndefined();
+  });
+});
+
+describe('eventFromRow for staff', () => {
+  it('keeps who made the event and its group', () => {
+    const event = eventFromRow(row(), NO_EXTRAS, NOW);
+    expect([event.created_by, event.room_id, event.shift_id]).toEqual(['teacher-sofia', 'room-2', 'morning-shift']);
+  });
+
+  it('is not over before it ends', () => {
+    expect(eventFromRow(row(), NO_EXTRAS, new Date(2026, 9, 28, 10, 59)).has_ended).toBe(false);
+  });
+
+  it('is over once it ended', () => {
+    expect(eventFromRow(row(), NO_EXTRAS, new Date(2026, 9, 28, 11, 0)).has_ended).toBe(true);
+  });
+
+  it('carries the author label of the row', () => {
+    expect(eventFromRow(row(), { ...NO_EXTRAS, authorLabel: 'Vos' }, NOW).author_label).toBe('Vos');
+  });
+});
+
+describe('eventAuthorLabel (T8 rows)', () => {
+  it('says Vos for the user own event', () => {
+    expect(eventAuthorLabel(true, null)).toBe('Vos');
+  });
+
+  it('names the teacher who made it', () => {
+    expect(eventAuthorLabel(false, { role: 'teacher', firstName: 'Sofía' })).toBe('Maestra Sofía');
+  });
+
+  it('says Dirección for the director', () => {
+    expect(eventAuthorLabel(false, { role: 'director', firstName: 'Laura' })).toBe('Dirección');
+  });
+
+  it('is left out when the author does not read', () => {
+    expect(eventAuthorLabel(false, null)).toBeNull();
+  });
+});
+
+describe('eventRowMeta', () => {
+  it('puts the author before the audience', () => {
+    expect(eventRowMeta(event('huerta', '2026-10-28', { author_label: 'Vos', audience: 'Sala 2 · Matutino' }))).toBe('Vos · Sala 2 · Matutino');
+  });
+
+  it('shows only the audience without an author', () => {
+    expect(eventRowMeta(event('fiesta', '2026-10-31'))).toBe('Todo el jardín');
   });
 });
 

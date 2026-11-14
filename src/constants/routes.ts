@@ -22,3 +22,7 @@ export function childDayHref(childId: string): Href {
 export function eventHref(eventId: string): Href {
   return `/event/${encodeURIComponent(eventId)}` as Href;
 }
+
+export function calendarWithToastHref(toast: string): Href {
+  return { pathname: '/calendar', params: { toast } } as Href;
+}
