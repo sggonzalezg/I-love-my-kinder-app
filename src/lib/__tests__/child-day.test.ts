@@ -3,13 +3,14 @@ import {
   dayGroups,
   dayStrip,
   emptyDayTitle,
-  groupTeacher,
+  groupTeachers,
   hygieneBlocks,
   initialGroupKey,
   mealRows,
   notYetLine,
   restDuration,
   routineEntryCount,
+  routineTeacher,
   sealLine,
   sealTitle,
   type DayGroup,
@@ -34,6 +35,7 @@ function routine(overrides: Partial<DayRoutine> = {}): DayRoutine {
     previousValues: {},
     createdAt: '2025-10-24T12:40:00',
     correctedAt: null,
+    loggedByLabel: 'Maestra Sofía',
     ...overrides,
   };
 }
@@ -232,16 +234,37 @@ describe('emptyDayTitle', () => {
   });
 });
 
-describe('groupTeacher', () => {
-  it('names the first teacher of the group', () => {
+describe('groupTeachers', () => {
+  it('lists the teachers of the group with their labels', () => {
     const teachers = [
       { id: 't0', first_name: 'Ana', last_name: 'Pérez', role: 'Asistente', photo_path: null },
       { id: 't1', first_name: 'Sofía', last_name: 'Gómez', role: 'Maestra', photo_path: 'teachers/t1.jpg' },
     ];
-    expect(groupTeacher(teachers)).toEqual({ label: 'Maestra Sofía', initials: 'SG', photoPath: 'teachers/t1.jpg' });
+    expect(groupTeachers(teachers)).toEqual([{ label: 'Maestra Sofía', initials: 'SG', photoPath: 'teachers/t1.jpg' }]);
   });
 
-  it('is null when the group has no teacher', () => {
-    expect(groupTeacher([{ id: 't0', first_name: 'Ana', last_name: 'Pérez', role: 'Asistente', photo_path: null }])).toBeNull();
+  it('is empty when the group has no teacher', () => {
+    expect(groupTeachers([{ id: 't0', first_name: 'Ana', last_name: 'Pérez', role: 'Asistente', photo_path: null }])).toEqual([]);
+  });
+});
+
+describe('routineTeacher', () => {
+  const SOFIA = { label: 'Maestra Sofía', initials: 'SG', photoPath: 'teachers/t1.jpg' };
+  const ANA = { label: 'Maestra Ana', initials: 'AP', photoPath: null };
+
+  it('names the teacher who logged the routine, with her photo from the group', () => {
+    expect(routineTeacher(routine({ loggedByLabel: 'Maestra Ana' }), [SOFIA, ANA])).toEqual(ANA);
+  });
+
+  it('keeps the stored label when the one who logged it is not in the group', () => {
+    expect(routineTeacher(routine({ loggedByLabel: 'Dirección' }), [SOFIA])).toEqual({ label: 'Dirección', initials: 'D', photoPath: null });
+  });
+
+  it('falls back to the first teacher of the group when there is no routine yet', () => {
+    expect(routineTeacher(null, [SOFIA, ANA])).toEqual(SOFIA);
+  });
+
+  it('is null with no routine and no teacher', () => {
+    expect(routineTeacher(null, [])).toBeNull();
   });
 });
