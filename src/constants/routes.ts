@@ -23,6 +23,10 @@ export function eventHref(eventId: string): Href {
   return `/event/${encodeURIComponent(eventId)}` as Href;
 }
 
+export function outingPermissionsHref(eventId: string): Href {
+  return `/outing-permissions/${encodeURIComponent(eventId)}` as Href;
+}
+
 /** `newDay` (YYYY-MM-DD) makes that day's dot pop after a save. */
 export function calendarWithToastHref(toast: string, newDay?: string): Href {
   return { pathname: '/calendar', params: newDay ? { toast, newDay } : { toast } } as Href;
