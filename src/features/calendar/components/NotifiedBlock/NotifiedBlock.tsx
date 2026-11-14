@@ -9,7 +9,6 @@ import { useColors } from '@/theme/use-theme';
 import { NOTIFIED_ICON_SIZE, styles, useNotifiedBlockStyles } from './NotifiedBlock.styles';
 
 interface NotifiedBlockProps {
-  /** The families line first, then the teachers. */
   lines: string[];
   voidedPermissionsLine?: string | null;
 }
