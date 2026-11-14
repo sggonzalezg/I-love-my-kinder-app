@@ -11,7 +11,7 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
-import { editEventHref } from '@/constants/routes';
+import { editEventHref, outingPermissionsHref } from '@/constants/routes';
 import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { CALENDAR_COPY, changedTimeLine, reminderLine } from '@/features/calendar/calendar-copy';
@@ -84,7 +84,7 @@ export function EventDetailScreen() {
 
       {event.permission_counts ? (
         <View style={styles.block}>
-          <OutingPermissionCard counts={event.permission_counts} />
+          <OutingPermissionCard counts={event.permission_counts} onPress={() => router.push(outingPermissionsHref(id))} />
         </View>
       ) : null}
 
