@@ -1,6 +1,7 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
 import { eventAuthorLabel, eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
 import type { EventReach } from '@/lib/event-cancellation';
+import type { EventChange, EventWriteRow, StoredEventForm } from '@/lib/event-form';
 import { uploaderLabel } from '@/lib/story';
 
 import { fetchRoomRoster } from './family-room';
@@ -126,4 +127,33 @@ export async function fetchEventReach(event: Pick<Event, 'room_id' | 'shift_id'>
       .filter((teacher) => teacher.id !== ownTeacherId)
       .map((teacher) => uploaderLabel({ role: teacher.role, firstName: teacher.first_name })),
   };
+}
+
+const EVENT_FORM_COLUMNS = 'title, event_type, starts_at, ends_at, all_day, location, description, room_id, shift_id, remind_day_before';
+
+export interface EventOwner {
+  nurseryId: string;
+  userId: string;
+}
+
+export async function fetchEventForm(eventId: string): Promise<StoredEventForm | null> {
+  const rows = throwOnError<StoredEventForm[]>(await supabase.from('events').select(EVENT_FORM_COLUMNS).eq('id', eventId).limit(1));
+  return rows[0] ?? null;
+}
+
+export async function createEvent(row: EventWriteRow, owner: EventOwner): Promise<void> {
+  throwOnError(await supabase.from('events').insert({ ...row, nursery_id: owner.nurseryId, created_by: owner.userId }));
+}
+
+/** RLS turns a refused update into zero rows instead of an error. */
+export async function updateEvent(eventId: string, row: EventWriteRow & EventChange): Promise<void> {
+  const updated = throwOnError<{ id: string }[]>(await supabase.from('events').update(row).eq('id', eventId).select('id'));
+  if (updated.length === 0) throw new Error(`Event ${eventId} was not updated`);
+}
+
+/** Only a room-and-shift audience has one roster to count. */
+export async function fetchAudienceFamilyCount(roomId: string, shiftId: string | null): Promise<number | null> {
+  if (!shiftId) return null;
+  const roster = await fetchRoomRoster({ roomId, shiftId });
+  return roster.children.length;
 }

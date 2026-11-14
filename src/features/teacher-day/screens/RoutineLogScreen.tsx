@@ -13,7 +13,9 @@ import { ProgressTrack } from '@/components/ProgressTrack/ProgressTrack';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
+import { TimeSheet, type QuickTime } from '@/components/TimeSheet/TimeSheet';
 import { Toast, TOAST_VISIBLE_MS } from '@/components/toast';
+import { QUICK_TIME_CHIPS_MINUTES } from '@/constants/routine';
 import { queueRoutine } from '@/data/routine-queue-store';
 import { AllergyStrip } from '@/features/teacher-day/components/AllergyStrip/AllergyStrip';
 import { FieldLabel } from '@/features/teacher-day/components/FieldLabel/FieldLabel';
@@ -21,7 +23,6 @@ import { HygieneLog } from '@/features/teacher-day/components/HygieneLog/Hygiene
 import { LogActionBar } from '@/features/teacher-day/components/LogActionBar/LogActionBar';
 import { NoteField } from '@/features/teacher-day/components/NoteField/NoteField';
 import { RestTimes } from '@/features/teacher-day/components/RestTimes/RestTimes';
-import { TimeSheet } from '@/features/teacher-day/components/TimeSheet/TimeSheet';
 import { WhoRow } from '@/features/teacher-day/components/WhoRow/WhoRow';
 import { initialRoutineLogState, ROUTINE_LOG_ACTIONS, routineLogReducer, type RoutineLogAction, type TimeSheetState } from '@/features/teacher-day/routine-log-reducer';
 import { TEACHER_DAY_COPY } from '@/features/teacher-day/teacher-day-copy';
@@ -30,11 +31,18 @@ import { formatDbTime } from '@/lib/dates';
 import { AMOUNT_LABELS, HYGIENE_TYPE_LABELS, hasRestRangeError, MEAL_LABELS, mealsForShift, type HygieneType, type MealAmount, type RoutineDraft } from '@/lib/routine';
 import { routineKey } from '@/lib/routine-queue';
 import { groupLabel } from '@/lib/shift';
-import { hygieneSheetCopy, syncedLabel, toTimeValue } from '@/lib/teacher-day';
+import { hygieneSheetCopy, minutesBefore, syncedLabel, toTimeValue } from '@/lib/teacher-day';
 
 import { CHILD_ENTERING, CHILD_EXITING, KEYBOARD_BEHAVIOR, SKELETON_BLOCK_HEIGHT, styles } from './RoutineLogScreen.styles';
 
 const AMOUNT_OPTIONS = (['all', 'half', 'little', 'none'] as const).map((value) => ({ value, label: AMOUNT_LABELS[value] }));
+
+function quickTimesBefore(now: Date): QuickTime[] {
+  return [
+    { label: TEACHER_DAY_COPY.now(formatDbTime(toTimeValue(now))), value: toTimeValue(now) },
+    ...QUICK_TIME_CHIPS_MINUTES.map((minutes) => ({ label: TEACHER_DAY_COPY.minutesAgo(minutes), value: minutesBefore(now, minutes) })),
+  ];
+}
 
 function sheetCopy(sheet: TimeSheetState, draft: RoutineDraft, hygieneType: HygieneType, childName: string) {
   const shownTime = formatDbTime(sheet.time);
@@ -216,7 +224,8 @@ export function RoutineLogScreen() {
           title={sheetText.title}
           subtitle={sheetText.subtitle}
           time={state.sheet.time}
-          now={now}
+          latest={now}
+          quickTimes={quickTimesBefore(now)}
           confirmLabel={sheetText.confirm}
           confirmIsAdd={state.sheet.purpose === 'hygieneAdd'}
           onChange={(time) => dispatch({ type: ROUTINE_LOG_ACTIONS.SHEET_TIME_CHANGED, time })}

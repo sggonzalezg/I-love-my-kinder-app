@@ -1,5 +1,5 @@
 import { router } from 'expo-router';
-import { ChevronLeft } from 'lucide-react-native';
+import { ChevronLeft, type LucideIcon } from 'lucide-react-native';
 import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
@@ -11,14 +11,16 @@ type Props = {
   title?: string;
   subtitle?: string;
   backLabel?: string;
+  /** A full-screen form closes with ✕ instead of going back. */
+  backIcon?: LucideIcon;
   onBack?: () => void;
   right?: ReactNode;
 };
 
-export function TopBar({ title, subtitle, backLabel, onBack, right }: Props) {
+export function TopBar({ title, subtitle, backLabel, backIcon = ChevronLeft, onBack, right }: Props) {
   return (
     <View style={styles.bar}>
-      {backLabel && <IconButton icon={ChevronLeft} label={backLabel} onPress={onBack ?? (() => router.back())} />}
+      {backLabel && <IconButton icon={backIcon} label={backLabel} onPress={onBack ?? (() => router.back())} />}
       <View style={styles.titles}>
         {title && (
           <Text variant="title" accessibilityRole="header">
