@@ -20,7 +20,7 @@ export function AuthorizationTextSheet({ authorizationKey, childName, onClose }:
   const document = authorizationKey ? CHILD_AUTHORIZATIONS[authorizationKey] : null;
 
   return (
-    <Sheet visible={document !== null} onClose={onClose}>
+    <Sheet visible={document !== null} onClose={onClose} scrollableContent>
       {document && (
         <View style={styles.content}>
           <View style={styles.header}>

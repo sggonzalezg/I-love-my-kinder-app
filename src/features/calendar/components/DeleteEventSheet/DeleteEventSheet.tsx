@@ -37,7 +37,7 @@ export function DeleteEventSheet({
   onClose,
 }: DeleteEventSheetProps) {
   return (
-    <Sheet visible={visible} onClose={onClose} sheetStyle={styles.sheet}>
+    <Sheet visible={visible} onClose={onClose} sheetStyle={styles.sheet} scrollableContent>
       <ScrollView keyboardShouldPersistTaps="handled">
         <Text variant="title" accessibilityRole="header" style={styles.title}>
           {deleteSheetTitle(eventTitle)}

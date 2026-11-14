@@ -122,7 +122,7 @@ export function Select({
         disabledHelp={disabledHelp}
         onPress={() => dispatch({ type: SELECT_ACTIONS.OPENED })}
       />
-      <Sheet visible={state.isOpen} onClose={close} sheetStyle={hasSearch ? styles.searchSheet : styles.shortSheet}>
+      <Sheet visible={state.isOpen} onClose={close} sheetStyle={hasSearch ? styles.searchSheet : styles.shortSheet} scrollableContent>
         <Text style={styles.title} accessibilityRole="header">
           {sheetTitle}
         </Text>

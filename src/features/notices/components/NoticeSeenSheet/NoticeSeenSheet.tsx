@@ -25,7 +25,7 @@ export function NoticeSeenSheet({ noticeId, summary, visible, onClose }: NoticeS
   const now = new Date();
 
   return (
-    <Sheet visible={visible} onClose={onClose} sheetStyle={styles.sheet}>
+    <Sheet visible={visible} onClose={onClose} sheetStyle={styles.sheet} scrollableContent>
       <View style={styles.content}>
         <Text variant="title" accessibilityRole="header" numeric>
           {seenByLabel(summary)}
