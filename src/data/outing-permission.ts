@@ -2,6 +2,7 @@ import { OUTING_EVENT_TYPE, OUTING_SCREEN_ID } from '@/constants/outing';
 import { OUTING } from '@/legal/texts';
 import type { OutingAnswer, OutingDecision } from '@/lib/outing';
 import { familyOutingRequests, type AudienceChild, type FamilyOutingRequest, type OutingSummary } from '@/lib/outing-permission';
+import type { PermissionChild } from '@/lib/outing-permissions';
 import { invoke, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -113,6 +114,43 @@ export async function fetchOutingPermission(eventId: string, userId: string): Pr
     fetchOutingAnswers([eventId]),
   ]);
   return { outing: toOutingDetails(throwOnError<EventRow>(event)), guardian, answers };
+}
+
+export interface OutingPermissionsData {
+  title: string;
+  startsAt: string;
+  permissionVersion: number;
+  answers: OutingAnswer[];
+  children: PermissionChild[];
+}
+
+interface PermissionChildRow {
+  id: string;
+  first_name: string;
+  last_name: string | null;
+  photo_path: string | null;
+}
+
+/** The trigger records one pending row per child asked, so the rows name every child; RLS returns a teacher only the children she teaches. */
+export async function fetchOutingPermissions(eventId: string): Promise<OutingPermissionsData | null> {
+  const [eventResult, answers] = await Promise.all([
+    supabase.from('events').select('title, starts_at, permission_version').eq('id', eventId).maybeSingle(),
+    fetchOutingAnswers([eventId]),
+  ]);
+  const event = throwOnError<{ title: string; starts_at: string; permission_version: number | null } | null>(eventResult);
+  if (!event) return null;
+  const childIds = [...new Set(answers.map((answer) => answer.child_id))];
+  const children =
+    childIds.length === 0
+      ? []
+      : throwOnError<PermissionChildRow[]>(await supabase.from('children').select('id, first_name, last_name, photo_path').in('id', childIds));
+  return {
+    title: event.title,
+    startsAt: event.starts_at,
+    permissionVersion: event.permission_version ?? DEFAULT_PERMISSION_VERSION,
+    answers,
+    children: children.map((child) => ({ id: child.id, firstName: child.first_name, lastName: child.last_name ?? '', photoPath: child.photo_path })),
+  };
 }
 
 export async function fetchFamilyOutingRequests(userId: string, now: Date): Promise<FamilyOutingRequest[]> {
