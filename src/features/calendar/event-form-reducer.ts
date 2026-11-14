@@ -13,6 +13,8 @@ export const EVENT_FORM_ACTIONS = {
   SHEET_CLOSED: 'sheetClosed',
   DISCARD_ASKED: 'discardAsked',
   DISCARD_CANCELLED: 'discardCancelled',
+  RESIGN_ASKED: 'resignAsked',
+  RESIGN_CANCELLED: 'resignCancelled',
   SAVE_STARTED: 'saveStarted',
   SAVE_FAILED: 'saveFailed',
 } as const;
@@ -35,6 +37,7 @@ export interface EventFormState {
   draftTime: string;
   sheetMonth: SheetMonth;
   discardOpen: boolean;
+  resignOpen: boolean;
   saving: boolean;
   saveError: SaveError | null;
 }
@@ -52,6 +55,8 @@ export type EventFormAction =
   | { type: typeof EVENT_FORM_ACTIONS.SHEET_CLOSED }
   | { type: typeof EVENT_FORM_ACTIONS.DISCARD_ASKED }
   | { type: typeof EVENT_FORM_ACTIONS.DISCARD_CANCELLED }
+  | { type: typeof EVENT_FORM_ACTIONS.RESIGN_ASKED }
+  | { type: typeof EVENT_FORM_ACTIONS.RESIGN_CANCELLED }
   | { type: typeof EVENT_FORM_ACTIONS.SAVE_STARTED }
   | { type: typeof EVENT_FORM_ACTIONS.SAVE_FAILED; offline: boolean };
 
@@ -65,6 +70,7 @@ export function initialEventFormState(values: EventFormValues): EventFormState {
     draftTime: values.startTime,
     sheetMonth: { year: 0, month: 0 },
     discardOpen: false,
+    resignOpen: false,
     saving: false,
     saveError: null,
   };
@@ -119,8 +125,12 @@ export function eventFormReducer(state: EventFormState, action: EventFormAction)
       return { ...state, discardOpen: true };
     case EVENT_FORM_ACTIONS.DISCARD_CANCELLED:
       return { ...state, discardOpen: false };
+    case EVENT_FORM_ACTIONS.RESIGN_ASKED:
+      return { ...state, resignOpen: true };
+    case EVENT_FORM_ACTIONS.RESIGN_CANCELLED:
+      return { ...state, resignOpen: false };
     case EVENT_FORM_ACTIONS.SAVE_STARTED:
-      return { ...state, saving: true, saveError: null };
+      return { ...state, saving: true, saveError: null, resignOpen: false };
     case EVENT_FORM_ACTIONS.SAVE_FAILED:
       return { ...state, saving: false, saveError: action.offline ? 'offline' : 'failed' };
   }

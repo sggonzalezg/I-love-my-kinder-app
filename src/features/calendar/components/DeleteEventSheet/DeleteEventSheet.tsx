@@ -16,6 +16,7 @@ interface DeleteEventSheetProps {
   eventTitle: string;
   hasEnded: boolean;
   notifiedLines: string[];
+  voidedPermissionsLine: string | null;
   reason: string;
   deleting: boolean;
   failed: boolean;
@@ -29,6 +30,7 @@ export function DeleteEventSheet({
   eventTitle,
   hasEnded,
   notifiedLines,
+  voidedPermissionsLine,
   reason,
   deleting,
   failed,
@@ -46,7 +48,7 @@ export function DeleteEventSheet({
 
         {hasEnded ? null : (
           <>
-            <NotifiedBlock lines={notifiedLines} />
+            <NotifiedBlock lines={notifiedLines} voidedPermissionsLine={voidedPermissionsLine} />
             <View style={styles.field}>
               <Text variant="smallStrong">{CALENDAR_COPY.reasonLabel}</Text>
               <Input

@@ -16,12 +16,14 @@ import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { CALENDAR_COPY, changedTimeLine, reminderLine } from '@/features/calendar/calendar-copy';
 import { DeleteEventSheet } from '@/features/calendar/components/DeleteEventSheet/DeleteEventSheet';
+import { OutingPermissionCard } from '@/features/calendar/components/OutingPermissionCard/OutingPermissionCard';
 import { useEventDeletion } from '@/features/calendar/use-event-deletion';
 import { useEventDetail } from '@/features/calendar/use-event-detail';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 import { toIsoDate } from '@/lib/dates';
 import { factsAuthorLine, notifiedLines } from '@/lib/event-cancellation';
 import { canEditEvent } from '@/lib/event-form';
+import { voidedPermissionsLine } from '@/lib/outing-tally';
 import { size } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
@@ -35,7 +37,7 @@ export function EventDetailScreen() {
   const deletion = useEventDeletion(event);
   const pendingRequest = useFamilyOutingRequests().find((request) => request.eventId === id && request.status === 'pending');
   const { session } = useSession();
-  const canEdit = Boolean(event && session && canEditEvent(session.active_role, event.created_by === session.user_id, event.type));
+  const canEdit = Boolean(event && session && canEditEvent(session.active_role, event.created_by === session.user_id));
   const editButton = canEdit ? (
     <Button label={CALENDAR_COPY.edit} icon={Pencil} variant="soft" height={size.touch} onPress={() => router.push(editEventHref(id))} />
   ) : undefined;
@@ -63,6 +65,8 @@ export function EventDetailScreen() {
   }
 
   const isPast = event.date < toIsoDate(new Date());
+  const isOuting = event.type === 'outing';
+  const audienceCount = event.permission_counts?.childCount ?? deletion.reach?.familyCount ?? null;
 
   return (
     <Screen header={header}>
@@ -78,13 +82,19 @@ export function EventDetailScreen() {
         </View>
       ) : null}
 
+      {event.permission_counts ? (
+        <View style={styles.block}>
+          <OutingPermissionCard counts={event.permission_counts} />
+        </View>
+      ) : null}
+
       {event.changed_previous_time && !isPast ? (
         <View style={styles.block}>
           <Banner kind="info" icon={Clock} text={changedTimeLine(event.changed_previous_time)} />
         </View>
       ) : null}
 
-      <FactsCard event={{ ...event, author_line: factsAuthorLine(event.author_line, deletion.reach?.familyCount ?? null) }} />
+      <FactsCard event={{ ...event, author_line: factsAuthorLine(event.author_line, audienceCount, isOuting) }} />
 
       {isPast ? <Banner kind="info" text={CALENDAR_COPY.eventPassed} /> : null}
 
@@ -101,7 +111,7 @@ export function EventDetailScreen() {
 
       {deletion.staffAction === 'delete' ? (
         <View style={styles.staffAction}>
-          <Button label={CALENDAR_COPY.deleteEvent} variant="danger-soft" icon={Trash2} block onPress={deletion.openSheet} />
+          <Button label={isOuting ? CALENDAR_COPY.deleteOuting : CALENDAR_COPY.deleteEvent} variant="danger-soft" icon={Trash2} block onPress={deletion.openSheet} />
         </View>
       ) : null}
       {deletion.staffAction === 'askDirection' ? (
@@ -115,6 +125,7 @@ export function EventDetailScreen() {
         eventTitle={event.title}
         hasEnded={event.has_ended === true}
         notifiedLines={notifiedLines(event, deletion.reach)}
+        voidedPermissionsLine={voidedPermissionsLine(event.permission_counts?.authorizedCount ?? 0)}
         reason={deletion.state.reason}
         deleting={deletion.state.deleting}
         failed={deletion.state.failed}

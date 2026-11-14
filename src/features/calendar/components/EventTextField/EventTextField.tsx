@@ -8,6 +8,7 @@ import { styles, useEventTextFieldStyles } from './EventTextField.styles';
 interface EventTextFieldProps {
   label: string;
   labelAside?: string;
+  help?: string;
   value: string;
   multiline?: boolean;
   editable: boolean;
@@ -15,7 +16,7 @@ interface EventTextFieldProps {
   onChange: (text: string) => void;
 }
 
-export function EventTextField({ label, labelAside, value, multiline = false, editable, maxLength, onChange }: EventTextFieldProps) {
+export function EventTextField({ label, labelAside, help, value, multiline = false, editable, maxLength, onChange }: EventTextFieldProps) {
   const colors = useColors();
   const themed = useEventTextFieldStyles();
   return (
@@ -38,6 +39,11 @@ export function EventTextField({ label, labelAside, value, multiline = false, ed
         placeholderTextColor={colors.muted}
         style={[styles.input, multiline && styles.multiline, themed.input]}
       />
+      {help ? (
+        <Text variant="small" tone="muted">
+          {help}
+        </Text>
+      ) : null}
     </View>
   );
 }

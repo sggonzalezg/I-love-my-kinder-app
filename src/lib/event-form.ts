@@ -1,13 +1,13 @@
 import { EVENT_TYPES, type EventType } from './calendar';
 import { MONTHS_SHORT, WEEKDAYS, WEEKDAYS_SHORT, formatDbTime, fromIsoDate, toIsoDate } from './dates';
 import { familiesLabel } from './event-cancellation';
+import { isOuting, isOutingComplete, transportFieldsFromStored, transportValue, type TransportChoice } from './outing-fields';
 import type { Role } from './role';
 import type { ChildGroup } from './room-groups';
 import { groupLabel } from './shift';
 import { toTimeValue } from './teacher-day';
 
-/** "Salida" needs the permission fields of step 15c, so the form offers it only then. */
-export const FORM_EVENT_TYPES: EventType[] = EVENT_TYPES.filter((type) => type !== 'outing');
+export const FORM_EVENT_TYPES: EventType[] = EVENT_TYPES;
 
 export const DEFAULT_START_TIME = '09:00';
 export const DEFAULT_END_TIME = '10:00';
@@ -36,6 +36,8 @@ export interface EventFormValues {
   place: string;
   description: string;
   remindDayBefore: boolean;
+  transportChoice: TransportChoice | null;
+  otherTransport: string;
 }
 
 export interface EventWriteRow {
@@ -49,6 +51,7 @@ export interface EventWriteRow {
   room_id: string | null;
   shift_id: string | null;
   remind_day_before: boolean;
+  transport: string | null;
 }
 
 export interface EventChange {
@@ -93,6 +96,8 @@ export function emptyEventForm(defaultAudienceKey: string | null): EventFormValu
     place: '',
     description: '',
     remindDayBefore: true,
+    transportChoice: null,
+    otherTransport: '',
   };
 }
 
@@ -102,7 +107,14 @@ export function timeError(values: EventFormValues): string | null {
 }
 
 export function canSaveEvent(values: EventFormValues): boolean {
-  return values.type !== null && values.title.trim() !== '' && values.date !== null && values.audienceKey !== null && timeError(values) === null;
+  return (
+    values.type !== null &&
+    values.title.trim() !== '' &&
+    values.date !== null &&
+    values.audienceKey !== null &&
+    timeError(values) === null &&
+    isOutingComplete(values)
+  );
 }
 
 function atTime(isoDate: string, time: string): Date {
@@ -124,18 +136,21 @@ export function eventInstants(values: EventFormValues): { startsAt: Date; endsAt
 }
 
 export function eventWriteRow(values: EventFormValues, audience: Pick<EventAudienceOption, 'roomId' | 'shiftId'>): EventWriteRow {
-  const { startsAt, endsAt } = eventInstants(values);
+  const outing = isOuting(values);
+  const allDay = values.allDay && !outing;
+  const { startsAt, endsAt } = eventInstants({ ...values, allDay });
   return {
     title: values.title.trim(),
     event_type: values.type!,
     starts_at: startsAt.toISOString(),
     ends_at: endsAt.toISOString(),
-    all_day: values.allDay,
+    all_day: allDay,
     location: values.place.trim() || null,
     description: values.description.trim() || null,
     room_id: audience.roomId,
     shift_id: audience.shiftId,
     remind_day_before: values.remindDayBefore,
+    transport: outing ? transportValue(values) : null,
   };
 }
 
@@ -159,6 +174,7 @@ export function formValuesFromRow(row: StoredEventForm): EventFormValues {
     place: row.location ?? '',
     description: row.description ?? '',
     remindDayBefore: row.remind_day_before !== false,
+    ...transportFieldsFromStored(row.transport),
   };
 }
 
@@ -201,7 +217,7 @@ export function canCreateEvents(role: Role): boolean {
   return role === 'teacher';
 }
 
-/** Mirrors events_update for a teacher: only her own events; an outing waits for the permission fields of 15c. */
-export function canEditEvent(role: Role, isOwnEvent: boolean, type: EventType): boolean {
-  return canCreateEvents(role) && isOwnEvent && type !== 'outing';
+/** Mirrors events_update for a teacher: only her own events. */
+export function canEditEvent(role: Role, isOwnEvent: boolean): boolean {
+  return canCreateEvents(role) && isOwnEvent;
 }

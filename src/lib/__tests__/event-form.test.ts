@@ -35,8 +35,8 @@ function filledForm(overrides: Partial<EventFormValues> = {}): EventFormValues {
 }
 
 describe('FORM_EVENT_TYPES', () => {
-  it('leaves the outing out until its permission fields exist', () => {
-    expect(FORM_EVENT_TYPES).toEqual(['workshop', 'meeting', 'celebration', 'no_classes', 'other']);
+  it('offers the six types in the mockup order, Salida included', () => {
+    expect(FORM_EVENT_TYPES).toEqual(['workshop', 'meeting', 'outing', 'celebration', 'no_classes', 'other']);
   });
 });
 
@@ -92,6 +92,10 @@ describe('canSaveEvent', () => {
   it('refuses an end before the start', () => {
     expect(canSaveEvent(filledForm({ endTime: '08:00' }))).toBe(false);
   });
+
+  it('needs where and how an outing goes', () => {
+    expect(canSaveEvent(filledForm({ type: 'outing', place: 'Parque Rodó' }))).toBe(false);
+  });
 });
 
 describe('eventInstants', () => {
@@ -133,7 +137,16 @@ describe('eventWriteRow', () => {
       room_id: 'room-2',
       shift_id: 'shift-am',
       remind_day_before: true,
+      transport: null,
     });
+  });
+
+  it('stores how an outing goes and never makes it all day', () => {
+    const audience = audienceOptions([MORNING_GROUP])[0];
+
+    const row = eventWriteRow(filledForm({ type: 'outing', allDay: true, place: 'Parque Rodó', transportChoice: 'hiredBus' }), audience);
+
+    expect(row).toMatchObject({ event_type: 'outing', all_day: false, transport: 'Ómnibus contratado' });
   });
 });
 
@@ -143,6 +156,13 @@ describe('formValuesFromRow', () => {
     const values = filledForm({ place: 'Huerta', description: 'Traer guantes', remindDayBefore: false });
 
     expect(formValuesFromRow({ ...eventWriteRow(values, audience) })).toEqual(values);
+  });
+
+  it('fills an outing back with its transport', () => {
+    const audience = audienceOptions([MORNING_GROUP])[0];
+    const values = filledForm({ type: 'outing', place: 'Parque Rodó', transportChoice: 'other', otherTransport: 'En camioneta' });
+
+    expect(formValuesFromRow(eventWriteRow(values, audience))).toEqual(values);
   });
 
   it('fills the last day of a stored several-day event', () => {
@@ -234,14 +254,14 @@ describe('event permissions', () => {
   });
 
   it('lets a teacher edit her own event', () => {
-    expect(canEditEvent('teacher', true, 'workshop')).toBe(true);
+    expect(canEditEvent('teacher', true)).toBe(true);
   });
 
   it('keeps a teacher from editing an event she did not create', () => {
-    expect(canEditEvent('teacher', false, 'workshop')).toBe(false);
+    expect(canEditEvent('teacher', false)).toBe(false);
   });
 
-  it('keeps outings out of the form until their permission fields exist', () => {
-    expect(canEditEvent('teacher', true, 'outing')).toBe(false);
+  it('keeps families from editing events', () => {
+    expect(canEditEvent('family', true)).toBe(false);
   });
 });

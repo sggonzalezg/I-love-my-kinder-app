@@ -2,8 +2,10 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useEffect, useReducer, type Dispatch } from 'react';
 
+import { OUTING_EVENT_TYPE } from '@/constants/outing';
 import { calendarWithToastHref } from '@/constants/routes';
-import { createEvent, fetchAudienceFamilyCount, fetchEventForm, updateEvent } from '@/data/events';
+import { createEvent, fetchAudienceFamilyCount, fetchEventForm, updateEvent, type StoredEvent } from '@/data/events';
+import { DEFAULT_PERMISSION_VERSION, fetchOutingAnswers } from '@/data/outing-permission';
 import { useSession } from '@/data/session';
 import { fetchTeacherGroups } from '@/data/teacher-day';
 import { useAsync } from '@/data/use-async';
@@ -19,6 +21,15 @@ import {
   type EventAudienceOption,
 } from '@/lib/event-form';
 import { isNetworkFailure } from '@/lib/network';
+import { isOuting } from '@/lib/outing-fields';
+import {
+  outingAnswerCounts,
+  permissionChangeLine,
+  permissionVersionAfterEdit,
+  resignLine,
+  savedOutingToast,
+  type OutingAnswerCounts,
+} from '@/lib/outing-form';
 import { defaultGroupIndex } from '@/lib/teacher-day';
 
 export interface EventForm {
@@ -32,8 +43,17 @@ export interface EventForm {
   options: EventAudienceOption[];
   audience: EventAudienceOption | null;
   familyCount: number | null;
+  resignText: string | null;
   close: () => void;
   save: () => Promise<void>;
+  confirmResign: () => Promise<void>;
+}
+
+const NO_ANSWERS: OutingAnswerCounts = { authorizedCount: 0, declinedCount: 0, pendingCount: 0, childCount: 0 };
+
+async function fetchAnswerCounts(eventId: string, stored: StoredEvent | null): Promise<OutingAnswerCounts> {
+  if (stored?.event_type !== OUTING_EVENT_TYPE) return NO_ANSWERS;
+  return outingAnswerCounts(await fetchOutingAnswers([eventId]), stored.permission_version ?? DEFAULT_PERMISSION_VERSION);
 }
 
 export function useEventForm(eventId: string | undefined): EventForm {
@@ -43,7 +63,8 @@ export function useEventForm(eventId: string | undefined): EventForm {
   const load = useAsync(
     async () => {
       const [groups, stored] = await Promise.all([fetchTeacherGroups(userId!), eventId ? fetchEventForm(eventId) : null]);
-      return { groups, stored };
+      const answers = eventId ? await fetchAnswerCounts(eventId, stored) : NO_ANSWERS;
+      return { groups, stored, answers };
     },
     userId ? `${userId}:${eventId ?? 'new'}:event-form` : null,
   );
@@ -57,6 +78,9 @@ export function useEventForm(eventId: string | undefined): EventForm {
   );
   const familyCount = audience?.shiftId ? (familyCountLoad.data ?? null) : null;
   const notFound = Boolean(eventId && load.data && !stored);
+  const answers = load.data?.answers ?? NO_ANSWERS;
+  const changeLine = stored ? permissionChangeLine(state.initial, state.values) : null;
+  const resignText = changeLine && answers.authorizedCount > 0 ? `${changeLine} ${resignLine(answers.authorizedCount, answers.childCount)}` : null;
 
   useEffect(() => {
     if (!load.data || state.loaded) return;
@@ -75,19 +99,27 @@ export function useEventForm(eventId: string | undefined): EventForm {
   }
 
   async function save() {
+    if (resignText) dispatch({ type: EVENT_FORM_ACTIONS.RESIGN_ASKED });
+    else await write();
+  }
+
+  async function write() {
     if (!audience || !session) return;
     dispatch({ type: EVENT_FORM_ACTIONS.SAVE_STARTED });
     const row = eventWriteRow(state.values, audience);
     try {
-      if (eventId && stored) await updateEvent(eventId, { ...row, ...eventChange(stored.starts_at, row.starts_at, new Date()) });
-      else await createEvent(row, { nurseryId: session.nursery_id, userId: session.user_id });
+      if (eventId && stored) {
+        const permissionVersion = permissionVersionAfterEdit(stored.permission_version ?? DEFAULT_PERMISSION_VERSION, state.initial, state.values);
+        await updateEvent(eventId, { ...row, ...eventChange(stored.starts_at, row.starts_at, new Date()), permission_version: permissionVersion });
+      } else await createEvent(row, { nurseryId: session.nursery_id, userId: session.user_id });
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       dispatch({ type: EVENT_FORM_ACTIONS.SAVE_FAILED, offline: isNetworkFailure(error) });
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.dismissTo(calendarWithToastHref(savedEventToast(Boolean(eventId), familyCount), state.values.date ?? undefined));
+    const toast = !eventId && isOuting(state.values) ? savedOutingToast(familyCount) : savedEventToast(Boolean(eventId), familyCount);
+    router.dismissTo(calendarWithToastHref(toast, state.values.date ?? undefined));
   }
 
   return {
@@ -101,8 +133,10 @@ export function useEventForm(eventId: string | undefined): EventForm {
     options,
     audience,
     familyCount,
+    resignText,
     close,
     save,
+    confirmResign: write,
   };
 }
 

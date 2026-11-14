@@ -55,7 +55,7 @@ interface GuardianLinkRow {
 
 const EVENT_COLUMNS = 'id, title, starts_at, ends_at, location, transport, description, permission_version, room_id, shift_id';
 const ANSWER_COLUMNS = 'event_id, child_id, decision, created_at, permission_version, signer_name, signer_relationship, signed_by';
-const DEFAULT_PERMISSION_VERSION = 1;
+export const DEFAULT_PERMISSION_VERSION = 1;
 
 function toOutingDetails(row: EventRow): OutingDetails {
   return {
@@ -101,7 +101,7 @@ async function fetchGuardian(userId: string): Promise<Guardian> {
   };
 }
 
-async function fetchAnswers(eventIds: string[]): Promise<(OutingAnswer & { event_id: string })[]> {
+export async function fetchOutingAnswers(eventIds: string[]): Promise<(OutingAnswer & { event_id: string })[]> {
   if (eventIds.length === 0) return [];
   return throwOnError(await supabase.from('outing_authorizations').select(ANSWER_COLUMNS).in('event_id', eventIds));
 }
@@ -110,7 +110,7 @@ export async function fetchOutingPermission(eventId: string, userId: string): Pr
   const [event, guardian, answers] = await Promise.all([
     supabase.from('events').select(EVENT_COLUMNS).eq('id', eventId).single(),
     fetchGuardian(userId),
-    fetchAnswers([eventId]),
+    fetchOutingAnswers([eventId]),
   ]);
   return { outing: toOutingDetails(throwOnError<EventRow>(event)), guardian, answers };
 }
@@ -121,7 +121,7 @@ export async function fetchFamilyOutingRequests(userId: string, now: Date): Prom
     fetchGuardian(userId),
   ]);
   const outings = throwOnError<EventRow[]>(events).map(toOutingDetails);
-  const answers = await fetchAnswers(outings.map((outing) => outing.id));
+  const answers = await fetchOutingAnswers(outings.map((outing) => outing.id));
   const answersByEvent: Record<string, OutingAnswer[]> = {};
   for (const answer of answers) (answersByEvent[answer.event_id] ??= []).push(answer);
   return familyOutingRequests(outings, guardian.children, answersByEvent);

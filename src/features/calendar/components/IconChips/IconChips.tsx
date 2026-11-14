@@ -1,53 +1,49 @@
 import * as Haptics from 'expo-haptics';
-import { Calendar, CalendarX, PartyPopper, Palette, Bus, Users, type LucideIcon } from 'lucide-react-native';
+import type { LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { PressableScale } from '@/components/pressable-scale';
 import { Text } from '@/components/text';
-import { eventTypeLabel, type EventType } from '@/lib/calendar';
 import { useColors } from '@/theme/use-theme';
 
-import { CHIP_ICON_SIZE, CHIP_PRESSED_SCALE, styles, useEventTypeChipsStyles } from './EventTypeChips.styles';
+import { CHIP_ICON_SIZE, CHIP_PRESSED_SCALE, styles, useIconChipsStyles } from './IconChips.styles';
 
-const TYPE_ICONS: Record<EventType, LucideIcon> = {
-  workshop: Palette,
-  meeting: Users,
-  outing: Bus,
-  celebration: PartyPopper,
-  no_classes: CalendarX,
-  other: Calendar,
-};
-
-interface EventTypeChipsProps {
+export interface IconChipOption<T extends string> {
+  value: T;
   label: string;
-  types: EventType[];
-  value: EventType | null;
-  onChange: (type: EventType) => void;
+  icon: LucideIcon;
 }
 
-export function EventTypeChips({ label, types, value, onChange }: EventTypeChipsProps) {
+interface IconChipsProps<T extends string> {
+  label: string;
+  options: IconChipOption<T>[];
+  value: T | null;
+  onChange: (value: T) => void;
+}
+
+export function IconChips<T extends string>({ label, options, value, onChange }: IconChipsProps<T>) {
   const colors = useColors();
-  const themed = useEventTypeChipsStyles();
+  const themed = useIconChipsStyles();
   return (
     <View style={styles.row} accessibilityRole="radiogroup" accessibilityLabel={label}>
-      {types.map((type) => {
-        const selected = type === value;
-        const Icon = TYPE_ICONS[type];
+      {options.map((option) => {
+        const selected = option.value === value;
+        const Icon = option.icon;
         return (
           <PressableScale
-            key={type}
+            key={option.value}
             pressedScale={CHIP_PRESSED_SCALE}
             accessibilityRole="radio"
             accessibilityState={{ checked: selected }}
             onPress={() => {
               if (selected) return;
               Haptics.selectionAsync();
-              onChange(type);
+              onChange(option.value);
             }}
             style={[styles.chip, selected ? themed.selected : themed.idle]}>
             <Icon size={CHIP_ICON_SIZE} color={selected ? colors.onBlue : colors.ink} />
             <Text variant="smallStrong" tone={selected ? 'onBlue' : 'ink'}>
-              {eventTypeLabel(type)}
+              {option.label}
             </Text>
           </PressableScale>
         );

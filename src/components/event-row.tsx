@@ -1,3 +1,4 @@
+import { ClipboardCheck } from 'lucide-react-native';
 import { View, TouchableOpacity, Image } from 'react-native';
 import Animated, { useReducedMotion, ReduceMotion, FadeInDown } from 'react-native-reanimated';
 import type { Event } from '@/data/events';
@@ -8,6 +9,7 @@ import { eventRowMeta } from '@/lib/calendar';
 import type { PermissionStatus } from '@/lib/outing';
 import { Text } from '@/components/text';
 import { formatShortDate, fromIsoDate } from '@/lib/dates';
+import { permissionRowChip } from '@/lib/outing-tally';
 import { listStagger, listStaggeredItems } from '@/theme/motion';
 
 import { ENTRANCE_MS, REDUCED_ENTRANCE_MS, styles, useEventRowStyles } from './event-row.styles';
@@ -57,6 +59,12 @@ export function EventRow({ event, onPress, index = 0, permissionStatus }: EventR
           <Text variant="small" tone="muted">
             {eventRowMeta(event)}
           </Text>
+
+          {event.permission_counts ? (
+            <View style={styles.permissionChip}>
+              <Chip label={permissionRowChip(event.permission_counts)} icon={ClipboardCheck} variant="wait" compact />
+            </View>
+          ) : null}
         </View>
       </TouchableOpacity>
     </Animated.View>
