@@ -19,7 +19,7 @@ export const EVENT_DESCRIPTION_MAX_LENGTH = 2000;
 
 export interface EventAudienceOption {
   key: string;
-  roomId: string;
+  roomId: string | null;
   shiftId: string | null;
   label: string;
 }
@@ -212,12 +212,11 @@ export function savedEventToast(isEdit: boolean, familyCount: number | null): st
   return `Evento guardado. Les avisamos a ${familyCount === null ? 'las familias' : familiesLabel(familyCount)}.`;
 }
 
-/** The director's form (any audience, every event) comes with step 15e. */
 export function canCreateEvents(role: Role): boolean {
-  return role === 'teacher';
+  return role === 'teacher' || role === 'director';
 }
 
-/** Mirrors events_update for a teacher: only her own events. */
+/** Mirrors events_update: a teacher only her own events, the director every event. */
 export function canEditEvent(role: Role, isOwnEvent: boolean): boolean {
-  return canCreateEvents(role) && isOwnEvent;
+  return role === 'director' || (role === 'teacher' && isOwnEvent);
 }

@@ -11,6 +11,7 @@ import { TimeSheet } from '@/components/TimeSheet/TimeSheet';
 import { TopBar } from '@/components/top-bar';
 import { AudienceRadios } from '@/features/calendar/components/AudienceRadios/AudienceRadios';
 import { DateSheet } from '@/features/calendar/components/DateSheet/DateSheet';
+import { DirectorAudienceFields } from '@/features/calendar/components/DirectorAudienceFields/DirectorAudienceFields';
 import { DiscardSheet } from '@/features/calendar/components/DiscardSheet/DiscardSheet';
 import { EventTextField } from '@/features/calendar/components/EventTextField/EventTextField';
 import { IconChips } from '@/features/calendar/components/IconChips/IconChips';
@@ -23,6 +24,7 @@ import { EVENT_TYPE_OPTIONS, TRANSPORT_OPTIONS } from '@/features/calendar/event
 import { EVENT_FORM_ACTIONS, type DateSheetKind, type TimeSheetKind } from '@/features/calendar/event-form-reducer';
 import { useEventForm } from '@/features/calendar/use-event-form';
 import { formatDbTime, fromIsoDate } from '@/lib/dates';
+import { audienceCaptionLabel } from '@/lib/director-event-audience';
 import {
   EVENT_DESCRIPTION_MAX_LENGTH,
   EVENT_PLACE_MAX_LENGTH,
@@ -95,7 +97,7 @@ export function EventFormScreen() {
   const outing = isOuting(values);
   const startTitle = outing ? EVENT_FORM_COPY.outingStartSheetTitle : EVENT_FORM_COPY.startSheetTitle;
   const endTitle = outing ? EVENT_FORM_COPY.outingEndSheetTitle : EVENT_FORM_COPY.endSheetTitle;
-  const audienceCaption = form.audience ? notifyFamiliesLine(form.audience.label, form.familyCount) : undefined;
+  const audienceCaption = form.audience ? notifyFamiliesLine(audienceCaptionLabel(form.audience), form.familyCount) : undefined;
   const notifyCaption = outing ? askPermissionCaption(form.familyCount) : audienceCaption;
   const saveLabel = form.isEdit ? EVENT_FORM_COPY.saveChanges : outing ? EVENT_FORM_COPY.saveOuting : EVENT_FORM_COPY.save;
 
@@ -167,7 +169,11 @@ export function EventFormScreen() {
 
             <View style={styles.section}>
               <Text variant="label">{EVENT_FORM_COPY.audience}</Text>
-              <AudienceRadios label={EVENT_FORM_COPY.audience} options={form.options} value={values.audienceKey} onChange={(audienceKey) => change({ audienceKey })} />
+              {form.isDirector ? (
+                <DirectorAudienceFields options={form.options} audience={form.audience} reach={form.reach} onChange={(audienceKey) => change({ audienceKey })} />
+              ) : (
+                <AudienceRadios label={EVENT_FORM_COPY.audience} options={form.options} value={values.audienceKey} onChange={(audienceKey) => change({ audienceKey })} />
+              )}
             </View>
 
             <EventTextField
