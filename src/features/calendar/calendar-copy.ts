@@ -3,6 +3,8 @@ import { WEEKDAYS, formatTime } from '@/lib/dates';
 
 export const CALENDAR_COPY = {
   title: 'Calendario',
+  newEvent: 'Nuevo evento',
+  edit: 'Editar',
   previousMonth: 'Mes anterior',
   nextMonth: 'Mes siguiente',
   upcoming: 'Lo que viene',

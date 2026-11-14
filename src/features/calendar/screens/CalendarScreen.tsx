@@ -1,5 +1,5 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { ChevronLeft, ChevronRight } from 'lucide-react-native';
+import { ChevronLeft, ChevronRight, Plus } from 'lucide-react-native';
 import { useCallback, useEffect, useReducer } from 'react';
 import { View } from 'react-native';
 import { GestureDetector } from 'react-native-gesture-handler';
@@ -15,7 +15,8 @@ import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { Toast, TOAST_VISIBLE_MS } from '@/components/toast';
 import { TopBar } from '@/components/top-bar';
-import { eventHref } from '@/constants/routes';
+import { eventHref, NEW_EVENT_ROUTE } from '@/constants/routes';
+import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import {
   CALENDAR_COPY,
@@ -29,7 +30,10 @@ import { CALENDAR_ACTIONS, calendarReducer, initialCalendarState } from '@/featu
 import { useCalendar } from '@/features/calendar/use-calendar';
 import { useMonthSwipe } from '@/features/calendar/use-month-swipe';
 import { calendarList, markedDays, monthPeriod, type Event } from '@/lib/calendar';
-import { MONTHS } from '@/lib/dates';
+import { MONTHS, fromIsoDate } from '@/lib/dates';
+import { canCreateEvents } from '@/lib/event-form';
+
+import { size } from '@/theme/tokens';
 
 import { EMPTY_ILLUSTRATION, SKELETON_ROW_HEIGHT, SKELETON_ROWS, styles } from './CalendarScreen.styles';
 
@@ -39,11 +43,12 @@ export function CalendarScreen() {
   const outingRequests = useFamilyOutingRequests();
   const shiftMonth = useCallback((step: 1 | -1) => dispatch({ type: CALENDAR_ACTIONS.MONTH_SHIFTED, step }), []);
   const { gesture, gridStyle } = useMonthSwipe(shiftMonth);
-  const { toast } = useLocalSearchParams<{ toast?: string }>();
+  const { toast, newDay } = useLocalSearchParams<{ toast?: string; newDay?: string }>();
+  const { session } = useSession();
 
   useEffect(() => {
     if (!toast) return;
-    const timer = setTimeout(() => router.setParams({ toast: undefined }), TOAST_VISIBLE_MS);
+    const timer = setTimeout(() => router.setParams({ toast: undefined, newDay: undefined }), TOAST_VISIBLE_MS);
     return () => clearTimeout(timer);
   }, [toast]);
 
@@ -53,10 +58,16 @@ export function CalendarScreen() {
   const marked = markedDays(monthEvents, state.year, state.month);
   const list = calendarList({ ...state, monthEvents, upcomingEvents, today });
   const openEvent = (event: Event) => router.push(eventHref(event.id));
+  const savedDay = newDay ? fromIsoDate(newDay) : null;
+  const poppedDay = savedDay && savedDay.getFullYear() === state.year && savedDay.getMonth() === state.month ? savedDay.getDate() : undefined;
+  const newEventButton =
+    session && canCreateEvents(session.active_role) ? (
+      <Button label={CALENDAR_COPY.newEvent} icon={Plus} height={size.touch} onPress={() => router.push(NEW_EVENT_ROUTE)} />
+    ) : undefined;
 
   return (
     <View style={styles.root}>
-      <Screen header={<TopBar title={CALENDAR_COPY.title} />}>
+      <Screen header={<TopBar title={CALENDAR_COPY.title} right={newEventButton} />}>
         <View style={styles.monthHeader}>
           <IconButton icon={ChevronLeft} label={CALENDAR_COPY.previousMonth} onPress={() => shiftMonth(-1)} />
           <Text variant="section">{monthHeading(state.year, state.month, today)}</Text>
@@ -73,6 +84,7 @@ export function CalendarScreen() {
               noClassesDays={marked.noClasses}
               onDayPress={(day) => dispatch({ type: CALENDAR_ACTIONS.DAY_TAPPED, day })}
               today={isCurrentMonth ? today.getDate() : undefined}
+              poppedDay={poppedDay}
             />
           </Animated.View>
         </GestureDetector>
