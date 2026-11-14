@@ -1,69 +1,65 @@
+import { Calendar, MapPin, Users } from 'lucide-react-native';
 import { View } from 'react-native';
-import {
-  Calendar,
-  MapPin,
-  Users,
-} from 'lucide-react-native';
-import type { Event } from '@/data/events';
+
 import { Text } from '@/components/text';
-import { space, radius } from '@/theme/tokens';
-import { useColors } from '@/theme/use-theme';
+import type { Event } from '@/data/events';
 import { formatLongDate, fromIsoDate } from '@/lib/dates';
+import { outingTimeLine } from '@/lib/outing-tally';
+import { iconStroke } from '@/theme/tokens';
+import { useColors } from '@/theme/use-theme';
+
+import { FACT_ICON_SIZE, styles, useFactsCardStyles } from './facts-card.styles';
 
 interface FactsCardProps {
   event: Event;
 }
 
-export function FactsCard({ event }: FactsCardProps) {
-  const c = useColors();
+function timeLine({ type, time_start, time_end }: Event): string {
+  if (!time_start) return 'Todo el día';
+  if (type === 'outing' && time_end) return outingTimeLine(time_start, time_end);
+  return time_end ? `${time_start} a ${time_end}` : time_start;
+}
 
-  const eventDate = fromIsoDate(event.date);
-  const dateStr = formatLongDate(eventDate);
-  const timeStr = event.time_start
-    ? `${event.time_start}${event.time_end ? ` a ${event.time_end}` : ''}`
-    : 'Todo el día';
+export function FactsCard({ event }: FactsCardProps) {
+  const colors = useColors();
+  const themed = useFactsCardStyles();
+  const placeDetail = event.type === 'outing' ? event.transport : undefined;
 
   return (
-    <View
-      style={{
-        backgroundColor: c.surface,
-        borderRadius: radius.md,
-        padding: space.s4,
-        marginVertical: space.s4,
-        gap: space.s1,
-      }}
-    >
-      {/* Date and time */}
-      <View style={{ flexDirection: 'row', gap: space.s1 }}>
-        <Calendar size={20} color={c.blue} strokeWidth={2} style={{ marginTop: 2 }} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: c.ink, fontWeight: '600' }}>{dateStr}</Text>
-          <Text variant="small" style={{ color: c.muted }}>
-            {timeStr}
+    <View style={[styles.card, themed.card]}>
+      <View style={styles.fact}>
+        <Calendar size={FACT_ICON_SIZE} color={colors.blue} strokeWidth={iconStroke.bold} style={styles.icon} />
+        <View style={styles.factText}>
+          <Text variant="bodyStrong">{formatLongDate(fromIsoDate(event.date))}</Text>
+          <Text variant="small" tone="muted">
+            {timeLine(event)}
           </Text>
         </View>
       </View>
 
-      {/* Place if available */}
-      {event.place && (
-        <View style={{ flexDirection: 'row', gap: space.s1 }}>
-          <MapPin size={20} color={c.blue} strokeWidth={2} style={{ marginTop: 2 }} />
-          <View style={{ flex: 1 }}>
-            <Text style={{ color: c.ink }}>{event.place}</Text>
+      {event.place ? (
+        <View style={styles.fact}>
+          <MapPin size={FACT_ICON_SIZE} color={colors.blue} strokeWidth={iconStroke.bold} style={styles.icon} />
+          <View style={styles.factText}>
+            <Text>{event.place}</Text>
+            {placeDetail ? (
+              <Text variant="small" tone="muted">
+                {placeDetail}
+              </Text>
+            ) : null}
           </View>
         </View>
-      )}
+      ) : null}
 
-      {/* Audience */}
-      <View style={{ flexDirection: 'row', gap: space.s1 }}>
-        <Users size={20} color={c.blue} strokeWidth={2} style={{ marginTop: 2 }} />
-        <View style={{ flex: 1 }}>
-          <Text style={{ color: c.ink }}>{event.audience}</Text>
-          {event.author_line && (
-            <Text variant="small" style={{ color: c.muted }}>
+      <View style={styles.fact}>
+        <Users size={FACT_ICON_SIZE} color={colors.blue} strokeWidth={iconStroke.bold} style={styles.icon} />
+        <View style={styles.factText}>
+          <Text>{event.audience}</Text>
+          {event.author_line ? (
+            <Text variant="small" tone="muted">
               {event.author_line}
             </Text>
-          )}
+          ) : null}
         </View>
       </View>
     </View>

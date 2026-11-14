@@ -13,6 +13,7 @@ export const styles = StyleSheet.create({
   details: { flex: 1 },
   chips: { flexDirection: 'row', gap: space.s1, marginBottom: space.s1 },
   title: { marginBottom: space.s1 },
+  permissionChip: { flexDirection: 'row', marginTop: space.s1 },
 });
 
 export const useEventRowStyles = createThemedStyles((colors) => ({

@@ -2,6 +2,7 @@ import { formatDbTime } from './dates';
 import { formDayLabel, type EventFormValues } from './event-form';
 import { summarizePermissions, type OutingAnswer } from './outing';
 import { isOuting, transportValue, type TransportFields } from './outing-fields';
+import { childrenLabel } from './outing-tally';
 
 function transportLabel(values: TransportFields): string {
   return transportValue(values) ?? '';
@@ -28,17 +29,16 @@ export function permissionVersionAfterEdit(currentVersion: number, initial: Even
 
 export interface OutingAnswerCounts {
   authorizedCount: number;
+  declinedCount: number;
+  pendingCount: number;
   childCount: number;
 }
 
 /** The trigger records one pending row per child of the audience, so the rows name every child asked. */
 export function outingAnswerCounts(rows: OutingAnswer[], version: number): OutingAnswerCounts {
   const childIds = [...new Set(rows.map((row) => row.child_id))];
-  return { authorizedCount: summarizePermissions(rows, childIds, version).authorized, childCount: childIds.length };
-}
-
-function childrenLabel(count: number): string {
-  return count === 1 ? '1 niño' : `${count} niños`;
+  const { authorized, declined, pending } = summarizePermissions(rows, childIds, version);
+  return { authorizedCount: authorized, declinedCount: declined, pendingCount: pending, childCount: childIds.length };
 }
 
 export function resignLine(authorizedCount: number, childCount: number): string {
