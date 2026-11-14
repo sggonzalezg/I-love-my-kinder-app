@@ -1,3 +1,4 @@
+import type { PhotoSourceCopy } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import type { LegalDocKey } from '@/legal/documents.generated';
 import { formatDbTime } from '@/lib/dates';
 import type { WorkHours } from '@/lib/chat';
@@ -42,10 +43,6 @@ export const CHAT_COPY = {
   unreadLabel: (count: number) => `${count} sin leer`,
   you: 'Vos',
   addPhoto: 'Agregar una foto',
-  photoSourceTitle: 'Mandar una foto',
-  takePhoto: 'Sacar una foto',
-  choosePhoto: 'Elegir de tu teléfono',
-  cancel: 'Cancelar',
   photoToSend: 'Foto por mandar',
   removePhoto: 'Sacar la foto',
   uploadingPhoto: (percent: number) => `Subiendo la foto, ${percent}%`,
@@ -60,6 +57,13 @@ export const CHAT_COPY = {
   filters: 'Filtrar los chats',
   noThreadsForFilter: 'No hay chats con este filtro',
 } as const;
+
+export const CHAT_PHOTO_SOURCE_COPY: PhotoSourceCopy = {
+  title: 'Mandar una foto',
+  takePhoto: 'Sacar una foto',
+  choosePhoto: 'Elegir de tu teléfono',
+  cancel: 'Cancelar',
+};
 
 export const NOTICE_LINKS: Record<string, LegalDocKey> = {
   'Política de uso del chat del Jardín': 'teacherChat',

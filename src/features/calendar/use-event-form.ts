@@ -4,7 +4,16 @@ import { useEffect, useReducer, type Dispatch } from 'react';
 
 import { OUTING_EVENT_TYPE } from '@/constants/outing';
 import { calendarWithToastHref } from '@/constants/routes';
-import { createEvent, fetchAudienceFamilyCount, fetchEventForm, updateEvent, type StoredEvent } from '@/data/events';
+import {
+  applyEventImageChange,
+  createEvent,
+  fetchAudienceFamilyCount,
+  fetchEventForm,
+  fetchEventImageUrl,
+  updateEvent,
+  type EventOwner,
+  type StoredEvent,
+} from '@/data/events';
 import { fetchNurseryAudience } from '@/data/nursery-audience';
 import { DEFAULT_PERMISSION_VERSION, fetchOutingAnswers } from '@/data/outing-permission';
 import { useSession } from '@/data/session';
@@ -22,7 +31,9 @@ import {
   isFormDirty,
   savedEventToast,
   type EventAudienceOption,
+  type EventWriteRow,
 } from '@/lib/event-form';
+import { eventImageChange, isEventImageChanged, type EventImage } from '@/lib/event-image';
 import { isNetworkFailure } from '@/lib/network';
 import { isOuting } from '@/lib/outing-fields';
 import {
@@ -56,6 +67,11 @@ export interface EventForm {
 
 const NO_ANSWERS: OutingAnswerCounts = { authorizedCount: 0, declinedCount: 0, pendingCount: 0, childCount: 0 };
 
+async function fetchStoredImage(stored: StoredEvent | null): Promise<EventImage | null> {
+  const imageUrl = await fetchEventImageUrl(stored?.image_path ?? null);
+  return imageUrl && stored?.image_path ? { uri: imageUrl, storedPath: stored.image_path } : null;
+}
+
 async function fetchAnswerCounts(eventId: string, stored: StoredEvent | null): Promise<OutingAnswerCounts> {
   if (stored?.event_type !== OUTING_EVENT_TYPE) return NO_ANSWERS;
   return outingAnswerCounts(await fetchOutingAnswers([eventId]), stored.permission_version ?? DEFAULT_PERMISSION_VERSION);
@@ -75,8 +91,8 @@ export function useEventForm(eventId: string | undefined): EventForm {
         isDirector ? fetchNurseryAudience(session!.nursery_id, new Date()) : null,
         eventId ? fetchEventForm(eventId) : null,
       ]);
-      const answers = eventId ? await fetchAnswerCounts(eventId, stored) : NO_ANSWERS;
-      return { groups, nurseryAudience, stored, answers };
+      const [answers, image] = await Promise.all([eventId ? fetchAnswerCounts(eventId, stored) : NO_ANSWERS, fetchStoredImage(stored)]);
+      return { groups, nurseryAudience, stored, answers, image };
     },
     userId ? `${userId}:${session?.active_role}:${eventId ?? 'new'}:event-form` : null,
   );
@@ -102,13 +118,13 @@ export function useEventForm(eventId: string | undefined): EventForm {
     const values = load.data.stored
       ? formValuesFromRow(load.data.stored)
       : emptyEventForm(isDirector ? NURSERY_AUDIENCE_KEY : (options[defaultGroupIndex(load.data.groups, new Date())]?.key ?? null));
-    dispatch({ type: EVENT_FORM_ACTIONS.FORM_LOADED, values });
+    dispatch({ type: EVENT_FORM_ACTIONS.FORM_LOADED, values, image: load.data.image });
     // options derive from load.data, which this effect already watches.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [load.data, state.loaded]);
 
   function close() {
-    if (isFormDirty(state.initial, state.values)) dispatch({ type: EVENT_FORM_ACTIONS.DISCARD_ASKED });
+    if (isFormDirty(state.initial, state.values) || isEventImageChanged(state.initialImage, state.image)) dispatch({ type: EVENT_FORM_ACTIONS.DISCARD_ASKED });
     else router.back();
   }
 
@@ -117,15 +133,29 @@ export function useEventForm(eventId: string | undefined): EventForm {
     else await write();
   }
 
+  async function writeEventRow(row: EventWriteRow, owner: EventOwner): Promise<string> {
+    if (eventId && stored) {
+      const permissionVersion = permissionVersionAfterEdit(stored.permission_version ?? DEFAULT_PERMISSION_VERSION, state.initial, state.values);
+      await updateEvent(eventId, { ...row, ...eventChange(stored.starts_at, row.starts_at, new Date()), permission_version: permissionVersion });
+      return eventId;
+    }
+    if (state.createdEventId) {
+      await updateEvent(state.createdEventId, row);
+      return state.createdEventId;
+    }
+    const createdEventId = await createEvent(row, owner);
+    dispatch({ type: EVENT_FORM_ACTIONS.EVENT_CREATED, eventId: createdEventId });
+    return createdEventId;
+  }
+
   async function write() {
     if (!audience || !session) return;
     dispatch({ type: EVENT_FORM_ACTIONS.SAVE_STARTED });
     const row = eventWriteRow(state.values, audience);
     try {
-      if (eventId && stored) {
-        const permissionVersion = permissionVersionAfterEdit(stored.permission_version ?? DEFAULT_PERMISSION_VERSION, state.initial, state.values);
-        await updateEvent(eventId, { ...row, ...eventChange(stored.starts_at, row.starts_at, new Date()), permission_version: permissionVersion });
-      } else await createEvent(row, { nurseryId: session.nursery_id, userId: session.user_id });
+      const owner = { nurseryId: session.nursery_id, userId: session.user_id };
+      const savedEventId = await writeEventRow(row, owner);
+      await applyEventImageChange(eventImageChange(state.initialImage, state.image), { nurseryId: owner.nurseryId, eventId: savedEventId });
     } catch (error) {
       Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
       dispatch({ type: EVENT_FORM_ACTIONS.SAVE_FAILED, offline: isNetworkFailure(error) });

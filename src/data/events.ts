@@ -1,13 +1,17 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
+import { CHAT_PHOTO_MIME_TYPE } from '@/constants/chat';
 import { OUTING_EVENT_TYPE } from '@/constants/outing';
 import { eventAuthorLabel, eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
 import type { EventReach } from '@/lib/event-cancellation';
 import type { EventChange, EventWriteRow, StoredEventForm } from '@/lib/event-form';
+import { eventImagePath, type EventImageChange } from '@/lib/event-image';
 import { outingAnswerCounts, type OutingAnswerCounts } from '@/lib/outing-form';
 import { uploaderLabel } from '@/lib/story';
 
+import { newChatPhotoId } from './chat-photos';
 import { fetchRoomRoster } from './family-room';
 import { DEFAULT_PERMISSION_VERSION, fetchOutingAnswers } from './outing-permission';
+import { uploadWithProgress } from './storage-upload';
 import { signedUrl, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -154,22 +158,55 @@ export async function fetchEventReach(event: Pick<Event, 'room_id' | 'shift_id'>
   };
 }
 
-const EVENT_FORM_COLUMNS = 'title, event_type, starts_at, ends_at, all_day, location, description, room_id, shift_id, remind_day_before, transport, permission_version';
+const EVENT_FORM_COLUMNS =
+  'title, event_type, starts_at, ends_at, all_day, location, description, room_id, shift_id, remind_day_before, transport, permission_version, image_path';
 
 export interface EventOwner {
   nurseryId: string;
   userId: string;
 }
 
-export type StoredEvent = StoredEventForm & { permission_version: number | null };
+export type StoredEvent = StoredEventForm & { permission_version: number | null; image_path: string | null };
 
 export async function fetchEventForm(eventId: string): Promise<StoredEvent | null> {
   const rows = throwOnError<StoredEvent[]>(await supabase.from('events').select(EVENT_FORM_COLUMNS).eq('id', eventId).limit(1));
   return rows[0] ?? null;
 }
 
-export async function createEvent(row: EventWriteRow, owner: EventOwner): Promise<void> {
-  throwOnError(await supabase.from('events').insert({ ...row, nursery_id: owner.nurseryId, created_by: owner.userId }));
+export async function createEvent(row: EventWriteRow, owner: EventOwner): Promise<string> {
+  const created = throwOnError<{ id: string }>(
+    await supabase.from('events').insert({ ...row, nursery_id: owner.nurseryId, created_by: owner.userId }).select('id').single(),
+  );
+  return created.id;
+}
+
+export async function fetchEventImageUrl(path: string | null): Promise<string | null> {
+  return signedUrl(path, EVENT_IMAGES_BUCKET);
+}
+
+async function setEventImagePath(eventId: string, path: string | null): Promise<void> {
+  const updated = throwOnError<{ id: string }[]>(await supabase.from('events').update({ image_path: path }).eq('id', eventId).select('id'));
+  if (updated.length === 0) throw new Error(`Event ${eventId} image was not updated`);
+}
+
+// The event already points at its new image, so a file left behind only costs storage; it must not fail the save.
+async function removeEventImageFile(path: string): Promise<void> {
+  const { error } = await supabase.storage.from(EVENT_IMAGES_BUCKET).remove([path]);
+  if (error) console.warn('Removing the old event image failed:', error.message);
+}
+
+/** The upload policy needs the event row, so the image goes up after the event is saved. */
+export async function applyEventImageChange(change: EventImageChange, target: { nurseryId: string; eventId: string }): Promise<void> {
+  if (change.kind === 'none') return;
+  if (change.kind === 'remove') {
+    await setEventImagePath(target.eventId, null);
+    await removeEventImageFile(change.removedPath);
+    return;
+  }
+  const path = eventImagePath(target.nurseryId, target.eventId, newChatPhotoId());
+  await uploadWithProgress({ bucket: EVENT_IMAGES_BUCKET, path, localUri: change.localUri, mimeType: CHAT_PHOTO_MIME_TYPE });
+  await setEventImagePath(target.eventId, path);
+  if (change.replacedPath) await removeEventImageFile(change.replacedPath);
 }
 
 /** RLS turns a refused update into zero rows instead of an error. */
