@@ -1,0 +1,5 @@
+export const SHEET_CLOSE_HEIGHT_SHARE = 0.3;
+export const SHEET_CLOSE_VELOCITY = 800;
+export const SHEET_OVERDRAG_LIMIT = 24;
+export const SHEET_DRAG_ACTIVATION = 10;
+export const SHEET_DRAG_HORIZONTAL_FAIL = 24;
