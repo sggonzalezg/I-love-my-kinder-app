@@ -1,4 +1,5 @@
 import { CircleAlert } from 'lucide-react-native';
+import type { ReactNode } from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/button';
@@ -8,14 +9,16 @@ import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { iconStroke } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
-import { ALERT_GLYPH_SIZE, styles } from './OnlyDirectorNotice.styles';
+import { ALERT_GLYPH_SIZE, styles } from './DeletionBlockedNotice.styles';
 
-export interface OnlyDirectorNoticeProps {
-  nurseryName: string;
+export interface DeletionBlockedNoticeProps {
+  title: string;
+  reason: ReactNode;
+  nextStep: string;
   onClose: () => void;
 }
 
-export function OnlyDirectorNotice({ nurseryName, onClose }: OnlyDirectorNoticeProps) {
+export function DeletionBlockedNotice({ title, reason, nextStep, onClose }: DeletionBlockedNoticeProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   return (
@@ -24,10 +27,10 @@ export function OnlyDirectorNotice({ nurseryName, onClose }: OnlyDirectorNoticeP
         <CircleAlert size={ALERT_GLYPH_SIZE} color={colors.wait} strokeWidth={iconStroke.regular} />
       </View>
       <Text variant="title" accessibilityRole="header" style={styles.title}>
-        {DELETE_ACCOUNT_COPY.onlyDirectorTitle}
+        {title}
       </Text>
-      <Text>{DELETE_ACCOUNT_COPY.onlyDirectorBody(nurseryName)}</Text>
-      <Text style={styles.paragraph}>{DELETE_ACCOUNT_COPY.onlyDirectorAsk}</Text>
+      <Text>{reason}</Text>
+      <Text style={styles.paragraph}>{nextStep}</Text>
       <Button label={DELETE_ACCOUNT_COPY.notNow} variant="plain" block onPress={onClose} style={styles.action} />
     </View>
   );
