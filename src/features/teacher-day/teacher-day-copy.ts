@@ -48,10 +48,6 @@ export const TEACHER_DAY_COPY = {
   now: (time: string) => `Ahora · ${time}`,
   minutesAgo: (minutes: number) => `Hace ${minutes} min`,
   setTime: (time: string) => `Guardar ${time}`,
-  deleteEntry: 'Borrar',
-  cancel: 'Cancelar',
-  hourColumn: 'Hora',
-  minuteColumn: 'Minutos',
 } as const;
 
 export const SYNC_STATUS_LABELS: Record<ChildSyncStatus, string> = {
