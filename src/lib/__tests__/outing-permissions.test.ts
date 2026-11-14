@@ -1,11 +1,16 @@
 import type { OutingAnswer } from '../outing';
 import {
   childPermissionRows,
+  goingHeading,
   initialPermissionFilter,
+  isOutingDay,
+  noGoTitle,
+  outingDaySubtitle,
   permissionFilterChips,
   permissionsSubtitle,
   permissionTally,
   rowsForFilter,
+  stayingNames,
   type PermissionChild,
 } from '../outing-permissions';
 
@@ -113,5 +118,67 @@ describe('permission filters', () => {
 describe('permissionsSubtitle', () => {
   it('names the outing, its short day and the time it leaves', () => {
     expect(permissionsSubtitle('Salida al Parque Rodó', at(30, 10, 0))).toBe('Salida al Parque Rodó · jue 30 · 10:00');
+  });
+});
+
+describe('isOutingDay', () => {
+  it('starts at 7:00 of the outing day', () => {
+    expect(isOutingDay(at(30, 10, 0), new Date(2025, 9, 30, 7, 0))).toBe(true);
+  });
+
+  it('is not yet the outing day before 7:00', () => {
+    expect(isOutingDay(at(30, 10, 0), new Date(2025, 9, 30, 6, 59))).toBe(false);
+  });
+
+  it('stays the outing day after it leaves, until the day ends', () => {
+    expect(isOutingDay(at(30, 10, 0), new Date(2025, 9, 30, 23, 0))).toBe(true);
+  });
+
+  it('is not the outing day the day before or after', () => {
+    expect(isOutingDay(at(30, 10, 0), new Date(2025, 9, 29, 12, 0))).toBe(false);
+    expect(isOutingDay(at(30, 10, 0), new Date(2025, 9, 31, 8, 0))).toBe(false);
+  });
+});
+
+describe('outingDaySubtitle', () => {
+  it('says today with the times they leave and come back', () => {
+    expect(outingDaySubtitle(at(30, 10, 0), at(30, 12, 0))).toBe('Hoy · salen 10:00 · vuelven 12:00');
+  });
+});
+
+describe('outing day rows', () => {
+  it('drops the weekday from the answer time', () => {
+    const rows = childPermissionRows([answer('sofia', 'authorized', at(24, 9, 40))], [child('sofia', 'Sofía')], VERSION, { withWeekday: false });
+
+    expect(rows[0].meta).toBe('Carla (madre) · 24/10 9:40');
+  });
+
+  it('names every child who does not go: declined, withdrawn and pending, in list order', () => {
+    const rows = childPermissionRows(
+      [
+        answer('sofia', 'authorized', at(24, 9, 40)),
+        answer('valentina', 'pending', at(24, 8, 0)),
+        answer('mateo', 'withdrawn', at(27, 8, 40)),
+        answer('tomas', 'declined', at(25, 11, 20)),
+      ],
+      [child('sofia', 'Sofía', 'Acosta'), child('valentina', 'Valentina', 'Méndez'), child('mateo', 'Mateo', 'Rodríguez'), child('tomas', 'Tomás', 'Ruiz')],
+      VERSION,
+    );
+
+    expect(stayingNames(rows)).toEqual(['Tomás Ruiz', 'Mateo Rodríguez', 'Valentina Méndez']);
+  });
+});
+
+describe('outing day copy', () => {
+  it('counts the children who do not go', () => {
+    expect(noGoTitle(5)).toBe('5 niños no salen');
+  });
+
+  it('uses the singular for one child', () => {
+    expect(noGoTitle(1)).toBe('1 niño no sale');
+  });
+
+  it('heads the list with the children who go', () => {
+    expect(goingHeading(21)).toBe('Salen (21)');
   });
 });

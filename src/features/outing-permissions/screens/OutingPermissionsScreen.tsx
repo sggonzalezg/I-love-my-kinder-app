@@ -2,15 +2,15 @@ import { useLocalSearchParams } from 'expo-router';
 import { CheckCheck } from 'lucide-react-native';
 import { useReducer } from 'react';
 import { View } from 'react-native';
-import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { NoGoCard } from '@/features/outing-permissions/components/NoGoCard/NoGoCard';
 import { PermissionFilterChips } from '@/features/outing-permissions/components/PermissionFilterChips/PermissionFilterChips';
-import { PermissionRow } from '@/features/outing-permissions/components/PermissionRow/PermissionRow';
+import { PermissionList } from '@/features/outing-permissions/components/PermissionList/PermissionList';
 import { PermissionSummary } from '@/features/outing-permissions/components/PermissionSummary/PermissionSummary';
 import { OUTING_PERMISSIONS_COPY } from '@/features/outing-permissions/outing-permissions-copy';
 import {
@@ -20,26 +20,16 @@ import {
   shownFilter,
 } from '@/features/outing-permissions/outing-permissions-reducer';
 import { useOutingPermissions } from '@/features/outing-permissions/use-outing-permissions';
-import { initialPermissionFilter, permissionFilterChips, permissionTally, rowsForFilter } from '@/lib/outing-permissions';
-import { listEntering } from '@/theme/motion';
+import { goingHeading, initialPermissionFilter, permissionFilterChips, permissionTally, rowsForFilter, stayingNames } from '@/lib/outing-permissions';
 import { useColors } from '@/theme/use-theme';
 
-import {
-  DONE_ICON_SIZE,
-  SKELETON_ROW_HEIGHT,
-  SKELETON_ROWS,
-  SKELETON_TILES_HEIGHT,
-  styles,
-  useOutingPermissionsScreenStyles,
-} from './OutingPermissionsScreen.styles';
+import { DONE_ICON_SIZE, SKELETON_ROW_HEIGHT, SKELETON_ROWS, SKELETON_TILES_HEIGHT, styles } from './OutingPermissionsScreen.styles';
 
 export function OutingPermissionsScreen() {
   const { eventId } = useLocalSearchParams<{ eventId: string }>();
   const colors = useColors();
-  const themed = useOutingPermissionsScreenStyles();
-  const reduced = useReducedMotion();
   const [state, dispatch] = useReducer(outingPermissionsReducer, INITIAL_OUTING_PERMISSIONS_STATE);
-  const { subtitle, rows, notFound, loading, failed, reload } = useOutingPermissions(eventId);
+  const { subtitle, rows, outingDay, notFound, loading, failed, reload } = useOutingPermissions(eventId);
   const header = <TopBar title={OUTING_PERMISSIONS_COPY.title} subtitle={subtitle ?? undefined} backLabel={OUTING_PERMISSIONS_COPY.back} />;
 
   if (loading) {
@@ -67,26 +57,36 @@ export function OutingPermissionsScreen() {
   }
 
   const tally = permissionTally(rows);
+
+  if (outingDay) {
+    const staying = stayingNames(rows);
+    const goingRows = rowsForFilter(rows, 'authorized');
+    return (
+      <Screen header={header}>
+        {staying.length > 0 ? <NoGoCard names={staying} /> : null}
+        <View style={styles.daySummary}>
+          <PermissionSummary authorized={tally.authorized} declined={tally.declined} pending={tally.pending} outingDay />
+        </View>
+        <Text accessibilityRole="header" style={styles.goingHeading}>
+          {goingHeading(goingRows.length)}
+        </Text>
+        <PermissionList rows={goingRows} />
+        <View style={styles.bottom} />
+      </Screen>
+    );
+  }
+
   const filter = shownFilter(state, initialPermissionFilter(rows));
-  const shownRows = rowsForFilter(rows, filter);
 
   return (
     <Screen header={header}>
-      <PermissionSummary authorized={tally.authorized} declined={tally.declined} pending={tally.pending} />
+      <PermissionSummary authorized={tally.authorized} declined={tally.declined} pending={tally.pending} outingDay={false} />
       <PermissionFilterChips
         chips={permissionFilterChips(rows)}
         selected={filter}
         onSelect={(chosen) => dispatch({ type: OUTING_PERMISSIONS_ACTIONS.FILTER_CHOSEN, filter: chosen })}
       />
-      {shownRows.length > 0 ? (
-        <View key={filter} style={[styles.list, themed.list]}>
-          {shownRows.map((row, index) => (
-            <Animated.View key={row.child.id} entering={listEntering(index, reduced)}>
-              <PermissionRow row={row} isFirst={index === 0} />
-            </Animated.View>
-          ))}
-        </View>
-      ) : null}
+      <PermissionList key={filter} rows={rowsForFilter(rows, filter)} />
       {filter === 'all' ? (
         <Text variant="caption" tone="muted" style={styles.caption}>
           {OUTING_PERMISSIONS_COPY.onePermissionPerChild}
