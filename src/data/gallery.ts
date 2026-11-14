@@ -20,7 +20,7 @@ interface ChildLinkRow {
   children: { id: string; first_name: string; enrollments: EnrollmentRow[] } | null;
 }
 
-interface MediaRow {
+export interface MediaRow {
   id: string;
   file_path: string;
   file_type: string;
@@ -80,6 +80,11 @@ export async function fetchGroupMedia(group: GalleryGroup): Promise<GalleryMedia
       .eq('shift_id', group.shiftId)
       .order('created_at', { ascending: false }),
   );
+  return galleryMediaOf(rows);
+}
+
+/** Signs every file and names its uploader, keeping the rows' order. */
+export async function galleryMediaOf(rows: MediaRow[]): Promise<GalleryMedia[]> {
   if (rows.length === 0) return [];
 
   const [{ data: signed, error }, uploaders] = await Promise.all([

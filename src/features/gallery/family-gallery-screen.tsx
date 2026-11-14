@@ -129,7 +129,7 @@ function GalleryGroupView({ group, groups, openMediaId, onSelectGroup, onOpenMed
         </View>
       ) : null}
       {openMediaId && sections.length > 0 ? (
-        <StoryViewer sections={sections} groupLabel={groupLabel(group.roomName, group.shift)} startMediaId={openMediaId} onClose={onCloseStory} />
+        <StoryViewer sections={sections} groupLabelOf={() => groupLabel(group.roomName, group.shift)} startMediaId={openMediaId} onClose={onCloseStory} />
       ) : null}
     </Screen>
   );
