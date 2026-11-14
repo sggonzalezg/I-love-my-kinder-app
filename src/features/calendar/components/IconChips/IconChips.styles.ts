@@ -13,7 +13,7 @@ export const styles = StyleSheet.create({
   chip: { flexDirection: 'row', alignItems: 'center', gap: 6, minHeight: size.touch, paddingHorizontal: CHIP_PADDING, borderRadius: radius.full },
 });
 
-export const useEventTypeChipsStyles = createThemedStyles((colors) => ({
+export const useIconChipsStyles = createThemedStyles((colors) => ({
   idle: { backgroundColor: colors.surface, borderWidth: BORDER_WIDTH, borderColor: colors.border },
   selected: { backgroundColor: colors.blue, borderWidth: BORDER_WIDTH, borderColor: colors.blue },
 }));

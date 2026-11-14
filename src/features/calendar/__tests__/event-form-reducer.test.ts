@@ -108,6 +108,22 @@ describe('eventFormReducer', () => {
     expect(eventFormReducer(asked, { type: EVENT_FORM_ACTIONS.DISCARD_CANCELLED }).discardOpen).toBe(false);
   });
 
+  it('opens the re-sign sheet and goes back to editing', () => {
+    const asked = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.RESIGN_ASKED });
+
+    expect(asked.resignOpen).toBe(true);
+    expect(eventFormReducer(asked, { type: EVENT_FORM_ACTIONS.RESIGN_CANCELLED }).resignOpen).toBe(false);
+  });
+
+  it('closes the re-sign sheet once saving starts', () => {
+    const asked = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.RESIGN_ASKED });
+
+    const saving = eventFormReducer(asked, { type: EVENT_FORM_ACTIONS.SAVE_STARTED });
+
+    expect(saving.resignOpen).toBe(false);
+    expect(saving.saving).toBe(true);
+  });
+
   it('keeps the data when saving fails', () => {
     const saving = eventFormReducer(loadedState({ title: 'Taller' }), { type: EVENT_FORM_ACTIONS.SAVE_STARTED });
 

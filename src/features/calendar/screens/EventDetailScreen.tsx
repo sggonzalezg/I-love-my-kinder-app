@@ -35,7 +35,7 @@ export function EventDetailScreen() {
   const deletion = useEventDeletion(event);
   const pendingRequest = useFamilyOutingRequests().find((request) => request.eventId === id && request.status === 'pending');
   const { session } = useSession();
-  const canEdit = Boolean(event && session && canEditEvent(session.active_role, event.created_by === session.user_id, event.type));
+  const canEdit = Boolean(event && session && canEditEvent(session.active_role, event.created_by === session.user_id));
   const editButton = canEdit ? (
     <Button label={CALENDAR_COPY.edit} icon={Pencil} variant="soft" height={size.touch} onPress={() => router.push(editEventHref(id))} />
   ) : undefined;

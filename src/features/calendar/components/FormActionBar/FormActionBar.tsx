@@ -1,4 +1,4 @@
-import { Check } from 'lucide-react-native';
+import { Check, type LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
@@ -10,17 +10,18 @@ import { bottomInsetStyle, styles } from './FormActionBar.styles';
 
 interface FormActionBarProps {
   label: string;
+  icon?: LucideIcon;
   disabled: boolean;
   loading: boolean;
   onPress: () => void;
 }
 
-export function FormActionBar({ label, disabled, loading, onPress }: FormActionBarProps) {
+export function FormActionBar({ label, icon = Check, disabled, loading, onPress }: FormActionBarProps) {
   const insets = useSafeAreaInsets();
   const backgroundStyles = useBackgroundColorStyles();
   return (
     <View style={[styles.bar, backgroundStyles.surface, bottomInsetStyle(insets.bottom)]}>
-      <Button label={label} icon={Check} block height={size.teacherAction} disabled={disabled} loading={loading} onPress={onPress} />
+      <Button label={label} icon={icon} block height={size.teacherAction} disabled={disabled} loading={loading} onPress={onPress} />
     </View>
   );
 }

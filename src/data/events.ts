@@ -129,15 +129,17 @@ export async function fetchEventReach(event: Pick<Event, 'room_id' | 'shift_id'>
   };
 }
 
-const EVENT_FORM_COLUMNS = 'title, event_type, starts_at, ends_at, all_day, location, description, room_id, shift_id, remind_day_before';
+const EVENT_FORM_COLUMNS = 'title, event_type, starts_at, ends_at, all_day, location, description, room_id, shift_id, remind_day_before, transport, permission_version';
 
 export interface EventOwner {
   nurseryId: string;
   userId: string;
 }
 
-export async function fetchEventForm(eventId: string): Promise<StoredEventForm | null> {
-  const rows = throwOnError<StoredEventForm[]>(await supabase.from('events').select(EVENT_FORM_COLUMNS).eq('id', eventId).limit(1));
+export type StoredEvent = StoredEventForm & { permission_version: number | null };
+
+export async function fetchEventForm(eventId: string): Promise<StoredEvent | null> {
+  const rows = throwOnError<StoredEvent[]>(await supabase.from('events').select(EVENT_FORM_COLUMNS).eq('id', eventId).limit(1));
   return rows[0] ?? null;
 }
 
@@ -146,7 +148,8 @@ export async function createEvent(row: EventWriteRow, owner: EventOwner): Promis
 }
 
 /** RLS turns a refused update into zero rows instead of an error. */
-export async function updateEvent(eventId: string, row: EventWriteRow & EventChange): Promise<void> {
+/** A new permission_version sends every outing answer back to pending. */
+export async function updateEvent(eventId: string, row: EventWriteRow & EventChange & { permission_version?: number }): Promise<void> {
   const updated = throwOnError<{ id: string }[]>(await supabase.from('events').update(row).eq('id', eventId).select('id'));
   if (updated.length === 0) throw new Error(`Event ${eventId} was not updated`);
 }
