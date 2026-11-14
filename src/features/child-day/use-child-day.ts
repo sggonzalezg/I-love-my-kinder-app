@@ -5,7 +5,7 @@ import { claimDayBeat } from '@/data/day-beat-store';
 import { useSession } from '@/data/session';
 import { useAsync } from '@/data/use-async';
 import { useReloadOnRefocus } from '@/data/use-reload-on-refocus';
-import { dayGroups, initialGroupKey, type DayGroup, type DayRoutine, type GroupTeacher } from '@/lib/child-day';
+import { dayGroups, initialGroupKey, routineTeacher, type DayGroup, type DayRoutine, type GroupTeacher } from '@/lib/child-day';
 import { toIsoDate } from '@/lib/dates';
 
 import { CHILD_DAY_ACTIONS, childDayReducer, initialChildDayState, type EnterSide } from './child-day-reducer';
@@ -53,12 +53,9 @@ export function useChildDay(childId: string): ChildDayView {
   const groups = dayGroups(base.data?.openGroups ?? [], dayRoutines.map((entry) => entry.group));
   const shownKey = state.groupKey ?? initialGroupKey(groups, new Date());
   const shownGroup = groups.find((group) => group.key === shownKey) ?? null;
+  const shownRoutine = shownGroup ? (dayRoutines.find((entry) => entry.group.key === shownGroup.key)?.routine ?? null) : null;
   const shown = shownGroup
-    ? {
-        group: shownGroup,
-        routine: dayRoutines.find((entry) => entry.group.key === shownGroup.key)?.routine ?? null,
-        teacher: base.data?.teachers[shownGroup.key] ?? null,
-      }
+    ? { group: shownGroup, routine: shownRoutine, teacher: routineTeacher(shownRoutine, base.data?.teachers[shownGroup.key] ?? []) }
     : null;
 
   const isToday = state.isoDate === todayIso;

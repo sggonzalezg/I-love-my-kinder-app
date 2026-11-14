@@ -1,4 +1,4 @@
-import { groupTeacher, type DayGroup, type DayRoutine, type GroupTeacher, type PreviousValues } from '@/lib/child-day';
+import { groupTeachers, type DayGroup, type DayRoutine, type GroupTeacher, type PreviousValues } from '@/lib/child-day';
 import type { FamilyChild } from '@/lib/room-groups';
 import type { HygieneEntry, MealAmount, MealKey } from '@/lib/routine';
 import type { ShiftName } from '@/lib/shift';
@@ -10,7 +10,7 @@ import { throwOnError } from './throw-on-error';
 export interface ChildDayBase {
   child: FamilyChild;
   openGroups: DayGroup[];
-  teachers: Record<string, GroupTeacher | null>;
+  teachers: Record<string, GroupTeacher[]>;
 }
 
 export interface GroupRoutine {
@@ -36,12 +36,13 @@ interface RoutineRow {
   previous_values: PreviousValues | null;
   created_at: string;
   corrected_at: string | null;
+  logged_by_label: string;
   rooms: { name: string } | null;
   shifts: { name: ShiftName; start_time: string; end_time: string } | null;
 }
 
 const ROUTINE_COLUMNS =
-  'room_id, shift_id, meals, rest_start_time, rest_end_time, no_sleep, hygiene_entries, notes, previous_values, created_at, corrected_at, rooms(name), shifts(name, start_time, end_time)';
+  'room_id, shift_id, meals, rest_start_time, rest_end_time, no_sleep, hygiene_entries, notes, previous_values, created_at, corrected_at, logged_by_label, rooms(name), shifts(name, start_time, end_time)';
 
 export function groupKeyOf(roomId: string, shiftId: string): string {
   return `${roomId}:${shiftId}`;
@@ -63,7 +64,7 @@ export async function fetchChildDayBase(userId: string, childId: string): Promis
     return times ? [{ ...group, key: groupKeyOf(group.roomId, group.shiftId), startTime: times.start_time, endTime: times.end_time }] : [];
   });
   const rosters = await Promise.all(openGroups.map((group) => fetchRoomRoster(group)));
-  const teachers = Object.fromEntries(openGroups.map((group, index) => [group.key, groupTeacher(rosters[index].teachers)]));
+  const teachers = Object.fromEntries(openGroups.map((group, index) => [group.key, groupTeachers(rosters[index].teachers)]));
   return { child, openGroups, teachers };
 }
 
@@ -92,6 +93,7 @@ export async function fetchDayRoutines(childId: string, isoDate: string): Promis
       previousValues: row.previous_values ?? {},
       createdAt: row.created_at,
       correctedAt: row.corrected_at,
+      loggedByLabel: row.logged_by_label,
     };
     return [{ group, routine }];
   });

@@ -39,6 +39,7 @@ export interface DayRoutine {
   previousValues: PreviousValues;
   createdAt: string;
   correctedAt: string | null;
+  loggedByLabel: string;
 }
 
 export interface GroupTeacher {
@@ -185,9 +186,16 @@ export function savedTimeOf(routine: DayRoutine): string {
   return timeOf(routine.createdAt);
 }
 
-/** Families cannot read who saved a routine (teachers RLS), so the day names the group's teacher from the roster. */
-export function groupTeacher(teachers: RosterTeacher[]): GroupTeacher | null {
-  const teacher = teachers.find((member) => member.role === TEACHER_ROLE);
-  if (!teacher) return null;
-  return { label: `${TEACHER_ROLE} ${teacher.first_name}`, initials: initials(teacher.first_name, teacher.last_name), photoPath: teacher.photo_path };
+export function groupTeachers(teachers: RosterTeacher[]): GroupTeacher[] {
+  return teachers
+    .filter((member) => member.role === TEACHER_ROLE)
+    .map((teacher) => ({ label: `${TEACHER_ROLE} ${teacher.first_name}`, initials: initials(teacher.first_name, teacher.last_name), photoPath: teacher.photo_path }));
+}
+
+/** Families cannot read `teachers`, so the photo comes from the group's roster matched by the routine's stored label. */
+export function routineTeacher(routine: DayRoutine | null, teachers: GroupTeacher[]): GroupTeacher | null {
+  if (!routine) return teachers[0] ?? null;
+  const label = routine.loggedByLabel;
+  const lastWord = label.split(' ').pop() ?? label;
+  return teachers.find((teacher) => teacher.label === label) ?? { label, initials: lastWord.charAt(0).toUpperCase(), photoPath: null };
 }
