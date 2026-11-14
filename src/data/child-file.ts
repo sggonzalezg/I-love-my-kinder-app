@@ -1,8 +1,5 @@
-import { currentAuthorizations } from '@/lib/authorizations';
 import { groupLabel, type ShiftName } from '@/lib/shift';
-import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 
-import { fetchChildAuthorizationRecords } from './family-room';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -24,7 +21,6 @@ export interface ChildFile {
   birthDate: string | null;
   photoPath: string | null;
   allergies: string | null;
-  healthGranted: boolean;
   groupLabels: string[];
   emergencyContacts: ChildContact[];
   pickupPeople: PickupPerson[];
@@ -43,7 +39,7 @@ interface ChildRow {
 const CONTACT_COLUMNS = 'id, name, relationship, phone';
 
 export async function fetchChildFile(childId: string): Promise<ChildFile> {
-  const [childResult, contactsResult, pickupResult, authorizationRecords] = await Promise.all([
+  const [childResult, contactsResult, pickupResult] = await Promise.all([
     supabase
       .from('children')
       .select('id, first_name, last_name, birth_date, photo_path, allergies, enrollments(ended_at, rooms(name), shifts(name))')
@@ -51,7 +47,6 @@ export async function fetchChildFile(childId: string): Promise<ChildFile> {
       .single(),
     supabase.from('emergency_contacts').select(CONTACT_COLUMNS).eq('child_id', childId).order('created_at'),
     supabase.from('pickup_people').select(`${CONTACT_COLUMNS}, national_id`).eq('child_id', childId).order('created_at'),
-    fetchChildAuthorizationRecords(childId),
   ]);
   const child = throwOnError<ChildRow>(childResult);
 
@@ -62,7 +57,6 @@ export async function fetchChildFile(childId: string): Promise<ChildFile> {
     birthDate: child.birth_date,
     photoPath: child.photo_path,
     allergies: child.allergies,
-    healthGranted: currentAuthorizations(authorizationRecords)[CHILD_AUTHORIZATIONS.health.id].granted,
     groupLabels: child.enrollments.flatMap((enrollment) =>
       !enrollment.ended_at && enrollment.rooms && enrollment.shifts ? [groupLabel(enrollment.rooms.name, enrollment.shifts.name)] : [],
     ),
