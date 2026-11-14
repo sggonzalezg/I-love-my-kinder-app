@@ -1,7 +1,9 @@
 import { View, TouchableOpacity } from 'react-native';
+import Animated from 'react-native-reanimated';
 import { buildMonthGrid } from '@/lib/calendar';
 import { Text } from '@/components/text';
 import { space, radius } from '@/theme/tokens';
+import { dotPop } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
 
 const WEEKDAYS = ['L', 'M', 'M', 'J', 'V', 'S', 'D'];
@@ -14,6 +16,11 @@ interface MonthGridProps {
   noClassesDays?: Set<number>;
   onDayPress?: (day: number) => void;
   today?: number; // day of month for today, for highlighting
+  /** Days before it cannot be chosen (the event form's day sheet). */
+  minDate?: Date;
+  /** The day whose dot pops in (an event just saved). */
+  poppedDay?: number;
+  showLegend?: boolean;
 }
 
 export function MonthGrid({
@@ -24,6 +31,9 @@ export function MonthGrid({
   noClassesDays,
   onDayPress,
   today,
+  minDate,
+  poppedDay,
+  showLegend = true,
 }: MonthGridProps) {
   const c = useColors();
   const weeks = buildMonthGrid(year, month);
@@ -61,12 +71,15 @@ export function MonthGrid({
             const isSelected = day === selectedDay;
             const isTodayCell = isToday(day);
             const isPastDay = isPast(day);
+            const isBeforeMin = !!day && !!minDate && new Date(year, month, day) < minDate;
+            const EventDot = day === poppedDay ? Animated.View : View;
 
             return (
               <TouchableOpacity
                 key={dayIdx}
                 onPress={() => day && onDayPress?.(day)}
-                disabled={!day}
+                disabled={!day || isBeforeMin}
+                accessibilityState={{ disabled: !day || isBeforeMin, selected: isSelected }}
                 style={{
                   flex: 1,
                   aspectRatio: 1,
@@ -88,7 +101,7 @@ export function MonthGrid({
                 >
                   <Text
                     style={{
-                      color: isPastDay ? c.muted : c.ink,
+                      color: isSelected ? c.onBlue : isBeforeMin ? c.border : isPastDay ? c.muted : c.ink,
                       fontWeight: '600',
                     }}
                   >
@@ -97,7 +110,8 @@ export function MonthGrid({
 
                   {/* Event dot */}
                   {hasEvent && !isNoClasses && (
-                    <View
+                    <EventDot
+                      entering={day === poppedDay ? dotPop : undefined}
                       style={{
                         position: 'absolute',
                         bottom: 4,
@@ -115,7 +129,7 @@ export function MonthGrid({
         </View>
       ))}
 
-      {/* Legend */}
+      {showLegend && (
       <View style={{ marginTop: space.s4, gap: space.s1 }}>
         <View style={{ flexDirection: 'row', alignItems: 'center', gap: space.s2 }}>
           <View
@@ -144,6 +158,7 @@ export function MonthGrid({
           </Text>
         </View>
       </View>
+      )}
     </View>
   );
 }

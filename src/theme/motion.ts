@@ -20,6 +20,19 @@ export const dayBeat = new Keyframe({
   .delay(DAY_BEAT_DELAY_MS)
   .reduceMotion(ReduceMotion.System);
 
+const DOT_POP_DELAY_MS = 200;
+const DOT_POP_DURATION_MS = 300;
+
+// Design section 7, "New event dot": scale 0 → 1.4 → 1 once the calendar is back; static with reduced motion.
+export const dotPop = new Keyframe({
+  0: { transform: [{ scale: 0 }] },
+  60: { transform: [{ scale: 1.4 }], easing: easeOut },
+  100: { transform: [{ scale: 1 }], easing: easeOut },
+})
+  .duration(DOT_POP_DURATION_MS)
+  .delay(DOT_POP_DELAY_MS)
+  .reduceMotion(ReduceMotion.System);
+
 export const pressSpring ={ damping: 18, stiffness: 220 } as const;
 
 export const signedRecord = { enter: 320, checkDraw: 420, checkDelay: 160, startScale: 0.96 } as const;
