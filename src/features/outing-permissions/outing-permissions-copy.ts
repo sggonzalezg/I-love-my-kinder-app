@@ -7,6 +7,9 @@ export const OUTING_PERMISSIONS_COPY = {
   tileAuthorized: 'Autorizaron',
   tileDeclined: 'No autorizan',
   tilePending: 'Sin responder',
+  tileGoing: 'Salen',
+  noGoReason: 'No tienen permiso firmado.',
+  noGoReasonOne: 'No tiene permiso firmado.',
   onePermissionPerChild:
     'Un permiso por niño: alcanza con que responda uno de los adultos a cargo, y al otro ya le aparece resuelto. Cada niño cuenta una sola vez y todas las respuestas quedan en su historial.',
   everyoneAnswered: 'Todas las familias respondieron',
