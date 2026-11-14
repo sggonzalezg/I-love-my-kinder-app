@@ -13,7 +13,7 @@ import { SessionProvider, useSession } from '@/data/session';
 
 SplashScreen.preventAutoHideAsync();
 
-function RootStackLayout() {
+export function RootStackLayout() {
   const c = useColors();
   const reduced = useReducedMotion();
   const { loading } = useSession();
