@@ -249,8 +249,16 @@ describe('event permissions', () => {
     expect(canCreateEvents('teacher')).toBe(true);
   });
 
+  it('lets the director create events', () => {
+    expect(canCreateEvents('director')).toBe(true);
+  });
+
   it('keeps families from creating events', () => {
     expect(canCreateEvents('family')).toBe(false);
+  });
+
+  it('lets the director edit an event a teacher created', () => {
+    expect(canEditEvent('director', false)).toBe(true);
   });
 
   it('lets a teacher edit her own event', () => {

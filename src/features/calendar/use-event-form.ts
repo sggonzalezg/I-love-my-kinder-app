@@ -5,12 +5,15 @@ import { useEffect, useReducer, type Dispatch } from 'react';
 import { OUTING_EVENT_TYPE } from '@/constants/outing';
 import { calendarWithToastHref } from '@/constants/routes';
 import { createEvent, fetchAudienceFamilyCount, fetchEventForm, updateEvent, type StoredEvent } from '@/data/events';
+import { fetchNurseryAudience } from '@/data/nursery-audience';
 import { DEFAULT_PERMISSION_VERSION, fetchOutingAnswers } from '@/data/outing-permission';
 import { useSession } from '@/data/session';
 import { fetchTeacherGroups } from '@/data/teacher-day';
 import { useAsync } from '@/data/use-async';
 import { EVENT_FORM_ACTIONS, eventFormReducer, initialEventFormState, type EventFormAction, type EventFormState } from '@/features/calendar/event-form-reducer';
+import { audienceReach, directorAudienceOptions, type AudienceReach } from '@/lib/director-event-audience';
 import {
+  audienceKey,
   audienceOptions,
   emptyEventForm,
   eventChange,
@@ -42,6 +45,8 @@ export interface EventForm {
   dispatch: Dispatch<EventFormAction>;
   options: EventAudienceOption[];
   audience: EventAudienceOption | null;
+  isDirector: boolean;
+  reach: AudienceReach | null;
   familyCount: number | null;
   resignText: string | null;
   close: () => void;
@@ -56,27 +61,36 @@ async function fetchAnswerCounts(eventId: string, stored: StoredEvent | null): P
   return outingAnswerCounts(await fetchOutingAnswers([eventId]), stored.permission_version ?? DEFAULT_PERMISSION_VERSION);
 }
 
+const NURSERY_AUDIENCE_KEY = audienceKey(null, null);
+
 export function useEventForm(eventId: string | undefined): EventForm {
   const { session } = useSession();
   const userId = session?.user_id ?? null;
+  const isDirector = session?.active_role === 'director';
   const [state, dispatch] = useReducer(eventFormReducer, emptyEventForm(null), initialEventFormState);
   const load = useAsync(
     async () => {
-      const [groups, stored] = await Promise.all([fetchTeacherGroups(userId!), eventId ? fetchEventForm(eventId) : null]);
+      const [groups, nurseryAudience, stored] = await Promise.all([
+        isDirector ? [] : fetchTeacherGroups(userId!),
+        isDirector ? fetchNurseryAudience(session!.nursery_id, new Date()) : null,
+        eventId ? fetchEventForm(eventId) : null,
+      ]);
       const answers = eventId ? await fetchAnswerCounts(eventId, stored) : NO_ANSWERS;
-      return { groups, stored, answers };
+      return { groups, nurseryAudience, stored, answers };
     },
-    userId ? `${userId}:${eventId ?? 'new'}:event-form` : null,
+    userId ? `${userId}:${session?.active_role}:${eventId ?? 'new'}:event-form` : null,
   );
   const groups = load.data?.groups ?? [];
+  const nurseryAudience = load.data?.nurseryAudience ?? null;
   const stored = load.data?.stored ?? null;
-  const options = audienceOptions(groups);
+  const options = nurseryAudience ? directorAudienceOptions(nurseryAudience) : audienceOptions(groups);
   const audience = options.find((option) => option.key === state.values.audienceKey) ?? null;
+  const reach = nurseryAudience && audience ? audienceReach(nurseryAudience, audience) : null;
   const familyCountLoad = useAsync(
-    () => fetchAudienceFamilyCount(audience!.roomId, audience!.shiftId),
-    audience?.shiftId ? `${audience.key}:family-count` : null,
+    () => fetchAudienceFamilyCount(audience!.roomId!, audience!.shiftId),
+    !isDirector && audience?.roomId && audience.shiftId ? `${audience.key}:family-count` : null,
   );
-  const familyCount = audience?.shiftId ? (familyCountLoad.data ?? null) : null;
+  const familyCount = isDirector ? (reach?.familyCount ?? null) : audience?.shiftId ? (familyCountLoad.data ?? null) : null;
   const notFound = Boolean(eventId && load.data && !stored);
   const answers = load.data?.answers ?? NO_ANSWERS;
   const changeLine = stored ? permissionChangeLine(state.initial, state.values) : null;
@@ -87,7 +101,7 @@ export function useEventForm(eventId: string | undefined): EventForm {
     if (eventId && !load.data.stored) return;
     const values = load.data.stored
       ? formValuesFromRow(load.data.stored)
-      : emptyEventForm(options[defaultGroupIndex(load.data.groups, new Date())]?.key ?? null);
+      : emptyEventForm(isDirector ? NURSERY_AUDIENCE_KEY : (options[defaultGroupIndex(load.data.groups, new Date())]?.key ?? null));
     dispatch({ type: EVENT_FORM_ACTIONS.FORM_LOADED, values });
     // options derive from load.data, which this effect already watches.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -132,6 +146,8 @@ export function useEventForm(eventId: string | undefined): EventForm {
     dispatch,
     options,
     audience,
+    isDirector,
+    reach,
     familyCount,
     resignText,
     close,

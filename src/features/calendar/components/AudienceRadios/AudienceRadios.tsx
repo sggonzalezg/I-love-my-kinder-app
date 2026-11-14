@@ -3,19 +3,23 @@ import { Fragment } from 'react';
 import { Pressable, View } from 'react-native';
 
 import { Text } from '@/components/text';
-import type { EventAudienceOption } from '@/lib/event-form';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 
 import { styles, useAudienceRadiosStyles } from './AudienceRadios.styles';
 
-interface AudienceRadiosProps {
+interface AudienceRadioOption<Key extends string> {
+  key: Key;
   label: string;
-  options: EventAudienceOption[];
-  value: string | null;
-  onChange: (key: string) => void;
 }
 
-export function AudienceRadios({ label, options, value, onChange }: AudienceRadiosProps) {
+interface AudienceRadiosProps<Key extends string> {
+  label: string;
+  options: AudienceRadioOption<Key>[];
+  value: Key | null;
+  onChange: (key: Key) => void;
+}
+
+export function AudienceRadios<Key extends string>({ label, options, value, onChange }: AudienceRadiosProps<Key>) {
   const backgroundStyles = useBackgroundColorStyles();
   const themed = useAudienceRadiosStyles();
   return (

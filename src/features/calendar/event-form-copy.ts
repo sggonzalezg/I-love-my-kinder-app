@@ -16,6 +16,8 @@ export const EVENT_FORM_COPY = {
   oneDay: 'Un solo día',
   allDayHelp: 'Con "Todo el día" no hay horas; "Hasta" sirve para vacaciones o semanas especiales.',
   audience: 'Para',
+  roomPicker: 'Sala',
+  groupPicker: 'Sala y turno',
   place: 'Lugar',
   description: 'Descripción',
   notifications: 'Notificaciones',
