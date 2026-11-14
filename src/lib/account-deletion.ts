@@ -1,3 +1,5 @@
+import { groupLabel, type ShiftName } from '@/lib/shift';
+
 export const DELETION_CODE_LENGTH = 6;
 export const RESEND_WAIT_SECONDS = 60;
 export const RESEND_TICK_MS = 1000;
@@ -40,7 +42,18 @@ export function isCompleteDeletionCode(code: string): boolean {
   return code.length === DELETION_CODE_LENGTH && DIGITS_ONLY.test(code);
 }
 
-const twoDigits = (value: number) => String(value).padStart(2, '0');
+export interface StaffedGroup {
+  roomName: string;
+  shift: ShiftName;
+  teacherCount: number;
+}
+
+export function soleTeacherGroupLabel(groups: StaffedGroup[]): string | null {
+  const soleGroup = groups.find((group) => group.teacherCount <= 1);
+  return soleGroup ? groupLabel(soleGroup.roomName, soleGroup.shift) : null;
+}
+
+const twoDigits =(value: number) => String(value).padStart(2, '0');
 
 export function deletedOnLine(deletedAt: Date): string {
   const day = `${twoDigits(deletedAt.getDate())}/${twoDigits(deletedAt.getMonth() + 1)}/${deletedAt.getFullYear()}`;

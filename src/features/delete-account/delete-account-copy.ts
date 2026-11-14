@@ -23,6 +23,11 @@ export const DELETE_ACCOUNT_COPY = {
   onlyDirectorBody: (nurseryName: string) =>
     `Sos la única cuenta de dirección de ${nurseryName}. Si la borrás, nadie podría administrar el jardín.`,
   onlyDirectorAsk: 'Pedile al soporte de la app que sume a otra persona de dirección con su e-mail, y después volvé acá.',
+  onlyTeacherTitle: 'Antes, hablá con la dirección',
+  onlyTeacherBodyStart: 'Sos la única maestra de ',
+  onlyTeacherBodyEnd: '. Si eliminás tu cuenta, nadie podría registrar el día de esos niños.',
+  onlyTeacherAsk:
+    'Hablá en persona con la dirección para que asigne otra maestra a la sala. Cuando lo haga, volvé acá para eliminar tu cuenta.',
   notNow: 'Ahora no',
   codeTitle: 'Confirmá que sos vos',
   back: 'Volver',

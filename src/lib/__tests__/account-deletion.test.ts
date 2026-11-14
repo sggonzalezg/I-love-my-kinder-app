@@ -5,6 +5,7 @@ import {
   familyAccessLine,
   isCompleteDeletionCode,
   joinNames,
+  soleTeacherGroupLabel,
 } from '../account-deletion';
 
 describe('joinNames', () => {
@@ -77,5 +78,19 @@ describe('deletedOnLine', () => {
     expect(deletedOnLine(new Date(2026, 9, 5))).toBe(
       'Eliminamos tu cuenta el 05/10/2026. Si querés volver, pedile a la dirección que te dé de alta otra vez.',
     );
+  });
+});
+
+describe('soleTeacherGroupLabel', () => {
+  it('names the first group where the teacher is the only one', () => {
+    const groups = [
+      { roomName: 'Sala 1', shift: 'morning' as const, teacherCount: 2 },
+      { roomName: 'Sala 2', shift: 'afternoon' as const, teacherCount: 1 },
+    ];
+    expect(soleTeacherGroupLabel(groups)).toBe('Sala 2 · Vespertino');
+  });
+
+  it('returns null when every group has another teacher', () => {
+    expect(soleTeacherGroupLabel([{ roomName: 'Sala 1', shift: 'morning', teacherCount: 2 }])).toBeNull();
   });
 });
