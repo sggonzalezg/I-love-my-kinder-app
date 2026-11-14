@@ -115,11 +115,11 @@ describe('restDuration', () => {
 });
 
 describe('mealRows', () => {
-  it('lists the logged meals in their order with time, amount and dots', () => {
+  it('lists the logged meals in their order with amount and dots, without a time', () => {
     const rows = mealRows(routine({ meals: { lunch: 'half', breakfast: 'all' } }));
     expect(rows).toEqual([
-      { key: 'breakfast', time: '9:00', label: 'Desayuno', amount: 'Todo', dots: 4, updated: null },
-      { key: 'lunch', time: '11:45', label: 'Almuerzo', amount: 'La mitad', dots: 2, updated: null },
+      { key: 'breakfast', label: 'Desayuno', amount: 'Todo', dots: 4, updated: null },
+      { key: 'lunch', label: 'Almuerzo', amount: 'La mitad', dots: 2, updated: null },
     ]);
   });
 

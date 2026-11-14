@@ -14,7 +14,6 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { Toast, TOAST_VISIBLE_MS } from '@/components/toast';
-import { MEAL_TIMES } from '@/constants/routine';
 import { queueRoutine } from '@/data/routine-queue-store';
 import { AllergyStrip } from '@/features/teacher-day/components/AllergyStrip/AllergyStrip';
 import { FieldLabel } from '@/features/teacher-day/components/FieldLabel/FieldLabel';
@@ -162,7 +161,7 @@ export function RoutineLogScreen() {
             {child.allergies ? <AllergyStrip allergies={child.allergies} /> : null}
             {mealsForShift(group.shift).map((meal) => (
               <View key={meal}>
-                <FieldLabel title={MEAL_LABELS[meal]} aside={MEAL_TIMES[meal]} />
+                <FieldLabel title={MEAL_LABELS[meal]} />
                 <ChoiceGroup<MealAmount>
                   label={MEAL_LABELS[meal]}
                   options={AMOUNT_OPTIONS}

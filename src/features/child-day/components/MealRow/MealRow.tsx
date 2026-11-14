@@ -33,5 +33,5 @@ export function MealRow({ meal, divided }: MealRowProps) {
       <Text style={styles.amount}>{meal.amount}</Text>
     </View>
   );
-  return <TimeRow time={meal.time} label={meal.label} divided={divided} detail={detail} aside={meter} />;
+  return <TimeRow label={meal.label} divided={divided} detail={detail} aside={meter} />;
 }
