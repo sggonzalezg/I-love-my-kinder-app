@@ -6,9 +6,10 @@ import Animated from 'react-native-reanimated';
 import { PressableScale } from '@/components/pressable-scale';
 import { Text } from '@/components/text';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
+import { attachmentEntering } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
 
-import { ATTACHMENT_ENTERING, PLATE_ICON_SIZE, RETRY_ICON_SIZE, progressFillStyle, styles } from './chat-attachment-preview.styles';
+import { PLATE_ICON_SIZE, RETRY_ICON_SIZE, progressFillStyle, styles } from './chat-attachment-preview.styles';
 import { CHAT_COPY } from './chat-copy';
 import type { ChatAttachment } from './chat-thread-reducer';
 
@@ -36,7 +37,7 @@ export function ChatAttachmentPreview({ attachment, onRemove, onRetry }: ChatAtt
           </Text>
         </Pressable>
       ) : null}
-      <Animated.View entering={ATTACHMENT_ENTERING} style={styles.preview}>
+      <Animated.View entering={attachmentEntering} style={styles.preview}>
         <Image source={{ uri: attachment.localUri }} style={styles.image} contentFit="cover" accessibilityLabel={CHAT_COPY.photoToSend} />
         <PressableScale
           accessibilityRole="button"

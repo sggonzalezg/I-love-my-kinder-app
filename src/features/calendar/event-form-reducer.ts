@@ -1,4 +1,5 @@
 import type { EventFormValues } from '@/lib/event-form';
+import type { EventImage } from '@/lib/event-image';
 
 export const EVENT_FORM_ACTIONS = {
   FORM_LOADED: 'formLoaded',
@@ -17,6 +18,12 @@ export const EVENT_FORM_ACTIONS = {
   RESIGN_CANCELLED: 'resignCancelled',
   SAVE_STARTED: 'saveStarted',
   SAVE_FAILED: 'saveFailed',
+  EVENT_CREATED: 'eventCreated',
+  IMAGE_SOURCE_OPENED: 'imageSourceOpened',
+  IMAGE_SOURCE_CLOSED: 'imageSourceClosed',
+  IMAGE_PICKED: 'imagePicked',
+  IMAGE_REMOVED: 'imageRemoved',
+  CAMERA_DENIED: 'cameraDenied',
 } as const;
 
 export type DateSheetKind = 'date' | 'until';
@@ -40,10 +47,16 @@ export interface EventFormState {
   resignOpen: boolean;
   saving: boolean;
   saveError: SaveError | null;
+  image: EventImage | null;
+  initialImage: EventImage | null;
+  imageSourceOpen: boolean;
+  cameraDenied: boolean;
+  /** Set when the insert worked but the image did not, so the next save updates that event instead of inserting it again. */
+  createdEventId: string | null;
 }
 
 export type EventFormAction =
-  | { type: typeof EVENT_FORM_ACTIONS.FORM_LOADED; values: EventFormValues }
+  | { type: typeof EVENT_FORM_ACTIONS.FORM_LOADED; values: EventFormValues; image?: EventImage | null }
   | { type: typeof EVENT_FORM_ACTIONS.FIELD_CHANGED; values: Partial<EventFormValues> }
   | { type: typeof EVENT_FORM_ACTIONS.DATE_SHEET_OPENED; sheet: DateSheetKind; today: Date }
   | { type: typeof EVENT_FORM_ACTIONS.TIME_SHEET_OPENED; sheet: TimeSheetKind }
@@ -58,9 +71,15 @@ export type EventFormAction =
   | { type: typeof EVENT_FORM_ACTIONS.RESIGN_ASKED }
   | { type: typeof EVENT_FORM_ACTIONS.RESIGN_CANCELLED }
   | { type: typeof EVENT_FORM_ACTIONS.SAVE_STARTED }
-  | { type: typeof EVENT_FORM_ACTIONS.SAVE_FAILED; offline: boolean };
+  | { type: typeof EVENT_FORM_ACTIONS.SAVE_FAILED; offline: boolean }
+  | { type: typeof EVENT_FORM_ACTIONS.EVENT_CREATED; eventId: string }
+  | { type: typeof EVENT_FORM_ACTIONS.IMAGE_SOURCE_OPENED }
+  | { type: typeof EVENT_FORM_ACTIONS.IMAGE_SOURCE_CLOSED }
+  | { type: typeof EVENT_FORM_ACTIONS.IMAGE_PICKED; uri: string }
+  | { type: typeof EVENT_FORM_ACTIONS.IMAGE_REMOVED }
+  | { type: typeof EVENT_FORM_ACTIONS.CAMERA_DENIED };
 
-export function initialEventFormState(values: EventFormValues): EventFormState {
+export function initialEventFormState(values: EventFormValues, image: EventImage | null = null): EventFormState {
   return {
     values,
     initial: values,
@@ -73,6 +92,11 @@ export function initialEventFormState(values: EventFormValues): EventFormState {
     resignOpen: false,
     saving: false,
     saveError: null,
+    image,
+    initialImage: image,
+    imageSourceOpen: false,
+    cameraDenied: false,
+    createdEventId: null,
   };
 }
 
@@ -100,7 +124,7 @@ function confirmedValues(state: EventFormState): Partial<EventFormValues> {
 export function eventFormReducer(state: EventFormState, action: EventFormAction): EventFormState {
   switch (action.type) {
     case EVENT_FORM_ACTIONS.FORM_LOADED:
-      return { ...initialEventFormState(action.values), loaded: true };
+      return { ...initialEventFormState(action.values, action.image ?? null), loaded: true };
     case EVENT_FORM_ACTIONS.FIELD_CHANGED:
       return { ...state, values: { ...state.values, ...action.values }, saveError: null };
     case EVENT_FORM_ACTIONS.DATE_SHEET_OPENED: {
@@ -133,5 +157,17 @@ export function eventFormReducer(state: EventFormState, action: EventFormAction)
       return { ...state, saving: true, saveError: null, resignOpen: false };
     case EVENT_FORM_ACTIONS.SAVE_FAILED:
       return { ...state, saving: false, saveError: action.offline ? 'offline' : 'failed' };
+    case EVENT_FORM_ACTIONS.EVENT_CREATED:
+      return { ...state, createdEventId: action.eventId };
+    case EVENT_FORM_ACTIONS.IMAGE_SOURCE_OPENED:
+      return { ...state, imageSourceOpen: true };
+    case EVENT_FORM_ACTIONS.IMAGE_SOURCE_CLOSED:
+      return { ...state, imageSourceOpen: false };
+    case EVENT_FORM_ACTIONS.IMAGE_PICKED:
+      return { ...state, image: { uri: action.uri, storedPath: null }, cameraDenied: false, saveError: null };
+    case EVENT_FORM_ACTIONS.IMAGE_REMOVED:
+      return { ...state, image: null, saveError: null };
+    case EVENT_FORM_ACTIONS.CAMERA_DENIED:
+      return { ...state, cameraDenied: true };
   }
 }

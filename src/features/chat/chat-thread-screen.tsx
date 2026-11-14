@@ -4,6 +4,7 @@ import { FlatList, KeyboardAvoidingView, View } from 'react-native';
 
 import { Banner } from '@/components/banner';
 import { EmptyState } from '@/components/empty-state';
+import { PhotoSourceSheet } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
@@ -19,12 +20,11 @@ import { chatListItems, membersLine, seenByCount, senderLine, type ChatListItem 
 import { chatPhotoVisibility } from '@/lib/chat-photo';
 
 import { ChatComposer } from './chat-composer';
-import { CHAT_COPY } from './chat-copy';
+import { CHAT_COPY, CHAT_PHOTO_SOURCE_COPY } from './chat-copy';
 import { ChatListSkeleton } from './chat-list-skeleton';
 import { ChatLoadError } from './chat-load-error';
 import { ChatMembersSheet } from './chat-members-sheet';
 import { ChatNoticeGate } from './chat-notice-gate';
-import { ChatPhotoSourceSheet } from './chat-photo-source-sheet';
 import { ChatPhotoViewer } from './chat-photo-viewer';
 import { ChatThreadHeader } from './chat-thread-header';
 import { CHAT_THREAD_ACTIONS, canSend, displayedMessages, isNewSinceOpen, type DisplayedMessage } from './chat-thread-reducer';
@@ -176,8 +176,9 @@ function ChatThreadView({ thread, session }: { thread: ChatThread; session: Auth
           roster={roster.data}
           onClose={() => dispatch({ type: CHAT_THREAD_ACTIONS.MEMBERS_CLOSED })}
         />
-        <ChatPhotoSourceSheet
+        <PhotoSourceSheet
           visible={state.photoSourceOpen}
+          copy={CHAT_PHOTO_SOURCE_COPY}
           onChoose={photo.choose}
           onClose={() => dispatch({ type: CHAT_THREAD_ACTIONS.PHOTO_SOURCE_CLOSED })}
           onDismiss={photo.onSourceSheetDismissed}
