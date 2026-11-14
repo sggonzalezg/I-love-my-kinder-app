@@ -1,7 +1,5 @@
 import type { Href } from 'expo-router';
 
-import type { MealKey } from '@/lib/routine';
-
 export function routineLogHref(groupKey: string, childIndex: number): Href {
   return `/log?group=${encodeURIComponent(groupKey)}&child=${childIndex}` as Href;
 }
@@ -15,10 +13,6 @@ export const ROUTINE_CONFLICT_RETRIES = 2;
 export const LAST_HYGIENE_LOOKBACK_DAYS = 30;
 
 export const QUICK_TIME_CHIPS_MINUTES = [15, 30] as const;
-
-// shortcut: the nursery has no meal times in the schema yet; these are the design's times. Read them from the
-// nursery settings once backend adds them (question for Seba in the SDD).
-export const MEAL_TIMES: Record<MealKey, string> = { breakfast: '9:00', lunch: '11:45', snack: '16:00' };
 
 // The family F6 day strip: today and the 13 days before it.
 export const CHILD_DAY_STRIP_DAYS = 14;

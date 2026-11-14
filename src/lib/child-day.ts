@@ -1,4 +1,3 @@
-import { MEAL_TIMES } from '@/constants/routine';
 
 import type { RosterTeacher } from '@/data/family-room';
 
@@ -56,7 +55,6 @@ export interface StripDay {
 
 export interface MealRow {
   key: MealKey;
-  time: string;
   label: string;
   amount: string;
   dots: number;
@@ -138,7 +136,7 @@ export function mealRows(routine: DayRoutine): MealRow[] {
     if (!amount) return [];
     const before = previous[key];
     const updated = routine.correctedAt && before && before !== amount ? `Actualizado ${timeOf(routine.correctedAt)} · antes "${AMOUNT_LABELS[before]}"` : null;
-    return [{ key, time: MEAL_TIMES[key], label: MEAL_LABELS[key], amount: AMOUNT_LABELS[amount], dots: AMOUNT_DOTS[amount], updated }];
+    return [{ key, label: MEAL_LABELS[key], amount: AMOUNT_LABELS[amount], dots: AMOUNT_DOTS[amount], updated }];
   });
 }
 
