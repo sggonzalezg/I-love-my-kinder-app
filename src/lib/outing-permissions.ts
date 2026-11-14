@@ -1,4 +1,6 @@
-import { formatTime, WEEKDAYS_SHORT } from './dates';
+import { OUTING_DAY_START_HOUR } from '@/constants/outing';
+
+import { formatTime, sameDay, WEEKDAYS_SHORT } from './dates';
 import { relationshipWord } from './format';
 import { permissionStatus, type OutingAnswer, type OutingDecision } from './outing';
 import { firstName } from './outing-permission';
@@ -42,15 +44,16 @@ const FILTER_ORDER: PermissionFilter[] = ['all', 'pending', 'declined', 'authori
 const shortWeekday = (date: Date) => WEEKDAYS_SHORT[date.getDay()].toLowerCase();
 const dayAndMonth = (date: Date) => `${date.getDate()}/${date.getMonth() + 1}`;
 
-function answerMoment(iso: string): string {
+function answerMoment(iso: string, withWeekday: boolean): string {
   const date = new Date(iso);
-  return `${shortWeekday(date)} ${dayAndMonth(date)} ${formatTime(date)}`;
+  const day = withWeekday ? `${shortWeekday(date)} ${dayAndMonth(date)}` : dayAndMonth(date);
+  return `${day} ${formatTime(date)}`;
 }
 
-function answerMeta(answer: OutingAnswer): string {
+function answerMeta(answer: OutingAnswer, withWeekday: boolean): string {
   const signer = `${firstName(answer.signer_name)} (${relationshipWord(answer.signer_relationship)})`;
   const who = answer.decision === 'withdrawn' ? `Retiró ${signer}` : signer;
-  return `${who}${SEPARATOR}${answerMoment(answer.created_at)}`;
+  return `${who}${SEPARATOR}${answerMoment(answer.created_at, withWeekday)}`;
 }
 
 function requestMeta(answers: OutingAnswer[], childId: string): string | null {
@@ -68,12 +71,17 @@ function compareRows(a: ChildPermissionRow, b: ChildPermissionRow): number {
 }
 
 /** One row per child: the permission belongs to the child, so any guardian's latest answer to the current version settles it. */
-export function childPermissionRows(answers: OutingAnswer[], children: PermissionChild[], version: number): ChildPermissionRow[] {
+export function childPermissionRows(
+  answers: OutingAnswer[],
+  children: PermissionChild[],
+  version: number,
+  { withWeekday = true }: { withWeekday?: boolean } = {},
+): ChildPermissionRow[] {
   return children
     .map((child) => {
       const { answer } = permissionStatus(answers, child.id, version);
       if (!answer) return { child, status: 'pending' as const, meta: requestMeta(answers, child.id), answeredAt: null };
-      return { child, status: answer.decision as PermissionRowStatus, meta: answerMeta(answer), answeredAt: answer.created_at };
+      return { child, status: answer.decision as PermissionRowStatus, meta: answerMeta(answer, withWeekday), answeredAt: answer.created_at };
     })
     .sort(compareRows);
 }
@@ -102,4 +110,25 @@ export function initialPermissionFilter(rows: ChildPermissionRow[]): PermissionF
 export function permissionsSubtitle(title: string, startsAt: string): string {
   const start = new Date(startsAt);
   return [title, `${shortWeekday(start)} ${start.getDate()}`, formatTime(start)].join(SEPARATOR);
+}
+
+/** From 7:00 of the outing's day the screen leads with who cannot go, because that morning the teacher sorts the children. */
+export function isOutingDay(startsAt: string, now: Date): boolean {
+  return sameDay(new Date(startsAt), now) && now.getHours() >= OUTING_DAY_START_HOUR;
+}
+
+export function outingDaySubtitle(startsAt: string, endsAt: string): string {
+  return ['Hoy', `salen ${formatTime(new Date(startsAt))}`, `vuelven ${formatTime(new Date(endsAt))}`].join(SEPARATOR);
+}
+
+export function stayingNames(rows: ChildPermissionRow[]): string[] {
+  return rows.filter((row) => row.status !== 'authorized').map((row) => `${row.child.firstName} ${row.child.lastName}`.trim());
+}
+
+export function noGoTitle(count: number): string {
+  return count === 1 ? '1 niño no sale' : `${count} niños no salen`;
+}
+
+export function goingHeading(count: number): string {
+  return `Salen (${count})`;
 }

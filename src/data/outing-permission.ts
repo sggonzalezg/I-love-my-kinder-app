@@ -119,6 +119,7 @@ export async function fetchOutingPermission(eventId: string, userId: string): Pr
 export interface OutingPermissionsData {
   title: string;
   startsAt: string;
+  endsAt: string;
   permissionVersion: number;
   answers: OutingAnswer[];
   children: PermissionChild[];
@@ -134,10 +135,10 @@ interface PermissionChildRow {
 /** The trigger records one pending row per child asked, so the rows name every child; RLS returns a teacher only the children she teaches. */
 export async function fetchOutingPermissions(eventId: string): Promise<OutingPermissionsData | null> {
   const [eventResult, answers] = await Promise.all([
-    supabase.from('events').select('title, starts_at, permission_version').eq('id', eventId).maybeSingle(),
+    supabase.from('events').select('title, starts_at, ends_at, permission_version').eq('id', eventId).maybeSingle(),
     fetchOutingAnswers([eventId]),
   ]);
-  const event = throwOnError<{ title: string; starts_at: string; permission_version: number | null } | null>(eventResult);
+  const event = throwOnError<{ title: string; starts_at: string; ends_at: string; permission_version: number | null } | null>(eventResult);
   if (!event) return null;
   const childIds = [...new Set(answers.map((answer) => answer.child_id))];
   const children =
@@ -147,6 +148,7 @@ export async function fetchOutingPermissions(eventId: string): Promise<OutingPer
   return {
     title: event.title,
     startsAt: event.starts_at,
+    endsAt: event.ends_at,
     permissionVersion: event.permission_version ?? DEFAULT_PERMISSION_VERSION,
     answers,
     children: children.map((child) => ({ id: child.id, firstName: child.first_name, lastName: child.last_name ?? '', photoPath: child.photo_path })),

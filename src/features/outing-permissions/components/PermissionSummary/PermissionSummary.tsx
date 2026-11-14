@@ -15,6 +15,7 @@ interface PermissionSummaryProps {
   authorized: number;
   declined: number;
   pending: number;
+  outingDay: boolean;
 }
 
 interface Tile {
@@ -26,12 +27,12 @@ interface Tile {
   foreground: ColorName;
 }
 
-export function PermissionSummary({ authorized, declined, pending }: PermissionSummaryProps) {
+export function PermissionSummary({ authorized, declined, pending, outingDay }: PermissionSummaryProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   const reduced = useReducedMotion();
   const tiles: Tile[] = [
-    { key: 'authorized', count: authorized, label: OUTING_PERMISSIONS_COPY.tileAuthorized, icon: Check, background: 'ok50', foreground: 'ok' },
+    { key: 'authorized', count: authorized, label: outingDay ? OUTING_PERMISSIONS_COPY.tileGoing : OUTING_PERMISSIONS_COPY.tileAuthorized, icon: Check, background: 'ok50', foreground: 'ok' },
     { key: 'declined', count: declined, label: OUTING_PERMISSIONS_COPY.tileDeclined, icon: X, background: 'red50', foreground: 'red' },
     { key: 'pending', count: pending, label: OUTING_PERMISSIONS_COPY.tilePending, icon: Clock, background: 'wait50', foreground: 'wait' },
   ];
@@ -51,11 +52,13 @@ export function PermissionSummary({ authorized, declined, pending }: PermissionS
           </View>
         ))}
       </View>
-      <View style={styles.bar} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
-        {tiles.map(({ key, count, foreground }) =>
-          count > 0 ? <Animated.View key={key} style={[styles.barPart, barPartStyle(count), backgroundStyles[foreground], !reduced && barGrowAnimation]} /> : null,
-        )}
-      </View>
+      {outingDay ? null : (
+        <View style={styles.bar} importantForAccessibility="no-hide-descendants" accessibilityElementsHidden>
+          {tiles.map(({ key, count, foreground }) =>
+            count > 0 ? <Animated.View key={key} style={[styles.barPart, barPartStyle(count), backgroundStyles[foreground], !reduced && barGrowAnimation]} /> : null,
+          )}
+        </View>
+      )}
     </View>
   );
 }
