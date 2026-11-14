@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
-import { useLocalSearchParams } from 'expo-router';
-import { Bell, Clock, Trash2 } from 'lucide-react-native';
+import { router, useLocalSearchParams } from 'expo-router';
+import { Bell, Clock, Pencil, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Banner } from '@/components/banner';
@@ -11,6 +11,8 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { editEventHref } from '@/constants/routes';
+import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { CALENDAR_COPY, changedTimeLine, reminderLine } from '@/features/calendar/calendar-copy';
 import { DeleteEventSheet } from '@/features/calendar/components/DeleteEventSheet/DeleteEventSheet';
@@ -19,6 +21,8 @@ import { useEventDetail } from '@/features/calendar/use-event-detail';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 import { toIsoDate } from '@/lib/dates';
 import { factsAuthorLine, notifiedLines } from '@/lib/event-cancellation';
+import { canEditEvent } from '@/lib/event-form';
+import { size } from '@/theme/tokens';
 import { useColors } from '@/theme/use-theme';
 
 import { REMINDER_ICON_SIZE, SKELETON_TITLE_HEIGHT, styles, useEventDetailScreenStyles } from './EventDetailScreen.styles';
@@ -30,7 +34,12 @@ export function EventDetailScreen() {
   const { event, loading, failed, reload } = useEventDetail(id);
   const deletion = useEventDeletion(event);
   const pendingRequest = useFamilyOutingRequests().find((request) => request.eventId === id && request.status === 'pending');
-  const header = <TopBar backLabel={CALENDAR_COPY.backToCalendar} />;
+  const { session } = useSession();
+  const canEdit = Boolean(event && session && canEditEvent(session.active_role, event.created_by === session.user_id, event.type));
+  const editButton = canEdit ? (
+    <Button label={CALENDAR_COPY.edit} icon={Pencil} variant="soft" height={size.touch} onPress={() => router.push(editEventHref(id))} />
+  ) : undefined;
+  const header = <TopBar backLabel={CALENDAR_COPY.backToCalendar} right={editButton} />;
 
   if (loading) {
     return (

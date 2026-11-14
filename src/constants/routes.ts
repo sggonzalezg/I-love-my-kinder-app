@@ -23,6 +23,13 @@ export function eventHref(eventId: string): Href {
   return `/event/${encodeURIComponent(eventId)}` as Href;
 }
 
-export function calendarWithToastHref(toast: string): Href {
-  return { pathname: '/calendar', params: { toast } } as Href;
+/** `newDay` (YYYY-MM-DD) makes that day's dot pop after a save. */
+export function calendarWithToastHref(toast: string, newDay?: string): Href {
+  return { pathname: '/calendar', params: newDay ? { toast, newDay } : { toast } } as Href;
+}
+
+export const NEW_EVENT_ROUTE = '/event/form' as Href;
+
+export function editEventHref(eventId: string): Href {
+  return { pathname: '/event/form', params: { id: eventId } } as Href;
 }

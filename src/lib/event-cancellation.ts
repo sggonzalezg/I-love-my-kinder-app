@@ -21,7 +21,7 @@ export function eventStaffAction(role: Role, isOwnEvent: boolean): EventStaffAct
   return role === 'teacher' ? 'askDirection' : 'none';
 }
 
-function familiesLabel(count: number): string {
+export function familiesLabel(count: number): string {
   return count === 1 ? '1 familia' : `${count} familias`;
 }
 
