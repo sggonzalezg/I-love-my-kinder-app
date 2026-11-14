@@ -1,4 +1,4 @@
-export const TEACHER_ROOM_COPY = {
+export const GROUP_ROSTER_COPY = {
   upcomingBirthdays: 'Próximos cumples',
   roomChildren: 'Niños de la sala',
   seeFile: 'Ver ficha',
