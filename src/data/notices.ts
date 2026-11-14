@@ -2,15 +2,13 @@ import type { CancelledEvent, Notice, NoticeViewer } from '@/lib/notices';
 import { guardianLine, mergeNotices, seenSummary } from '@/lib/notices';
 import type { ShiftName } from '@/lib/shift';
 
-import { uploaderLabel } from '@/lib/story';
-
 import { signedUrl, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
 const NOTICE_IMAGES_BUCKET = 'announcement-images';
 // shortcut: staff read the newest notices only; add paging when a nursery keeps more than this.
 const STAFF_NOTICES_LIMIT = 100;
-const NOTICE_COLUMNS = 'id, title, body, image_path, created_at, created_by, room_id, cancelled_event, rooms(name), shifts(name)';
+const NOTICE_COLUMNS = 'id, title, body, image_path, created_at, created_by, sender_label, room_id, cancelled_event, rooms(name), shifts(name)';
 // RLS returns recipient rows only to the notice's sender and to the direction.
 const STAFF_NOTICE_COLUMNS = `${NOTICE_COLUMNS}, announcement_recipients(seen_at)`;
 
@@ -31,6 +29,7 @@ interface NoticeRow {
   image_path: string | null;
   created_at: string;
   created_by: string | null;
+  sender_label: string | null;
   room_id: string | null;
   cancelled_event: CancelledEventRow | null;
   rooms: { name: string } | null;
@@ -69,6 +68,7 @@ function toNotice(row: NoticeRow, unread: boolean): Notice {
     imagePath: row.image_path,
     createdAt: row.created_at,
     createdBy: row.created_by,
+    senderLabel: row.sender_label,
     roomId: row.room_id,
     roomName: row.rooms?.name ?? null,
     shift: row.shifts?.name ?? null,
@@ -135,13 +135,4 @@ export async function fetchNoticeViewers(noticeId: string): Promise<NoticeViewer
     );
     return [{ id: row.id, name: `${member.first_name} ${member.last_name}`, relation: guardianLine(links), seenAt: row.seen_at }];
   });
-}
-
-/** Only the direction may read teachers, so only she gets the senders' names. */
-export async function fetchSenderLabels(userIds: string[]): Promise<Map<string, string>> {
-  if (userIds.length === 0) return new Map();
-  const rows = throwOnError<{ user_id: string; first_name: string; role: string }[]>(
-    await supabase.from('teachers').select('user_id, first_name, role').in('user_id', userIds),
-  );
-  return new Map(rows.map((row) => [row.user_id, uploaderLabel({ role: row.role, firstName: row.first_name })]));
 }

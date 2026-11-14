@@ -1,17 +1,15 @@
 import { useEffect } from 'react';
 
 import { fetchFamilyChildren } from '@/data/family-room';
-import { fetchNotice, fetchNoticeImageUrl, fetchSenderLabels, markNoticeSeen } from '@/data/notices';
+import { fetchNotice, fetchNoticeImageUrl, markNoticeSeen } from '@/data/notices';
 import { useSession } from '@/data/session';
 import { useAsync } from '@/data/use-async';
-import { childrenInAudience, NO_SENDER_LABELS, type Notice } from '@/lib/notices';
+import { childrenInAudience, type Notice } from '@/lib/notices';
 
 export interface NoticeDetail {
   notice: Notice | null;
   userId: string | null;
   isFamily: boolean;
-  /** The sender's name, known only to the direction. */
-  senderLabels: ReadonlyMap<string, string>;
   /** The family's children the notice went to, for the void outing permission line. */
   audienceChildren: string[];
   imageUrl: string | null;
@@ -27,8 +25,6 @@ export function useNoticeDetail(noticeId: string | undefined, imageAttempt: numb
   const isFamily = session?.active_role === 'family';
 
   const notice = useAsync(() => fetchNotice(noticeId!, !isFamily), noticeId && session ? `${session.active_role}:${noticeId}` : null);
-  const otherSenderId = session?.active_role === 'director' && notice.data?.createdBy !== userId ? (notice.data?.createdBy ?? null) : null;
-  const senderLabels = useAsync(() => fetchSenderLabels([otherSenderId!]), otherSenderId);
   const children = useAsync(() => fetchFamilyChildren(userId!), isFamily ? userId : null);
   const imagePath = notice.data?.imagePath ?? null;
   const imageUrl = useAsync(() => fetchNoticeImageUrl(imagePath!), imagePath ? `${imagePath}#${imageAttempt}` : null);
@@ -43,7 +39,6 @@ export function useNoticeDetail(noticeId: string | undefined, imageAttempt: numb
     notice: notice.data,
     userId,
     isFamily,
-    senderLabels: senderLabels.data ?? NO_SENDER_LABELS,
     audienceChildren: notice.data && children.data ? childrenInAudience(children.data, notice.data) : [],
     imageUrl: imageUrl.data,
     imageUrlFailed: imageUrl.failed,

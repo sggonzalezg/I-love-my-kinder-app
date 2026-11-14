@@ -23,7 +23,7 @@ import { CALENDAR_BUTTON_HEIGHT, EMPTY_ILLUSTRATION, SKELETON_ROW_HEIGHT, SKELET
 export function NoticesScreen() {
   const reduced = useReducedMotion();
   const themed = useNoticesScreenStyles();
-  const { notices, userId, isFamily, senderLabels, withdrawnChildren, loading, failed, reload } = useNotices();
+  const { notices, userId, isFamily, withdrawnChildren, loading, failed, reload } = useNotices();
   const now = new Date();
   // Staff notices come from Calendario events, so their inbox links there instead of composing (design round 25).
   const calendarButton = isFamily ? undefined : (
@@ -70,7 +70,7 @@ export function NoticesScreen() {
           <Fragment key={notice.id}>
             {index > 0 ? <View style={[styles.separator, themed.separator]} /> : null}
             <Animated.View entering={listEntering(index, reduced)}>
-              <NoticeRow notice={notice} userId={userId} senderLabels={senderLabels} now={now} onPress={() => router.push(noticeHref(notice.id))} />
+              <NoticeRow notice={notice} userId={userId} now={now} onPress={() => router.push(noticeHref(notice.id))} />
             </Animated.View>
           </Fragment>
         ))}

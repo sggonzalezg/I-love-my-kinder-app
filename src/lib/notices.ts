@@ -21,6 +21,7 @@ export interface Notice {
   imagePath: string | null;
   createdAt: string;
   createdBy: string | null;
+  senderLabel: string | null;
   roomId: string | null;
   roomName: string | null;
   shift: ShiftName | null;
@@ -47,8 +48,6 @@ export interface NoticeViewer {
   seenAt: string | null;
 }
 
-export const NO_SENDER_LABELS: ReadonlyMap<string, string> = new Map();
-
 const DAYS_SHOWN_AS_WEEKDAY = 7;
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 const NURSERY_WIDE_AUDIENCE = 'Todo el jardín';
@@ -72,11 +71,9 @@ export function noticeTimeLabel(sentAt: Date, now: Date): string {
   return sentAt.getFullYear() === now.getFullYear() ? dayAndMonth : `${dayAndMonth} ${sentAt.getFullYear()}`;
 }
 
-// shortcut: announcements store no sender name and families cannot read teachers (SDD gap 21); use a stored label once backend adds it.
-export function noticeSender(notice: Notice, userId: string | null, senderLabels = NO_SENDER_LABELS): string {
+export function noticeSender(notice: Notice, userId: string | null): string {
   if (notice.createdBy !== null && notice.createdBy === userId) return 'Vos';
-  const knownSender = notice.createdBy === null ? undefined : senderLabels.get(notice.createdBy);
-  if (knownSender) return knownSender;
+  if (notice.senderLabel) return notice.senderLabel;
   return notice.roomId === null ? 'Dirección' : 'La maestra';
 }
 
