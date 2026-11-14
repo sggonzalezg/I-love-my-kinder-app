@@ -49,7 +49,7 @@ export interface EventForm {
   confirmResign: () => Promise<void>;
 }
 
-const NO_ANSWERS: OutingAnswerCounts = { authorizedCount: 0, childCount: 0 };
+const NO_ANSWERS: OutingAnswerCounts = { authorizedCount: 0, declinedCount: 0, pendingCount: 0, childCount: 0 };
 
 async function fetchAnswerCounts(eventId: string, stored: StoredEvent | null): Promise<OutingAnswerCounts> {
   if (stored?.event_type !== OUTING_EVENT_TYPE) return NO_ANSWERS;

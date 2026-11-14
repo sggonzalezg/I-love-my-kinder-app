@@ -75,6 +75,10 @@ describe('factsAuthorLine', () => {
     expect(factsAuthorLine('Lo agendaste vos', 26)).toBe('Lo agendaste vos · 26 familias');
   });
 
+  it('counts children on an outing, since the permission is asked per child', () => {
+    expect(factsAuthorLine('Lo agendaste vos', 26, true)).toBe('Lo agendaste vos · 26 niños');
+  });
+
   it('keeps the author alone without a count', () => {
     expect(factsAuthorLine('Lo agendaste vos', null)).toBe('Lo agendaste vos');
   });

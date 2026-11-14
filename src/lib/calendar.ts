@@ -1,5 +1,6 @@
 import { MONTHS, formatTime, fromIsoDate, toIsoDate } from './dates';
 import { eventAudienceLabel } from './family-today';
+import type { OutingAnswerCounts } from './outing-form';
 import type { ShiftName } from './shift';
 import { uploaderLabel } from './story';
 
@@ -25,6 +26,7 @@ export interface Event {
   time_start?: string;
   time_end?: string;
   place?: string;
+  transport?: string;
   description?: string;
   image_url?: string;
   audience: string;
@@ -36,6 +38,7 @@ export interface Event {
   has_ended?: boolean;
   reminder_at?: string;
   changed_previous_time?: string;
+  permission_counts?: OutingAnswerCounts;
 }
 
 export interface EventRow {
@@ -46,6 +49,7 @@ export interface EventRow {
   ends_at: string;
   all_day: boolean | null;
   location: string | null;
+  transport: string | null;
   description: string | null;
   remind_day_before: boolean | null;
   changed_at: string | null;
@@ -61,6 +65,7 @@ export interface EventExtras {
   imageUrl: string | null;
   authorLine: string | null;
   authorLabel?: string | null;
+  permissionCounts?: OutingAnswerCounts | null;
 }
 
 export interface EventAuthor {
@@ -100,7 +105,7 @@ function recentPreviousTime(row: EventRow, now: Date): string | undefined {
   return isRecent ? formatTime(new Date(previousStart)) : undefined;
 }
 
-export function eventFromRow(row: EventRow, { imageUrl, authorLine, authorLabel = null }: EventExtras, now: Date): Event {
+export function eventFromRow(row: EventRow, { imageUrl, authorLine, authorLabel = null, permissionCounts = null }: EventExtras, now: Date): Event {
   const startsAt = new Date(row.starts_at);
   const isAllDay = row.all_day === true;
   return {
@@ -111,6 +116,7 @@ export function eventFromRow(row: EventRow, { imageUrl, authorLine, authorLabel 
     time_start: isAllDay ? undefined : formatTime(startsAt),
     time_end: isAllDay ? undefined : formatTime(new Date(row.ends_at)),
     place: row.location ?? undefined,
+    transport: row.transport ?? undefined,
     description: row.description ?? undefined,
     image_url: imageUrl ?? undefined,
     audience: eventAudienceLabel(row.rooms?.name ?? null, row.shifts?.name ?? null),
@@ -122,6 +128,7 @@ export function eventFromRow(row: EventRow, { imageUrl, authorLine, authorLabel 
     has_ended: new Date(row.ends_at) <= now,
     reminder_at: reminderAt(startsAt, row.remind_day_before, now),
     changed_previous_time: recentPreviousTime(row, now),
+    permission_counts: permissionCounts ?? undefined,
   };
 }
 

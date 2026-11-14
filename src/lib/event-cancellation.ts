@@ -1,4 +1,5 @@
 import type { Event } from './calendar';
+import { childrenLabel } from './outing-tally';
 import type { Role } from './role';
 
 export type EventStaffAction = 'delete' | 'askDirection' | 'none';
@@ -52,7 +53,9 @@ export function deletedEventToast(hasEnded: boolean, reach: EventReach | null): 
   return `${DELETED} Les avisamos a ${familiesLabel(reach.familyCount)}${teachers}.`;
 }
 
-export function factsAuthorLine(authorLine: string | undefined, familyCount: number | null): string | undefined {
-  const parts = [authorLine, familyCount === null ? undefined : familiesLabel(familyCount)].filter(Boolean);
+/** An outing asks permission per child, so its audience is counted in children (T10 mockup). */
+export function factsAuthorLine(authorLine: string | undefined, familyCount: number | null, isOuting = false): string | undefined {
+  const countLabel = isOuting ? childrenLabel : familiesLabel;
+  const parts = [authorLine, familyCount === null ? undefined : countLabel(familyCount)].filter(Boolean);
   return parts.length > 0 ? parts.join(SEPARATOR) : undefined;
 }

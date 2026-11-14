@@ -1,10 +1,13 @@
 import { SIGNED_URL_EXPIRY_SECONDS } from '@/constants/cache';
+import { OUTING_EVENT_TYPE } from '@/constants/outing';
 import { eventAuthorLabel, eventAuthorLine, eventFromRow, monthBounds, type Event, type EventRow } from '@/lib/calendar';
 import type { EventReach } from '@/lib/event-cancellation';
 import type { EventChange, EventWriteRow, StoredEventForm } from '@/lib/event-form';
+import { outingAnswerCounts, type OutingAnswerCounts } from '@/lib/outing-form';
 import { uploaderLabel } from '@/lib/story';
 
 import { fetchRoomRoster } from './family-room';
+import { DEFAULT_PERMISSION_VERSION, fetchOutingAnswers } from './outing-permission';
 import { signedUrl, supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -12,6 +15,7 @@ export type { Event } from '@/lib/calendar';
 
 interface StoredEventRow extends EventRow {
   image_path: string | null;
+  permission_version: number | null;
 }
 
 /** Staff rows name the author ("Vos · Sala 2 · Matutino"); family rows do not. */
@@ -28,7 +32,7 @@ interface AuthorRow {
 
 export const EVENT_IMAGES_BUCKET = 'event-images';
 const EVENT_COLUMNS =
-  'id, title, event_type, starts_at, ends_at, all_day, location, description, image_path, created_by, room_id, shift_id, remind_day_before, changed_at, previous_values, rooms(name), shifts(name)';
+  'id, title, event_type, starts_at, ends_at, all_day, location, transport, permission_version, description, image_path, created_by, room_id, shift_id, remind_day_before, changed_at, previous_values, rooms(name), shifts(name)';
 const UPCOMING_EVENTS_LIMIT = 30;
 
 async function signedImageUrls(paths: string[]): Promise<Map<string, string>> {
@@ -49,10 +53,26 @@ async function fetchAuthorLabels(rows: StoredEventRow[], viewer: EventViewer): P
   return labels;
 }
 
+/** Staff see how many children each outing's permission has; RLS returns a teacher only the children she teaches. */
+async function fetchPermissionCounts(rows: StoredEventRow[], viewer: EventViewer): Promise<Map<string, OutingAnswerCounts>> {
+  const outings = viewer.isStaff ? rows.filter((row) => row.event_type === OUTING_EVENT_TYPE) : [];
+  const answers = await fetchOutingAnswers(outings.map((outing) => outing.id));
+  const counts = new Map<string, OutingAnswerCounts>();
+  for (const outing of outings) {
+    const outingCounts = outingAnswerCounts(
+      answers.filter((answer) => answer.event_id === outing.id),
+      outing.permission_version ?? DEFAULT_PERMISSION_VERSION,
+    );
+    if (outingCounts.childCount > 0) counts.set(outing.id, outingCounts);
+  }
+  return counts;
+}
+
 async function withImagesAndAuthors(rows: StoredEventRow[], viewer: EventViewer, now: Date): Promise<Event[]> {
-  const [imageUrls, authorLabels] = await Promise.all([
+  const [imageUrls, authorLabels, permissionCounts] = await Promise.all([
     signedImageUrls(rows.flatMap((row) => (row.image_path ? [row.image_path] : []))),
     fetchAuthorLabels(rows, viewer),
+    fetchPermissionCounts(rows, viewer),
   ]);
   return rows.map((row) =>
     eventFromRow(
@@ -61,6 +81,7 @@ async function withImagesAndAuthors(rows: StoredEventRow[], viewer: EventViewer,
         imageUrl: row.image_path ? (imageUrls.get(row.image_path) ?? null) : null,
         authorLine: null,
         authorLabel: row.created_by ? (authorLabels.get(row.created_by) ?? null) : null,
+        permissionCounts: permissionCounts.get(row.id) ?? null,
       },
       now,
     ),
@@ -100,12 +121,16 @@ async function fetchAuthorLine(createdBy: string | null, userId: string): Promis
 }
 
 /** Null when the event does not read: deleted, or not sent to this user. */
-export async function fetchEvent(eventId: string, userId: string, now: Date): Promise<Event | null> {
+export async function fetchEvent(eventId: string, viewer: EventViewer, now: Date): Promise<Event | null> {
   const rows = throwOnError<StoredEventRow[]>(await supabase.from('events').select(EVENT_COLUMNS).eq('id', eventId).limit(1));
   const row = rows[0];
   if (!row) return null;
-  const [imageUrl, authorLine] = await Promise.all([signedUrl(row.image_path, EVENT_IMAGES_BUCKET), fetchAuthorLine(row.created_by, userId)]);
-  return eventFromRow(row, { imageUrl, authorLine }, now);
+  const [imageUrl, authorLine, permissionCounts] = await Promise.all([
+    signedUrl(row.image_path, EVENT_IMAGES_BUCKET),
+    fetchAuthorLine(row.created_by, viewer.userId),
+    fetchPermissionCounts([row], viewer),
+  ]);
+  return eventFromRow(row, { imageUrl, authorLine, permissionCounts: permissionCounts.get(row.id) ?? null }, now);
 }
 
 export async function cancelEvent(eventId: string, reason: string): Promise<void> {

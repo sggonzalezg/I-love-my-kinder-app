@@ -142,7 +142,13 @@ describe('outingAnswerCounts', () => {
       answer('lucas', 'pending', 1),
     ];
 
-    expect(outingAnswerCounts(rows, 2)).toEqual({ authorizedCount: 1, childCount: 3 });
+    expect(outingAnswerCounts(rows, 2)).toEqual({ authorizedCount: 1, declinedCount: 0, pendingCount: 2, childCount: 3 });
+  });
+
+  it('counts the children who said no apart from those who did not answer', () => {
+    const rows = [answer('mateo', 'pending', 1), answer('mateo', 'declined', 1), answer('sofia', 'pending', 1)];
+
+    expect(outingAnswerCounts(rows, 1)).toEqual({ authorizedCount: 0, declinedCount: 1, pendingCount: 1, childCount: 2 });
   });
 });
 

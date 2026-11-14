@@ -53,6 +53,7 @@ function row(overrides: Partial<EventRow> = {}): EventRow {
     ends_at: new Date(2026, 9, 28, 11, 0).toISOString(),
     all_day: false,
     location: 'Huerta del jardín',
+    transport: null,
     description: 'Vamos a plantar lechugas.',
     remind_day_before: true,
     changed_at: null,
@@ -95,6 +96,13 @@ describe('eventFromRow', () => {
     expect(event.place).toBe('Huerta del jardín');
     expect(event.image_url).toBe('https://signed');
     expect(event.author_line).toBe('Lo agendó Maestra Sofía');
+  });
+
+  it('keeps how an outing goes and its permission counts', () => {
+    const permissionCounts = { authorizedCount: 18, declinedCount: 2, pendingCount: 6, childCount: 26 };
+    const event = eventFromRow(row({ event_type: 'outing', transport: 'Caminando' }), { ...NO_EXTRAS, permissionCounts }, NOW);
+    expect(event.transport).toBe('Caminando');
+    expect(event.permission_counts).toEqual(permissionCounts);
   });
 
   it('reminds the day before at 18:00', () => {

@@ -21,6 +21,7 @@ export const CALENDAR_COPY = {
   eventLoadError: 'No pudimos cargar el evento.',
   eventPassed: 'Ya pasó',
   deleteEvent: 'Borrar evento',
+  deleteOuting: 'Borrar salida',
   askDirection: 'Para cambiar algo de este evento, hablá con la dirección.',
   deleteSheetBody: 'Desaparece del calendario. No se puede deshacer.',
   pastSheetBody: 'Ya pasó: lo sacamos del calendario sin avisar a nadie.',
