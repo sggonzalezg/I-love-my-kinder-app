@@ -29,6 +29,11 @@ export interface Event {
   image_url?: string;
   audience: string;
   author_line?: string;
+  author_label?: string;
+  created_by?: string;
+  room_id?: string;
+  shift_id?: string;
+  has_ended?: boolean;
   reminder_at?: string;
   changed_previous_time?: string;
 }
@@ -47,11 +52,20 @@ export interface EventRow {
   previous_values: { starts_at?: string } | null;
   rooms: { name: string } | null;
   shifts: { name: ShiftName } | null;
+  room_id: string | null;
+  shift_id: string | null;
+  created_by: string | null;
 }
 
 export interface EventExtras {
   imageUrl: string | null;
   authorLine: string | null;
+  authorLabel?: string | null;
+}
+
+export interface EventAuthor {
+  role: string;
+  firstName: string;
 }
 
 export type MonthPeriod = 'past' | 'current' | 'future';
@@ -60,6 +74,8 @@ const REMINDER_HOUR = 18;
 const RECENT_CHANGE_DAYS = 3;
 const MILLISECONDS_PER_DAY = 24 * 60 * 60 * 1000;
 const OWN_EVENT_AUTHOR_LINE = 'Lo agendaste vos';
+const OWN_EVENT_AUTHOR_LABEL = 'Vos';
+const META_SEPARATOR = ' · ';
 
 export function eventTypeLabel(type: string): string {
   return EVENT_LABELS[type as EventType] ?? 'Otro';
@@ -84,7 +100,7 @@ function recentPreviousTime(row: EventRow, now: Date): string | undefined {
   return isRecent ? formatTime(new Date(previousStart)) : undefined;
 }
 
-export function eventFromRow(row: EventRow, { imageUrl, authorLine }: EventExtras, now: Date): Event {
+export function eventFromRow(row: EventRow, { imageUrl, authorLine, authorLabel = null }: EventExtras, now: Date): Event {
   const startsAt = new Date(row.starts_at);
   const isAllDay = row.all_day === true;
   return {
@@ -99,14 +115,28 @@ export function eventFromRow(row: EventRow, { imageUrl, authorLine }: EventExtra
     image_url: imageUrl ?? undefined,
     audience: eventAudienceLabel(row.rooms?.name ?? null, row.shifts?.name ?? null),
     author_line: authorLine ?? undefined,
+    author_label: authorLabel ?? undefined,
+    created_by: row.created_by ?? undefined,
+    room_id: row.room_id ?? undefined,
+    shift_id: row.shift_id ?? undefined,
+    has_ended: new Date(row.ends_at) <= now,
     reminder_at: reminderAt(startsAt, row.remind_day_before, now),
     changed_previous_time: recentPreviousTime(row, now),
   };
 }
 
-export function eventAuthorLine(isOwnEvent: boolean, author: { role: string; firstName: string } | null): string | null {
+export function eventAuthorLine(isOwnEvent: boolean, author: EventAuthor | null): string | null {
   if (isOwnEvent) return OWN_EVENT_AUTHOR_LINE;
   return author ? `Lo agendó ${uploaderLabel(author)}` : null;
+}
+
+export function eventAuthorLabel(isOwnEvent: boolean, author: EventAuthor | null): string | null {
+  if (isOwnEvent) return OWN_EVENT_AUTHOR_LABEL;
+  return author ? uploaderLabel(author) : null;
+}
+
+export function eventRowMeta(event: Pick<Event, 'author_label' | 'audience'>): string {
+  return event.author_label ? [event.author_label, event.audience].join(META_SEPARATOR) : event.audience;
 }
 
 export function markedDays(events: Event[], year: number, month: number): { withEvents: Set<number>; noClasses: Set<number> } {

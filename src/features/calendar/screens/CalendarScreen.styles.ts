@@ -7,6 +7,7 @@ export const SKELETON_ROW_HEIGHT = 76;
 export const SKELETON_ROWS = 3;
 
 export const styles = StyleSheet.create({
+  root: { flex: 1 },
   monthHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: space.s3 },
   listHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginTop: space.s6, marginBottom: space.s3 },
   list: { gap: space.s2 },

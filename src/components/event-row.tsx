@@ -4,11 +4,13 @@ import type { Event } from '@/data/events';
 import { Chip } from '@/components/chip';
 import { EventTypeChip } from '@/components/event-type-chip';
 import { CALENDAR_PERMISSION_LABELS, PERMISSION_CHIP_VARIANT } from '@/constants/outing';
+import { eventRowMeta } from '@/lib/calendar';
 import type { PermissionStatus } from '@/lib/outing';
 import { Text } from '@/components/text';
-import { space, radius } from '@/theme/tokens';
-import { useColors } from '@/theme/use-theme';
 import { formatShortDate, fromIsoDate } from '@/lib/dates';
+import { listStagger, listStaggeredItems } from '@/theme/motion';
+
+import { ENTRANCE_MS, REDUCED_ENTRANCE_MS, styles, useEventRowStyles } from './event-row.styles';
 
 interface EventRowProps {
   event: Event;
@@ -18,71 +20,42 @@ interface EventRowProps {
 }
 
 export function EventRow({ event, onPress, index = 0, permissionStatus }: EventRowProps) {
-  const c = useColors();
+  const themed = useEventRowStyles();
   const reduced = useReducedMotion();
 
-  const eventDate = fromIsoDate(event.date);
-  const dateStr = formatShortDate(eventDate);
-  const timeStr = event.time_start
-    ? `${event.time_start}${event.time_end ? ` a ${event.time_end}` : ''}`
-    : 'Todo el día';
-
-  // Cap stagger at 6 items as per design spec
-  const delay = index < 6 ? index * 40 : 0;
+  const dateStr = formatShortDate(fromIsoDate(event.date));
+  const timeStr = event.time_start ? `${event.time_start}${event.time_end ? ` a ${event.time_end}` : ''}` : 'Todo el día';
+  const delay = index < listStaggeredItems ? index * listStagger : 0;
 
   return (
     <Animated.View
       entering={
         reduced
-          ? FadeInDown.duration(120).reduceMotion(ReduceMotion.System)
-          : FadeInDown.delay(delay).duration(300).damping(1).mass(1)
+          ? FadeInDown.duration(REDUCED_ENTRANCE_MS).reduceMotion(ReduceMotion.System)
+          : FadeInDown.delay(delay).duration(ENTRANCE_MS).damping(1).mass(1)
       }
     >
-      <TouchableOpacity
-        onPress={() => onPress?.(event)}
-        style={{
-          flexDirection: 'row',
-          gap: space.s4,
-          padding: space.s4,
-          backgroundColor: c.surface,
-          borderRadius: radius.md,
-          marginBottom: space.s2,
-          alignItems: 'center',
-        }}
-      >
-        {/* Thumbnail if available */}
-        {event.image_url && (
-          <Image
-            source={{ uri: event.image_url }}
-            style={{
-              width: 48,
-              height: 48,
-              borderRadius: radius.md,
-            }}
-          />
-        )}
+      <TouchableOpacity onPress={() => onPress?.(event)} style={[styles.row, themed.row]}>
+        {event.image_url && <Image source={{ uri: event.image_url }} style={styles.thumbnail} />}
 
-        {/* Event details */}
-        <View style={{ flex: 1 }}>
-          <View style={{ flexDirection: 'row', gap: space.s1, marginBottom: space.s1 }}>
+        <View style={styles.details}>
+          <View style={styles.chips}>
             <EventTypeChip type={event.type} />
             {permissionStatus && (
               <Chip label={CALENDAR_PERMISSION_LABELS[permissionStatus]} variant={PERMISSION_CHIP_VARIANT[permissionStatus]} />
             )}
           </View>
 
-          <Text style={{ color: c.ink, marginBottom: space.s1 }} numberOfLines={1}>
+          <Text style={styles.title} numberOfLines={1}>
             {event.title}
           </Text>
 
-          <View style={{ flexDirection: 'row', gap: space.s1 }}>
-            <Text variant="small" style={{ color: c.muted }}>
-              {dateStr} · {timeStr}
-            </Text>
-          </View>
+          <Text variant="small" tone="muted">
+            {dateStr} · {timeStr}
+          </Text>
 
-          <Text variant="small" style={{ color: c.muted }}>
-            {event.audience}
+          <Text variant="small" tone="muted">
+            {eventRowMeta(event)}
           </Text>
         </View>
       </TouchableOpacity>

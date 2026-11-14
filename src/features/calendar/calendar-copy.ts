@@ -18,7 +18,22 @@ export const CALENDAR_COPY = {
   eventNotFound: 'No encontramos este evento.',
   eventLoadError: 'No pudimos cargar el evento.',
   eventPassed: 'Ya pasó',
+  deleteEvent: 'Borrar evento',
+  askDirection: 'Para cambiar algo de este evento, hablá con la dirección.',
+  deleteSheetBody: 'Desaparece del calendario. No se puede deshacer.',
+  pastSheetBody: 'Ya pasó: lo sacamos del calendario sin avisar a nadie.',
+  notifiedTitle: 'Les avisamos que se suspendió',
+  reasonLabel: 'Motivo (opcional)',
+  reasonHelp: 'Va en el aviso. Sin datos de salud ni nombres de niños.',
+  deleteAndNotify: 'Borrar y avisar',
+  deletePast: 'Borrar',
+  cancel: 'Cancelar',
+  deleteFailed: 'No pudimos borrar el evento. Probá de nuevo.',
 } as const;
+
+export function deleteSheetTitle(eventTitle: string): string {
+  return `¿Borrar "${eventTitle}"?`;
+}
 
 export function pastListTitle(monthName: string): string {
   return `Lo que pasó en ${monthName}`;

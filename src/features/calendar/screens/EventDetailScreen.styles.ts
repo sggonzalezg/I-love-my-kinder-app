@@ -15,6 +15,7 @@ export const styles = StyleSheet.create({
   reminder: { flexDirection: 'row', alignItems: 'center', gap: space.s2, padding: space.s3, borderRadius: radius.md, marginBottom: space.s6 },
   reminderText: { flex: 1 },
   feedback: { gap: space.s3, alignItems: 'flex-start' },
+  staffAction: { marginBottom: space.s6 },
 });
 
 export const useEventDetailScreenStyles = createThemedStyles((colors) => ({

@@ -1,6 +1,6 @@
 import { Image } from 'expo-image';
 import { useLocalSearchParams } from 'expo-router';
-import { Bell, Clock } from 'lucide-react-native';
+import { Bell, Clock, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Banner } from '@/components/banner';
@@ -13,9 +13,12 @@ import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import { CALENDAR_COPY, changedTimeLine, reminderLine } from '@/features/calendar/calendar-copy';
+import { DeleteEventSheet } from '@/features/calendar/components/DeleteEventSheet/DeleteEventSheet';
+import { useEventDeletion } from '@/features/calendar/use-event-deletion';
 import { useEventDetail } from '@/features/calendar/use-event-detail';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 import { toIsoDate } from '@/lib/dates';
+import { factsAuthorLine, notifiedLines } from '@/lib/event-cancellation';
 import { useColors } from '@/theme/use-theme';
 
 import { REMINDER_ICON_SIZE, SKELETON_TITLE_HEIGHT, styles, useEventDetailScreenStyles } from './EventDetailScreen.styles';
@@ -25,6 +28,7 @@ export function EventDetailScreen() {
   const colors = useColors();
   const themed = useEventDetailScreenStyles();
   const { event, loading, failed, reload } = useEventDetail(id);
+  const deletion = useEventDeletion(event);
   const pendingRequest = useFamilyOutingRequests().find((request) => request.eventId === id && request.status === 'pending');
   const header = <TopBar backLabel={CALENDAR_COPY.backToCalendar} />;
 
@@ -71,7 +75,7 @@ export function EventDetailScreen() {
         </View>
       ) : null}
 
-      <FactsCard event={event} />
+      <FactsCard event={{ ...event, author_line: factsAuthorLine(event.author_line, deletion.reach?.familyCount ?? null) }} />
 
       {isPast ? <Banner kind="info" text={CALENDAR_COPY.eventPassed} /> : null}
 
@@ -85,6 +89,30 @@ export function EventDetailScreen() {
           </Text>
         </View>
       ) : null}
+
+      {deletion.staffAction === 'delete' ? (
+        <View style={styles.staffAction}>
+          <Button label={CALENDAR_COPY.deleteEvent} variant="danger-soft" icon={Trash2} block onPress={deletion.openSheet} />
+        </View>
+      ) : null}
+      {deletion.staffAction === 'askDirection' ? (
+        <Text variant="caption" tone="muted" style={styles.staffAction}>
+          {CALENDAR_COPY.askDirection}
+        </Text>
+      ) : null}
+
+      <DeleteEventSheet
+        visible={deletion.state.sheetOpen}
+        eventTitle={event.title}
+        hasEnded={event.has_ended === true}
+        notifiedLines={notifiedLines(event, deletion.reach)}
+        reason={deletion.state.reason}
+        deleting={deletion.state.deleting}
+        failed={deletion.state.failed}
+        onReasonChange={deletion.changeReason}
+        onConfirm={deletion.confirm}
+        onClose={deletion.closeSheet}
+      />
     </Screen>
   );
 }

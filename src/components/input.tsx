@@ -13,6 +13,8 @@ interface InputProps {
   textContentType?: 'oneTimeCode' | 'telephoneNumber' | 'emailAddress' | 'password';
   keyboardType?: 'default' | 'numeric' | 'decimal-pad' | 'phone-pad' | 'email-address' | 'url' | 'ascii-capable';
   secureTextEntry?: boolean;
+  maxLength?: number;
+  accessibilityLabel?: string;
   style?: ViewStyle;
 }
 
@@ -26,6 +28,8 @@ export default function Input({
   textContentType,
   keyboardType = 'default',
   secureTextEntry,
+  maxLength,
+  accessibilityLabel,
   style,
 }: InputProps) {
   const c = useColors();
@@ -42,6 +46,8 @@ export default function Input({
         textContentType={textContentType}
         keyboardType={keyboardType}
         secureTextEntry={secureTextEntry}
+        maxLength={maxLength}
+        accessibilityLabel={accessibilityLabel}
         placeholderTextColor={c.muted}
         style={[
           {
