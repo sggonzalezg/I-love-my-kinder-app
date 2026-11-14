@@ -1,8 +1,6 @@
 export const CHILD_FILE_COPY = {
   back: 'Volver a la sala',
   allergiesTitle: 'Alergias',
-  noHealthAuthorizationTitle: 'Sin autorización para datos de salud',
-  noHealthAuthorizationHint: 'La familia no autorizó compartir alergias. Consultá con dirección.',
   noAllergies: 'Sin alergias registradas',
   emergencyContacts: 'Contactos de emergencia',
   pickupPeople: 'Personas autorizadas a retirar',

@@ -75,7 +75,7 @@ export function ChildFileScreen({ childId }: { childId: string }) {
           photoPath={file.photoPath}
           subtitle={childFileSubtitle(file.groupLabels, file.birthDate, new Date())}
         />
-        <AllergyCard state={allergyState(file.allergies, file.healthGranted)} allergies={file.allergies} />
+        <AllergyCard state={allergyState(file.allergies)} allergies={file.allergies} />
       </Animated.View>
       {file.emergencyContacts.length ? (
         <Animated.View entering={listEntering(1, reduced)}>

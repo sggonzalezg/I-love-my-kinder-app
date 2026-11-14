@@ -1,4 +1,4 @@
-import { CircleAlert, Info, Lock, type LucideIcon } from 'lucide-react-native';
+import { CircleAlert, Info, type LucideIcon } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Text } from '@/components/text';
@@ -12,7 +12,6 @@ import { ALLERGY_CARD_ICON_SIZE, styles } from './AllergyCard.styles';
 
 const CARD_LOOKS: Record<AllergyState, { icon: LucideIcon; iconColor: ColorName; background: ColorName; title: string }> = {
   listed: { icon: CircleAlert, iconColor: 'red', background: 'red50', title: CHILD_FILE_COPY.allergiesTitle },
-  notAuthorized: { icon: Lock, iconColor: 'muted', background: 'raised', title: CHILD_FILE_COPY.noHealthAuthorizationTitle },
   none: { icon: Info, iconColor: 'muted', background: 'raised', title: CHILD_FILE_COPY.noAllergies },
 };
 
@@ -32,11 +31,6 @@ export function AllergyCard({ state, allergies }: AllergyCardProps) {
       <View style={styles.text}>
         <Text variant="bodyStrong">{look.title}</Text>
         {state === 'listed' ? <Text>{allergies}</Text> : null}
-        {state === 'notAuthorized' ? (
-          <Text variant="small" tone="muted">
-            {CHILD_FILE_COPY.noHealthAuthorizationHint}
-          </Text>
-        ) : null}
       </View>
     </View>
   );

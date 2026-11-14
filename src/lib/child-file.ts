@@ -5,11 +5,10 @@ import { fromIsoDate } from './dates';
 const MONTHS_PER_YEAR = 12;
 const THOUSANDS_GROUP = /\B(?=(\d{3})+(?!\d))/g;
 
-export type AllergyState = 'notAuthorized' | 'none' | 'listed';
+export type AllergyState = 'none' | 'listed';
 
-/** Allergies are health data: shown only with the child's `auth_health` (design T3, legal Ley 18.331 art. 18). */
-export function allergyState(allergies: string | null, healthGranted: boolean): AllergyState {
-  if (!healthGranted) return 'notAuthorized';
+// Seba (2026-11-14, change 961bce6a): staff always see allergies, with or without the family's health authorization.
+export function allergyState(allergies: string | null): AllergyState {
   return allergies?.trim() ? 'listed' : 'none';
 }
 

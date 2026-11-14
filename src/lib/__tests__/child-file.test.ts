@@ -3,17 +3,13 @@ import { ageLabel, allergyState, childFileSubtitle, detailLine, formatNationalId
 const TODAY = new Date(2026, 10, 12);
 
 describe('allergyState', () => {
-  it('hides the allergies when the family did not authorize health data', () => {
-    expect(allergyState('Proteína de leche de vaca', false)).toBe('notAuthorized');
+  it('says there are none when nothing is recorded', () => {
+    expect(allergyState(null)).toBe('none');
+    expect(allergyState('   ')).toBe('none');
   });
 
-  it('says there are none when authorized and nothing is recorded', () => {
-    expect(allergyState(null, true)).toBe('none');
-    expect(allergyState('   ', true)).toBe('none');
-  });
-
-  it('lists the allergies when authorized and recorded', () => {
-    expect(allergyState('Maní', true)).toBe('listed');
+  it('lists the recorded allergies', () => {
+    expect(allergyState('Maní')).toBe('listed');
   });
 });
 
