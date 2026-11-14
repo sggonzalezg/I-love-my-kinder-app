@@ -27,7 +27,7 @@ export function NoticeDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const themed = useNoticeDetailScreenStyles();
   const [state, dispatch] = useReducer(noticeDetailReducer, INITIAL_NOTICE_DETAIL_STATE);
-  const { notice, userId, isFamily, senderLabels, audienceChildren, imageUrl, imageUrlFailed, loading, failed, reload } = useNoticeDetail(id, state.attempt);
+  const { notice, userId, isFamily, audienceChildren, imageUrl, imageUrlFailed, loading, failed, reload } = useNoticeDetail(id, state.attempt);
   const header = <TopBar backLabel={NOTICES_COPY.backToNotices} />;
 
   if (loading) {
@@ -52,7 +52,7 @@ export function NoticeDetailScreen() {
     );
   }
 
-  const sender = noticeSender(notice, userId, senderLabels);
+  const sender = noticeSender(notice, userId);
   const paragraphs = bodyParagraphs(notice.body);
 
   return (

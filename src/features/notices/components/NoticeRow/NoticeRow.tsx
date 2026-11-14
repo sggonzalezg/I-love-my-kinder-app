@@ -16,17 +16,16 @@ import { PREVIEW_LINES, styles, useNoticeRowStyles } from './NoticeRow.styles';
 interface NoticeRowProps {
   notice: Notice;
   userId: string | null;
-  senderLabels: ReadonlyMap<string, string>;
   now: Date;
   onPress: () => void;
 }
 
-export function NoticeRow({ notice, userId, senderLabels, now, onPress }: NoticeRowProps) {
+export function NoticeRow({ notice, userId, now, onPress }: NoticeRowProps) {
   const themed = useNoticeRowStyles();
   const backgroundStyles = useBackgroundColorStyles();
   const thumbnail = useAsync(() => fetchNoticeImageUrl(notice.imagePath!), notice.imagePath);
 
-  const sender = noticeSender(notice, userId, senderLabels);
+  const sender = noticeSender(notice, userId);
   const time = noticeTimeLabel(new Date(notice.createdAt), now);
   const audience = noticeAudience(notice);
   const preview = notice.cancelledEvent ? cancelledPreview(notice.cancelledEvent) : notice.body;

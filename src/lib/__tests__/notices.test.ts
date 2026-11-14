@@ -32,6 +32,7 @@ function notice(overrides: Partial<Notice> = {}): Notice {
     imagePath: null,
     createdAt: new Date(2026, 9, 24, 9, 12).toISOString(),
     createdBy: 'teacher-user',
+    senderLabel: 'Maestra Sofía',
     roomId: 'room-2',
     roomName: 'Sala 2',
     shift: 'morning',
@@ -79,22 +80,20 @@ describe('noticeSender', () => {
     expect(noticeSender(notice({ createdBy: 'me' }), 'me')).toBe('Vos');
   });
 
-  it('says Dirección for a nursery-wide notice', () => {
-    expect(noticeSender(notice({ roomId: null, roomName: null, shift: null }), 'me')).toBe('Dirección');
+  it('shows the stored sender label', () => {
+    expect(noticeSender(notice({ senderLabel: 'Maestra Sofía' }), 'me')).toBe('Maestra Sofía');
   });
 
-  it('says La maestra for a room notice', () => {
-    expect(noticeSender(notice(), 'me')).toBe('La maestra');
+  it('still says Vos when the user own notice has a label', () => {
+    expect(noticeSender(notice({ createdBy: 'me', senderLabel: 'Dirección' }), 'me')).toBe('Vos');
   });
 
-  it('uses the known name of the sender for the direction', () => {
-    const senderLabels = new Map([['teacher-user', 'Maestra Sofía']]);
-    expect(noticeSender(notice(), 'me', senderLabels)).toBe('Maestra Sofía');
+  it('falls back to Dirección for a nursery-wide notice without a label', () => {
+    expect(noticeSender(notice({ senderLabel: null, roomId: null, roomName: null, shift: null }), 'me')).toBe('Dirección');
   });
 
-  it('still says Vos when the user is among the known senders', () => {
-    const senderLabels = new Map([['me', 'Dirección']]);
-    expect(noticeSender(notice({ createdBy: 'me' }), 'me', senderLabels)).toBe('Vos');
+  it('falls back to La maestra for a room notice without a label', () => {
+    expect(noticeSender(notice({ senderLabel: null }), 'me')).toBe('La maestra');
   });
 });
 
