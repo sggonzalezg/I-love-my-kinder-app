@@ -2,7 +2,7 @@ import { Cake } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Text } from '@/components/text';
-import { TEACHER_ROOM_COPY } from '@/features/teacher-room/teacher-room-copy';
+import { GROUP_ROSTER_COPY } from '@/components/GroupRoster/group-roster-copy';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { useColors } from '@/theme/use-theme';
 
@@ -16,7 +16,7 @@ export function NoBirthdaysCard({ nextLine }: { nextLine: string | null }) {
     <View style={[styles.card, backgroundStyles.surface]} accessible>
       <Cake size={CAKE_ICON_SIZE} color={colors.ink} strokeWidth={1.8} />
       <View style={styles.text}>
-        <Text variant="bodyStrong">{TEACHER_ROOM_COPY.noBirthdays}</Text>
+        <Text variant="bodyStrong">{GROUP_ROSTER_COPY.noBirthdays}</Text>
         {nextLine ? (
           <Text variant="small" tone="muted">
             {nextLine}

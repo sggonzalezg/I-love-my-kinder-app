@@ -12,6 +12,10 @@ export function noticeHref(noticeId: string): Href {
 export function childFileHref(childId: string): Href {
   return `/child/${encodeURIComponent(childId)}` as Href;
 }
+export function roomGroupHref(roomId: string, shiftId: string): Href {
+  return `/room-group/${encodeURIComponent(roomId)}/${encodeURIComponent(shiftId)}` as Href;
+}
+
 export const CALENDAR_TAB_ROUTE = '/calendar' as Href;
 export const GALLERY_TAB_ROUTE = '/gallery' as Href;
 

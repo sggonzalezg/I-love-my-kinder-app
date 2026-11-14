@@ -4,7 +4,7 @@ import { Pressable, View } from 'react-native';
 import { Avatar } from '@/components/avatar';
 import { Text } from '@/components/text';
 import { TEACHER_DAY_COPY } from '@/features/teacher-day/teacher-day-copy';
-import { TEACHER_ROOM_COPY } from '@/features/teacher-room/teacher-room-copy';
+import { GROUP_ROSTER_COPY } from '@/components/GroupRoster/group-roster-copy';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 import { useColors } from '@/theme/use-theme';
 
@@ -26,7 +26,7 @@ export function RoomChildRow({ name, initials, photoPath, hasAllergy, onPress }:
     <Pressable
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={TEACHER_ROOM_COPY.childRowLabel(name, hasAllergy)}
+      accessibilityLabel={GROUP_ROSTER_COPY.childRowLabel(name, hasAllergy)}
       style={({ pressed }) => [styles.row, pressed ? backgroundStyles.raised : backgroundStyles.surface]}>
       <Avatar photoPath={photoPath} initials={initials} />
       <View style={styles.text}>
@@ -42,7 +42,7 @@ export function RoomChildRow({ name, initials, photoPath, hasAllergy, onPress }:
           </View>
         ) : (
           <Text variant="small" tone="muted">
-            {TEACHER_ROOM_COPY.seeFile}
+            {GROUP_ROSTER_COPY.seeFile}
           </Text>
         )}
       </View>
