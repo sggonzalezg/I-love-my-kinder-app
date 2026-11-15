@@ -1,6 +1,8 @@
 // The backend names shifts 'morning' / 'afternoon'; end-user copy says Matutino / Vespertino.
 export type ShiftName = 'morning' | 'afternoon';
 
+export const SHIFT_NAMES: readonly ShiftName[] = ['morning', 'afternoon'];
+
 export function shiftLabel(shift: ShiftName): string {
   return shift === 'morning' ? 'Matutino' : 'Vespertino';
 }

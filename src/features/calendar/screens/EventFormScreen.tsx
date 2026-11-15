@@ -16,10 +16,10 @@ import { DateSheet } from '@/features/calendar/components/DateSheet/DateSheet';
 import { DirectorAudienceFields } from '@/features/calendar/components/DirectorAudienceFields/DirectorAudienceFields';
 import { DiscardSheet } from '@/features/calendar/components/DiscardSheet/DiscardSheet';
 import { EventImageField } from '@/features/calendar/components/EventImageField/EventImageField';
-import { EventTextField } from '@/features/calendar/components/EventTextField/EventTextField';
+import { FormTextField } from '@/components/FormTextField/FormTextField';
 import { IconChips } from '@/features/calendar/components/IconChips/IconChips';
 import { ResignSheet } from '@/features/calendar/components/ResignSheet/ResignSheet';
-import { FormActionBar } from '@/features/calendar/components/FormActionBar/FormActionBar';
+import { FormActionBar } from '@/components/FormActionBar/FormActionBar';
 import { FormRow } from '@/features/calendar/components/FormRow/FormRow';
 import { FormRows } from '@/features/calendar/components/FormRows/FormRows';
 import { EVENT_FORM_COPY, EVENT_IMAGE_SOURCE_COPY, timeSheetDoneLabel } from '@/features/calendar/event-form-copy';
@@ -120,7 +120,7 @@ export function EventFormScreen() {
 
             {outing ? <Banner kind="info" icon={ClipboardCheck} text={outingBannerText(form.familyCount)} /> : null}
 
-            <EventTextField
+            <FormTextField
               label={EVENT_FORM_COPY.title}
               value={values.title}
               editable={!state.saving}
@@ -182,7 +182,7 @@ export function EventFormScreen() {
               )}
             </View>
 
-            <EventTextField
+            <FormTextField
               label={outing ? EVENT_FORM_COPY.outingPlace : EVENT_FORM_COPY.place}
               labelAside={outing ? undefined : EVENT_FORM_COPY.optional}
               help={outing ? EVENT_FORM_COPY.outingPlaceHelp : undefined}
@@ -201,7 +201,7 @@ export function EventFormScreen() {
                   onChange={(transportChoice) => change({ transportChoice })}
                 />
                 {values.transportChoice === 'other' ? (
-                  <EventTextField
+                  <FormTextField
                     label={EVENT_FORM_COPY.otherTransport}
                     value={values.otherTransport}
                     editable={!state.saving}
@@ -211,7 +211,7 @@ export function EventFormScreen() {
                 ) : null}
               </View>
             ) : null}
-            <EventTextField
+            <FormTextField
               label={outing ? EVENT_FORM_COPY.outingNotes : EVENT_FORM_COPY.description}
               labelAside={EVENT_FORM_COPY.optional}
               value={values.description}

@@ -5,6 +5,8 @@ import { NURSERY_WHATSAPP_URL } from '@/constants/nursery';
 import { supabase } from '@/data/supabase';
 import { useSession } from '@/data/session';
 import { DeleteAccountEntry } from '@/features/delete-account/components/DeleteAccountEntry/DeleteAccountEntry';
+import { SettingsEntryRow } from '@/features/director-settings/components/SettingsEntryRow/SettingsEntryRow';
+import { DIRECTOR_SETTINGS_COPY } from '@/features/director-settings/director-settings-copy';
 import { ChildAuthorizationLinks } from '@/features/family/child-authorization-links';
 import { Button } from '@/components/button';
 import { Chip } from '@/components/chip';
@@ -75,6 +77,8 @@ export default function ProfileTab() {
 
       {isDirector && (
         <>
+          <SectionHeader title={DIRECTOR_SETTINGS_COPY.entrySection} />
+          <SettingsEntryRow />
           <SectionHeader title="Dirección" />
           <View style={[styles.panelCard, { backgroundColor: c.blue50 }]}>
             <Monitor size={24} color={c.blue} strokeWidth={1.8} />
