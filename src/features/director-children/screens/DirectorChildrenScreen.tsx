@@ -1,4 +1,5 @@
 import { router } from 'expo-router';
+import { Plus } from 'lucide-react-native';
 import { Fragment, type ReactNode } from 'react';
 import { View } from 'react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
@@ -10,13 +11,14 @@ import { Select } from '@/components/Select/Select';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
-import { childFileHref } from '@/constants/routes';
+import { NEW_CHILD_ROUTE, directorChildHref } from '@/constants/routes';
 import { ChildListRow } from '@/features/director-children/components/ChildListRow/ChildListRow';
 import { ChildSearchField } from '@/features/director-children/components/ChildSearchField/ChildSearchField';
 import { DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { useDirectorChildren } from '@/features/director-children/use-director-children';
 import { DIRECTOR_ROOMS_COPY } from '@/features/director-rooms/director-rooms-copy';
 import { listEntering } from '@/theme/motion';
+import { size } from '@/theme/tokens';
 
 import { SKELETON_ROW_HEIGHT, SKELETON_ROWS, styles, useChildrenListStyles } from './DirectorChildrenScreen.styles';
 
@@ -60,7 +62,7 @@ export function DirectorChildrenScreen({ partSwitch }: DirectorChildrenScreenPro
             <Fragment key={child.id}>
               {index > 0 ? <View style={[styles.separator, themed.separator]} /> : null}
               <Animated.View entering={listEntering(index, reduced)}>
-                <ChildListRow child={child} onPress={() => router.push(childFileHref(child.id))} />
+                <ChildListRow child={child} onPress={() => router.push(directorChildHref(child.id))} />
               </Animated.View>
             </Fragment>
           ))}
@@ -69,8 +71,10 @@ export function DirectorChildrenScreen({ partSwitch }: DirectorChildrenScreenPro
     );
   }
 
+  const newChildButton = <Button label={DIRECTOR_CHILDREN_COPY.newChild} icon={Plus} height={size.touch} onPress={() => router.push(NEW_CHILD_ROUTE)} />;
+
   return (
-    <Screen header={<TopBar title={DIRECTOR_ROOMS_COPY.title} />}>
+    <Screen header={<TopBar title={DIRECTOR_ROOMS_COPY.title} right={newChildButton} />}>
       {partSwitch}
       <View style={styles.tools}>
         <ChildSearchField value={childrenList.filters.query} placeholder={DIRECTOR_CHILDREN_COPY.searchPlaceholder} onChange={childrenList.changeQuery} />

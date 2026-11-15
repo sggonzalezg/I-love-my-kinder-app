@@ -14,4 +14,5 @@ export const styles = StyleSheet.create({
 
 export const useFormTextFieldStyles = createThemedStyles((colors) => ({
   input: { backgroundColor: colors.surface, borderWidth: BORDER_WIDTH, borderColor: colors.border, color: colors.ink },
+  inputError: { borderColor: colors.red },
 }));
