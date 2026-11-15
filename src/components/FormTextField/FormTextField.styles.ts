@@ -12,6 +12,7 @@ export const styles = StyleSheet.create({
   multiline: { minHeight: MULTILINE_MIN_HEIGHT, textAlignVertical: 'top' },
 });
 
-export const useEventTextFieldStyles = createThemedStyles((colors) => ({
+export const useFormTextFieldStyles = createThemedStyles((colors) => ({
   input: { backgroundColor: colors.surface, borderWidth: BORDER_WIDTH, borderColor: colors.border, color: colors.ink },
+  inputError: { borderColor: colors.red },
 }));
