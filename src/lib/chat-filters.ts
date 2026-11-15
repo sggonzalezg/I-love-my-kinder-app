@@ -11,6 +11,7 @@ export interface ChatFilterChip {
 
 export const ALL_CHATS_FILTER: ChatThreadFilter = { kind: 'all' };
 export const ALL_CHATS_FILTER_KEY = 'all';
+export const NO_TEACHER_FILTER_KEY = 'noTeacher';
 
 const SHIFT_ORDER: ShiftName[] = ['morning', 'afternoon'];
 const ALL_LABEL = 'Todas';
@@ -26,7 +27,7 @@ export function chatFilterChips(threads: ChildGroup[]): ChatFilterChip[] {
     { key: ALL_CHATS_FILTER_KEY, label: ALL_LABEL, filter: ALL_CHATS_FILTER },
     ...rooms.map(([roomId, roomName]) => ({ key: `room-${roomId}`, label: roomName, filter: { kind: 'room', roomId } as const })),
     ...shifts.map((shift) => ({ key: `shift-${shift}`, label: shiftLabel(shift), filter: { kind: 'shift', shift } as const })),
-    { key: 'noTeacher', label: NO_TEACHER_LABEL, filter: { kind: 'noTeacher' } },
+    { key: NO_TEACHER_FILTER_KEY, label: NO_TEACHER_LABEL, filter: { kind: 'noTeacher' } },
   ];
 }
 

@@ -1,5 +1,7 @@
+import { router } from 'expo-router';
+import { MessageSquare } from 'lucide-react-native';
 import { Fragment } from 'react';
-import { View } from 'react-native';
+import { Pressable, View } from 'react-native';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
@@ -8,9 +10,13 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { chatListFilteredHref } from '@/constants/chat';
 import { GroupTeacherRow } from '@/features/director-rooms/components/GroupTeacherRow/GroupTeacherRow';
+import { GroupTeachersSheet } from '@/features/director-rooms/components/GroupTeachersSheet/GroupTeachersSheet';
 import { DIRECTOR_ROOMS_COPY } from '@/features/director-rooms/director-rooms-copy';
 import { useDirectorGroup } from '@/features/director-rooms/use-director-group';
+import { useGroupTeachersSheet } from '@/features/director-rooms/use-group-teachers-sheet';
+import { NO_TEACHER_FILTER_KEY } from '@/lib/chat-filters';
 import { noTeacherRosterLine } from '@/lib/director-rooms';
 import { groupLabel } from '@/lib/shift';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
@@ -25,6 +31,7 @@ interface DirectorGroupScreenProps {
 export function DirectorGroupScreen({ roomId, shiftId }: DirectorGroupScreenProps) {
   const backgroundStyles = useBackgroundColorStyles();
   const { data: group, loading, failed, reload } = useDirectorGroup(roomId, shiftId);
+  const teachersSheet = useGroupTeachersSheet(reload);
   const label = group ? groupLabel(group.roomName, group.shift) : undefined;
   const header = <TopBar title={label} backLabel={DIRECTOR_ROOMS_COPY.back} />;
 
@@ -52,14 +59,26 @@ export function DirectorGroupScreen({ roomId, shiftId }: DirectorGroupScreenProp
   }
 
   const { teachers, children } = group.roster;
+  const openTeachersSheet = () => teachersSheet.open({ roomId, shiftId, label });
 
   return (
     <Screen header={header}>
       {teachers.length ? (
         <View style={styles.section}>
-          <Text variant="section" accessibilityRole="header">
-            {DIRECTOR_ROOMS_COPY.teachers}
-          </Text>
+          <View style={styles.sectionHeader}>
+            <Text variant="section" accessibilityRole="header">
+              {DIRECTOR_ROOMS_COPY.teachers}
+            </Text>
+            <Pressable
+              onPress={openTeachersSheet}
+              accessibilityRole="button"
+              accessibilityHint={DIRECTOR_ROOMS_COPY.teachersSheetTitle(label)}
+              style={styles.sectionLink}>
+              <Text variant="smallStrong" tone="blue">
+                {DIRECTOR_ROOMS_COPY.changeTeachers}
+              </Text>
+            </Pressable>
+          </View>
           <View style={[styles.list, backgroundStyles.surface]}>
             {teachers.map((teacher, index) => (
               <Fragment key={teacher.id}>
@@ -70,9 +89,20 @@ export function DirectorGroupScreen({ roomId, shiftId }: DirectorGroupScreenProp
           </View>
         </View>
       ) : (
-        <Banner kind="error" text={noTeacherRosterLine(children.length)} />
+        <View style={styles.noTeacher}>
+          <Banner kind="error" text={noTeacherRosterLine(children.length)} />
+          <Button label={DIRECTOR_ROOMS_COPY.assignTeacherLong} block onPress={openTeachersSheet} />
+          <Button
+            label={DIRECTOR_ROOMS_COPY.seeConversations}
+            icon={MessageSquare}
+            variant="soft"
+            block
+            onPress={() => router.push(chatListFilteredHref(NO_TEACHER_FILTER_KEY))}
+          />
+        </View>
       )}
       <GroupRoster rosterChildren={children} groupLabel={label} childrenTitle={DIRECTOR_ROOMS_COPY.children} />
+      <GroupTeachersSheet control={teachersSheet} />
     </Screen>
   );
 }

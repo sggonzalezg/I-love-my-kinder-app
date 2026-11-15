@@ -6,6 +6,10 @@ export interface ChatListState {
 
 export const INITIAL_CHAT_LIST_STATE: ChatListState = { filterKey: ALL_CHATS_FILTER_KEY };
 
+export function chatListInitialState(filterKey: string | undefined): ChatListState {
+  return { filterKey: filterKey ?? ALL_CHATS_FILTER_KEY };
+}
+
 export const CHAT_LIST_ACTIONS = {
   FILTER_SELECTED: 'filterSelected',
 } as const;

@@ -5,12 +5,17 @@ import { View } from 'react-native';
 import { Text } from '@/components/text';
 import { roomGroupHref } from '@/constants/routes';
 import { GroupRow } from '@/features/director-rooms/components/GroupRow/GroupRow';
-import { roomTitleAge, type DirectorRoomCard } from '@/lib/director-rooms';
+import { roomTitleAge, type DirectorGroup, type DirectorRoomCard } from '@/lib/director-rooms';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
 
 import { styles } from './RoomCard.styles';
 
-export function RoomCard({ card }: { card: DirectorRoomCard }) {
+interface RoomCardProps {
+  card: DirectorRoomCard;
+  onManageTeachers: (group: DirectorGroup) => void;
+}
+
+export function RoomCard({ card, onManageTeachers }: RoomCardProps) {
   const backgroundStyles = useBackgroundColorStyles();
   const age = roomTitleAge(card.description);
 
@@ -27,7 +32,7 @@ export function RoomCard({ card }: { card: DirectorRoomCard }) {
       {card.groups.map((group, index) => (
         <Fragment key={group.shiftId}>
           {index > 0 ? <View style={[styles.separator, backgroundStyles.raised]} /> : null}
-          <GroupRow group={group} onPress={() => router.push(roomGroupHref(group.roomId, group.shiftId))} />
+          <GroupRow group={group} onPress={() => router.push(roomGroupHref(group.roomId, group.shiftId))} onManageTeachers={() => onManageTeachers(group)} />
         </Fragment>
       ))}
     </View>

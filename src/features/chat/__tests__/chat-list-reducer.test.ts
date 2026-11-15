@@ -1,8 +1,16 @@
-import { CHAT_LIST_ACTIONS, INITIAL_CHAT_LIST_STATE, chatListReducer } from '../chat-list-reducer';
+import { CHAT_LIST_ACTIONS, INITIAL_CHAT_LIST_STATE, chatListInitialState, chatListReducer } from '../chat-list-reducer';
 
 describe('chatListReducer', () => {
   it('starts on every chat', () => {
     expect(INITIAL_CHAT_LIST_STATE.filterKey).toBe('all');
+  });
+
+  it('starts on the chip a link asked for', () => {
+    expect(chatListInitialState('noTeacher').filterKey).toBe('noTeacher');
+  });
+
+  it('starts on every chat when no chip was asked for', () => {
+    expect(chatListInitialState(undefined).filterKey).toBe('all');
   });
 
   it('keeps the chip the director picked', () => {

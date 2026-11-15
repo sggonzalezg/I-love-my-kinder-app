@@ -1,4 +1,4 @@
-import { router, type Href } from 'expo-router';
+import { router, useLocalSearchParams, type Href } from 'expo-router';
 import { Clock } from 'lucide-react-native';
 import { useEffect, useReducer } from 'react';
 import { View } from 'react-native';
@@ -21,7 +21,7 @@ import { listEntering } from '@/theme/motion';
 
 import { CHAT_COPY } from './chat-copy';
 import { ChatFilterChips } from './chat-filter-chips';
-import { CHAT_LIST_ACTIONS, INITIAL_CHAT_LIST_STATE, chatListReducer } from './chat-list-reducer';
+import { CHAT_LIST_ACTIONS, chatListInitialState, chatListReducer } from './chat-list-reducer';
 import { styles } from './chat-list-screen.styles';
 import { ChatListSkeleton } from './chat-list-skeleton';
 import { ChatLoadError } from './chat-load-error';
@@ -54,7 +54,8 @@ function openThread(threadId: string) {
 function ChatList({ session }: { session: AuthSession }) {
   const { user_id: userId, active_role: role } = session;
   const reduced = useReducedMotion();
-  const [state, dispatch] = useReducer(chatListReducer, INITIAL_CHAT_LIST_STATE);
+  const { filter: initialFilterKey } = useLocalSearchParams<{ filter?: string }>();
+  const [state, dispatch] = useReducer(chatListReducer, initialFilterKey, chatListInitialState);
   const summaries = useAsync(() => fetchChatThreadSummaries(userId), userId);
   const threads = summaries.data?.map((summary) => summary.thread) ?? [];
   const rosters = useAsync(() => fetchThreadRosters(threads), summaries.data ? threads.map((thread) => thread.id).join(',') : null);

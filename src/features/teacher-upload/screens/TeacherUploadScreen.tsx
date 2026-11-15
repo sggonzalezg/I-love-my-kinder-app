@@ -4,13 +4,13 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
+import { CheckRow } from '@/components/CheckRow/CheckRow';
 import { EmptyState } from '@/components/empty-state';
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
 import { TEACHER_DAY_COPY } from '@/features/teacher-day/teacher-day-copy';
 import { groupKeyOf } from '@/features/teacher-day/use-group-day';
-import { GroupCheckRow } from '@/features/teacher-upload/components/GroupCheckRow/GroupCheckRow';
 import { MediaSourceButtons } from '@/features/teacher-upload/components/MediaSourceButtons/MediaSourceButtons';
 import { PickedGrid } from '@/features/teacher-upload/components/PickedGrid/PickedGrid';
 import { UploadEmptyState } from '@/features/teacher-upload/components/UploadEmptyState/UploadEmptyState';
@@ -101,7 +101,7 @@ export function TeacherUploadScreen() {
             {groups.map((group, index) => {
               const groupKey = groupKeyOf(group);
               return (
-                <GroupCheckRow
+                <CheckRow
                   key={groupKey}
                   label={groupLabel(group.roomName, group.shift)}
                   checked={upload.checkedKeys.includes(groupKey)}

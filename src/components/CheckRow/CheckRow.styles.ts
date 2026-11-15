@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
   label: { flex: 1 },
 });
 
-export const useGroupCheckRowStyles = createThemedStyles((colors) => ({
+export const useCheckRowStyles = createThemedStyles((colors) => ({
   row: { backgroundColor: colors.surface, borderColor: colors.raised },
   rowPressed: { backgroundColor: colors.raised, borderColor: colors.raised },
   boxOff: { borderWidth: BOX_BORDER_WIDTH, borderColor: colors.muted, backgroundColor: colors.surface },
