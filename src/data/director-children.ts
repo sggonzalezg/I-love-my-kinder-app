@@ -1,5 +1,6 @@
 import { AUTHORIZATION_KEYS } from '@/lib/authorizations';
 import type { DirectorChildrenInput } from '@/lib/director-children';
+import type { CreateChildArgs, NewChildRoom, NewChildShift } from '@/lib/new-child-form';
 import type { ShiftName } from '@/lib/shift';
 import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 
@@ -47,4 +48,22 @@ export async function fetchDirectorChildren(nurseryId: string): Promise<Director
     authorizations: throwOnError<ConsentRow[]>(consents).map((row) => ({ childId: row.child_id, documentType: row.document_type, accepted: row.accepted, createdAt: row.created_at })),
     rooms: throwOnError<{ id: string; name: string }[]>(rooms),
   };
+}
+
+export interface NewChildChoices {
+  rooms: NewChildRoom[];
+  shifts: NewChildShift[];
+}
+
+export async function fetchNewChildChoices(nurseryId: string): Promise<NewChildChoices> {
+  const [rooms, shifts] = await Promise.all([
+    supabase.from('rooms').select('id, name').eq('nursery_id', nurseryId),
+    supabase.from('shifts').select('id, name').eq('nursery_id', nurseryId),
+  ]);
+  return { rooms: throwOnError<NewChildRoom[]>(rooms), shifts: throwOnError<NewChildShift[]>(shifts) };
+}
+
+/** `create_child` saves the child, the cédula and the enrollment in one transaction; the cédula never stays on the phone. */
+export async function createChild(args: CreateChildArgs): Promise<string> {
+  return throwOnError<string>(await supabase.rpc('create_child', args));
 }

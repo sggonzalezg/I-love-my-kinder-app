@@ -17,6 +17,7 @@ export function roomGroupHref(roomId: string, shiftId: string): Href {
 }
 
 export const NEW_ROOM_ROUTE = '/room-form' as Href;
+export const NEW_CHILD_ROUTE = '/child-form' as Href;
 
 export function editRoomHref(roomId: string, name: string, age: string | null): Href {
   return { pathname: '/room-form', params: { id: roomId, name, age: age ?? '' } } as Href;
