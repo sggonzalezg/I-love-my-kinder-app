@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import { CircleAlert } from 'lucide-react-native';
-import { useEffect, useReducer, useRef } from 'react';
+import { useEffect, useReducer, useRef, type ReactNode } from 'react';
 import { ActivityIndicator, Modal, Pressable, View } from 'react-native';
 import { GestureDetector, GestureHandlerRootView } from 'react-native-gesture-handler';
 import Animated, { cancelAnimation, Easing, FadeIn, FadeInLeft, FadeInRight, useReducedMotion, useSharedValue, withTiming } from 'react-native-reanimated';
@@ -8,7 +8,7 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { Toast, TOAST_VISIBLE_MS } from '@/components/toast';
 import { PHOTO_STORY_MS, STORY_SLIDE_DISTANCE } from '@/constants/story';
-import type { MediaDaySection } from '@/lib/gallery';
+import type { GalleryMedia, MediaDaySection } from '@/lib/gallery';
 import {
   nextDayPosition,
   nextStoryPosition,
@@ -45,12 +45,16 @@ import { useStorySave } from './use-story-save';
 
 interface StoryViewerProps {
   sections: MediaDaySection[];
-  groupLabel: string;
+  groupLabelOf: (media: GalleryMedia) => string;
   startMediaId: string;
   onClose: () => void;
+  onDelete?: (media: GalleryMedia) => void;
+  /** Held by a sheet the caller draws over the viewer (the delete question). */
+  paused?: boolean;
+  children?: ReactNode;
 }
 
-export function StoryViewer({ sections, groupLabel, startMediaId, onClose }: StoryViewerProps) {
+export function StoryViewer({ sections, groupLabelOf, startMediaId, onClose, onDelete, paused: heldByCaller = false, children }: StoryViewerProps) {
   const reduced = useReducedMotion();
   const insets = useSafeAreaInsets();
   const screenReaderOn = useScreenReaderEnabled();
@@ -63,7 +67,7 @@ export function StoryViewer({ sections, groupLabel, startMediaId, onClose }: Sto
   const media = day.items[state.position.itemIndex];
   const isVideo = media.type === 'video';
   const failed = state.mediaStatus === 'failed' || !media.url;
-  const paused = isStoryPaused(state, screenReaderOn);
+  const paused = isStoryPaused(state, screenReaderOn) || heldByCaller;
   const save = useStorySave(media, state, dispatch);
 
   function moveTo(position: StoryPosition | null, direction: StoryDirection) {
@@ -143,7 +147,7 @@ export function StoryViewer({ sections, groupLabel, startMediaId, onClose }: Sto
                 <StoryVideo
                   url={media.url}
                   muted={state.muted}
-                  playing={state.sheet === null}
+                  playing={state.sheet === null && !heldByCaller}
                   progress={progress}
                   onStatusChange={setMediaStatus}
                   onDurationLoaded={(seconds) => dispatch({ type: STORY_VIEWER_ACTIONS.DURATION_LOADED, seconds })}
@@ -172,12 +176,13 @@ export function StoryViewer({ sections, groupLabel, startMediaId, onClose }: Sto
             </View>
             <View style={[styles.bottom, bottomInsetStyle(insets.bottom)]}>
               <StoryBottomBar
-                groupLabel={groupLabel}
+                groupLabel={groupLabelOf(media)}
                 failed={failed}
                 saving={state.savingId === media.id}
                 saved={state.savedIds.includes(media.id)}
                 onSave={save.requestSave}
                 onNext={goNext}
+                onDelete={onDelete ? () => onDelete(media) : undefined}
               />
             </View>
           </Animated.View>
@@ -195,6 +200,7 @@ export function StoryViewer({ sections, groupLabel, startMediaId, onClose }: Sto
           onConfirm={state.sheet === 'notice' ? save.acceptNotice : save.openSettings}
           onDismiss={() => dispatch({ type: STORY_VIEWER_ACTIONS.SHEET_CLOSED })}
         />
+        {children}
       </GestureHandlerRootView>
     </Modal>
   );

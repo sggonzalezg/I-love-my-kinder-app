@@ -4,6 +4,8 @@ import { createThemedStyles } from '@/theme/themed-styles';
 import { radius, size, space } from '@/theme/tokens';
 
 export const PERMISSION_ICON_SIZE = 22;
+export const CHEVRON_SIZE = 22;
+export const CARD_PRESSED_SCALE = 0.98;
 const CARD_PADDING = 14;
 const CARD_BORDER_WIDTH = 2;
 

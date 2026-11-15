@@ -141,3 +141,59 @@ describe('eventFormReducer', () => {
     expect(state.saveError).toBe('offline');
   });
 });
+
+describe('eventFormReducer image', () => {
+  const STORED_IMAGE = { uri: 'https://storage/signed/poster.jpg', storedPath: 'nursery-1/event-1/poster.jpg' };
+
+  it('keeps the stored image as the clean starting point', () => {
+    const state = eventFormReducer(initialEventFormState(emptyEventForm(null)), {
+      type: EVENT_FORM_ACTIONS.FORM_LOADED,
+      values: emptyEventForm('room-2:shift-am'),
+      image: STORED_IMAGE,
+    });
+
+    expect(state.image).toEqual(STORED_IMAGE);
+    expect(state.initialImage).toEqual(STORED_IMAGE);
+  });
+
+  it('opens and closes the source sheet', () => {
+    const opened = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.IMAGE_SOURCE_OPENED });
+
+    const closed = eventFormReducer(opened, { type: EVENT_FORM_ACTIONS.IMAGE_SOURCE_CLOSED });
+
+    expect(opened.imageSourceOpen).toBe(true);
+    expect(closed.imageSourceOpen).toBe(false);
+  });
+
+  it('shows a picked image as a local file and clears the camera notice', () => {
+    const denied = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.CAMERA_DENIED });
+
+    const state = eventFormReducer(denied, { type: EVENT_FORM_ACTIONS.IMAGE_PICKED, uri: 'file:///picked.jpg' });
+
+    expect(state.image).toEqual({ uri: 'file:///picked.jpg', storedPath: null });
+    expect(state.cameraDenied).toBe(false);
+  });
+
+  it('notes a refused camera', () => {
+    const state = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.CAMERA_DENIED });
+
+    expect(state.cameraDenied).toBe(true);
+  });
+
+  it('removes the image and keeps the stored one as the starting point', () => {
+    const loaded = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.FORM_LOADED, values: emptyEventForm('a:b'), image: STORED_IMAGE });
+
+    const state = eventFormReducer(loaded, { type: EVENT_FORM_ACTIONS.IMAGE_REMOVED });
+
+    expect(state.image).toBeNull();
+    expect(state.initialImage).toEqual(STORED_IMAGE);
+  });
+
+  it('keeps the id of an event inserted before its image failed, through the save error', () => {
+    const created = eventFormReducer(loadedState(), { type: EVENT_FORM_ACTIONS.EVENT_CREATED, eventId: 'event-9' });
+
+    const state = eventFormReducer(created, { type: EVENT_FORM_ACTIONS.SAVE_FAILED, offline: false });
+
+    expect(state.createdEventId).toBe('event-9');
+  });
+});

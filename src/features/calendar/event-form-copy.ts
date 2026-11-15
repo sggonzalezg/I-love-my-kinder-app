@@ -1,3 +1,5 @@
+import type { PhotoSourceCopy } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
+
 export const EVENT_FORM_COPY = {
   newTitle: 'Nuevo evento',
   editTitle: 'Editar evento',
@@ -53,7 +55,22 @@ export const EVENT_FORM_COPY = {
   loadError: 'No pudimos cargar el evento.',
   notFound: 'No encontramos este evento.',
   retry: 'Reintentar',
+  image: 'Imagen',
+  addImage: 'Agregar una imagen',
+  addImageHint: 'El afiche del taller o una foto del lugar',
+  changeImage: 'Cambiar',
+  removeImage: 'Quitar imagen',
+  chosenImage: 'Imagen elegida',
+  cameraDenied: 'Necesitamos permiso para usar la cámara.',
+  openSettings: 'Abrir Ajustes',
 } as const;
+
+export const EVENT_IMAGE_SOURCE_COPY: PhotoSourceCopy = {
+  title: 'Agregar una imagen',
+  takePhoto: 'Sacar foto',
+  choosePhoto: 'Elegir de la galería',
+  cancel: 'Cancelar',
+};
 
 export function timeSheetDoneLabel(time: string): string {
   return `Listo · ${time}`;

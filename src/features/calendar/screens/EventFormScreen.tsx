@@ -1,9 +1,11 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { CircleAlert, ClipboardCheck, X } from 'lucide-react-native';
 import { KeyboardAvoidingView, View } from 'react-native';
+import Animated from 'react-native-reanimated';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
+import { PhotoSourceSheet } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
@@ -14,15 +16,17 @@ import { DateSheet } from '@/features/calendar/components/DateSheet/DateSheet';
 import { DirectorAudienceFields } from '@/features/calendar/components/DirectorAudienceFields/DirectorAudienceFields';
 import { DiscardSheet } from '@/features/calendar/components/DiscardSheet/DiscardSheet';
 import { FormTextField } from '@/components/FormTextField/FormTextField';
+import { EventImageField } from '@/features/calendar/components/EventImageField/EventImageField';
 import { IconChips } from '@/features/calendar/components/IconChips/IconChips';
 import { ResignSheet } from '@/features/calendar/components/ResignSheet/ResignSheet';
 import { FormActionBar } from '@/components/FormActionBar/FormActionBar';
 import { FormRow } from '@/features/calendar/components/FormRow/FormRow';
 import { FormRows } from '@/features/calendar/components/FormRows/FormRows';
-import { EVENT_FORM_COPY, timeSheetDoneLabel } from '@/features/calendar/event-form-copy';
+import { EVENT_FORM_COPY, EVENT_IMAGE_SOURCE_COPY, timeSheetDoneLabel } from '@/features/calendar/event-form-copy';
 import { EVENT_TYPE_OPTIONS, TRANSPORT_OPTIONS } from '@/features/calendar/event-form-options';
 import { EVENT_FORM_ACTIONS, type DateSheetKind, type TimeSheetKind } from '@/features/calendar/event-form-reducer';
 import { useEventForm } from '@/features/calendar/use-event-form';
+import { useEventImagePicker } from '@/features/calendar/use-event-image-picker';
 import { formatDbTime, fromIsoDate } from '@/lib/dates';
 import { audienceCaptionLabel } from '@/lib/director-event-audience';
 import {
@@ -40,6 +44,7 @@ import {
 } from '@/lib/event-form';
 import { isOuting, typeChangeValues } from '@/lib/outing-fields';
 import { askPermissionCaption, outingBannerText } from '@/lib/outing-form';
+import { formLayoutTransition } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
 
 import { ERROR_ICON_SIZE, KEYBOARD_BEHAVIOR, SKELETON_HEIGHT, styles } from './EventFormScreen.styles';
@@ -56,6 +61,7 @@ export function EventFormScreen() {
   const colors = useColors();
   const form = useEventForm(id);
   const { state, dispatch } = form;
+  const imagePicker = useEventImagePicker(dispatch);
   const { values } = state;
   const now = new Date();
   const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -215,7 +221,16 @@ export function EventFormScreen() {
               onChange={(description) => change({ description })}
             />
 
-            <View style={styles.section}>
+            <EventImageField
+              image={state.image}
+              cameraDenied={state.cameraDenied}
+              disabled={state.saving}
+              onAdd={imagePicker.open}
+              onRemove={imagePicker.remove}
+              onOpenSettings={imagePicker.openSettings}
+            />
+
+            <Animated.View layout={formLayoutTransition} style={styles.section}>
               <Text variant="label">{EVENT_FORM_COPY.notifications}</Text>
               <FormRows>
                 {form.isEdit ? null : (
@@ -234,7 +249,7 @@ export function EventFormScreen() {
                   onSwitchChange={(remindDayBefore) => change({ remindDayBefore })}
                 />
               </FormRows>
-            </View>
+            </Animated.View>
 
             {state.saveError === 'offline' ? <Banner kind="offline" text={EVENT_FORM_COPY.offline} /> : null}
             {state.saveError === 'failed' ? <Banner kind="error" text={EVENT_FORM_COPY.saveFailed} /> : null}
@@ -280,6 +295,13 @@ export function EventFormScreen() {
         text={form.resignText ?? ''}
         onConfirm={form.confirmResign}
         onKeepEditing={() => dispatch({ type: EVENT_FORM_ACTIONS.RESIGN_CANCELLED })}
+      />
+      <PhotoSourceSheet
+        visible={state.imageSourceOpen}
+        copy={EVENT_IMAGE_SOURCE_COPY}
+        onChoose={imagePicker.choose}
+        onClose={imagePicker.close}
+        onDismiss={imagePicker.onSourceSheetDismissed}
       />
       <DiscardSheet visible={state.discardOpen} onDiscard={() => router.back()} onKeepEditing={() => dispatch({ type: EVENT_FORM_ACTIONS.DISCARD_CANCELLED })} />
     </View>

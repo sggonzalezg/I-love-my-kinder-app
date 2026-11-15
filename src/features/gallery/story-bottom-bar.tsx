@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Download } from 'lucide-react-native';
+import { Check, ChevronRight, Download, Trash2 } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Text } from '@/components/text';
@@ -14,15 +14,19 @@ interface StoryBottomBarProps {
   saved: boolean;
   onSave: () => void;
   onNext: () => void;
+  /** The direction deletes instead of saving (D2g); a broken item can be deleted too. */
+  onDelete?: () => void;
 }
 
-export function StoryBottomBar({ groupLabel, failed, saving, saved, onSave, onNext }: StoryBottomBarProps) {
+export function StoryBottomBar({ groupLabel, failed, saving, saved, onSave, onNext, onDelete }: StoryBottomBarProps) {
   return (
     <View style={styles.row}>
       <Text variant="smallStrong" style={styles.label} numberOfLines={1}>
         {groupLabel}
       </Text>
-      {failed ? (
+      {onDelete ? (
+        <StoryPillButton label={STORY_COPY.delete} icon={Trash2} onPress={onDelete} />
+      ) : failed ? (
         <StoryPillButton label={STORY_COPY.next} icon={ChevronRight} iconAfter onPress={onNext} />
       ) : saved ? (
         <StoryPillButton label={STORY_COPY.saved} icon={Check} onPress={onSave} disabled />

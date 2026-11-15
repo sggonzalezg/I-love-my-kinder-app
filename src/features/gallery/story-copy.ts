@@ -6,6 +6,7 @@ export const STORY_COPY = {
   soundOff: 'Silenciar',
   save: 'Guardar',
   saved: 'Guardado',
+  delete: 'Borrar',
   savedToast: 'Guardado en tu galería',
   saveFailedToast: 'No pudimos guardar. Probá de nuevo.',
   videoFailedTitle: 'No pudimos cargar este video',
