@@ -12,6 +12,10 @@ export function noticeHref(noticeId: string): Href {
 export function childFileHref(childId: string): Href {
   return `/child/${encodeURIComponent(childId)}` as Href;
 }
+export function directorChildHref(childId: string): Href {
+  return `/director-child/${encodeURIComponent(childId)}` as Href;
+}
+
 export function roomGroupHref(roomId: string, shiftId: string): Href {
   return `/room-group/${encodeURIComponent(roomId)}/${encodeURIComponent(shiftId)}` as Href;
 }

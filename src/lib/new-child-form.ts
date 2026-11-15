@@ -83,12 +83,19 @@ function birthDateError(text: string, today: Date): string | null {
   return iso > toIsoDate(today) ? NEW_CHILD_MESSAGES.birthDateFuture : null;
 }
 
-export function validateNewChild(values: NewChildFormValues, today: Date): NewChildFieldErrors {
-  const errors: NewChildFieldErrors = {};
+export type ChildIdentityValues = Pick<NewChildFormValues, 'firstName' | 'lastName' | 'birthDate'>;
+
+export function validateChildIdentity(values: ChildIdentityValues, today: Date): Partial<Record<keyof ChildIdentityValues, string>> {
+  const errors: Partial<Record<keyof ChildIdentityValues, string>> = {};
   if (!values.firstName.trim()) errors.firstName = NEW_CHILD_MESSAGES.firstNameMissing;
   if (!values.lastName.trim()) errors.lastName = NEW_CHILD_MESSAGES.lastNameMissing;
   const birthDate = birthDateError(values.birthDate, today);
   if (birthDate) errors.birthDate = birthDate;
+  return errors;
+}
+
+export function validateNewChild(values: NewChildFormValues, today: Date): NewChildFieldErrors {
+  const errors: NewChildFieldErrors = validateChildIdentity(values, today);
   const nationalId = nationalIdFieldError(values.nationalId);
   if (nationalId) errors.nationalId = nationalId;
   if (!values.roomId) errors.roomId = NEW_CHILD_MESSAGES.roomMissing;
@@ -96,7 +103,7 @@ export function validateNewChild(values: NewChildFormValues, today: Date): NewCh
   return errors;
 }
 
-export function hasErrors(errors: NewChildFieldErrors): boolean {
+export function hasErrors(errors: object): boolean {
   return Object.keys(errors).length > 0;
 }
 

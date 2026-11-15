@@ -1,4 +1,5 @@
 import type { AuthorizationKey } from '@/lib/authorizations';
+import type { ChildFilePart } from '@/lib/director-child-file';
 
 export const DIRECTOR_CHILDREN_COPY = {
   searchPlaceholder: 'Buscar niño',
@@ -25,6 +26,16 @@ export const DIRECTOR_CHILDREN_COPY = {
   noResultsTitle: 'No encontramos a nadie',
   noResultsHint: 'Probá con otro nombre o con otra sala.',
   groupsSeparator: ', ',
+  fileParts: { data: 'Datos', health: 'Salud' } satisfies Record<ChildFilePart, string>,
+  filePartsLabel: 'Secciones de la ficha',
+  allergies: 'Alergias',
+  allergiesHelp: (firstName: string) => `Las ven solo las maestras de ${firstName} y la dirección.`,
+  healthLockedTitle: 'Sin autorización de salud',
+  healthLockedText: 'No se pueden cargar alergias hasta tener la autorización.',
+  healthLockedHint: 'La familia la da desde la app.',
+  save: 'Guardar',
+  fileLoadError: 'No pudimos cargar la ficha.',
+  fileNotFound: 'No encontramos a este niño.',
   authorizationChips: { image: 'Redes', visibility: 'Visibilidad', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
   authorizationState: (label: string, granted: boolean) => `${label}: ${granted ? 'sí' : 'no'}`,
 } as const;

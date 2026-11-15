@@ -2,7 +2,7 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useReducer } from 'react';
 
-import { childFileHref } from '@/constants/routes';
+import { directorChildHref } from '@/constants/routes';
 import { createChild, fetchNewChildChoices } from '@/data/director-children';
 import { useSession } from '@/data/session';
 import { useAsync } from '@/data/use-async';
@@ -56,7 +56,7 @@ export function useNewChildForm() {
       return;
     }
     Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
-    router.replace(childFileHref(childId));
+    router.replace(directorChildHref(childId));
   }
 
   return {
