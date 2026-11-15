@@ -11,7 +11,7 @@ import { Select } from '@/components/Select/Select';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
-import { NEW_CHILD_ROUTE, childFileHref } from '@/constants/routes';
+import { NEW_CHILD_ROUTE, directorChildHref } from '@/constants/routes';
 import { ChildListRow } from '@/features/director-children/components/ChildListRow/ChildListRow';
 import { ChildSearchField } from '@/features/director-children/components/ChildSearchField/ChildSearchField';
 import { DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
@@ -62,7 +62,7 @@ export function DirectorChildrenScreen({ partSwitch }: DirectorChildrenScreenPro
             <Fragment key={child.id}>
               {index > 0 ? <View style={[styles.separator, themed.separator]} /> : null}
               <Animated.View entering={listEntering(index, reduced)}>
-                <ChildListRow child={child} onPress={() => router.push(childFileHref(child.id))} />
+                <ChildListRow child={child} onPress={() => router.push(directorChildHref(child.id))} />
               </Animated.View>
             </Fragment>
           ))}
