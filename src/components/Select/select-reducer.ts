@@ -1,3 +1,5 @@
+import { foldForSearch } from '@/lib/search';
+
 export interface SelectOption {
   value: string;
   label: string;
@@ -30,7 +32,6 @@ export type SelectAction =
 export const INITIAL_SELECT_STATE: SelectState = { isOpen: false, query: '' };
 
 const SEARCH_OPTION_THRESHOLD = 8;
-const COMBINING_MARKS = /[̀-ͯ]/g;
 
 export function selectReducer(state: SelectState, action: SelectAction): SelectState {
   switch (action.type) {
@@ -42,10 +43,6 @@ export function selectReducer(state: SelectState, action: SelectAction): SelectS
     case SELECT_ACTIONS.OPTION_CHOSEN:
       return INITIAL_SELECT_STATE;
   }
-}
-
-function foldForSearch(text: string): string {
-  return text.normalize('NFD').replace(COMBINING_MARKS, '').toLowerCase();
 }
 
 function matchesQuery(option: SelectOption, foldedQuery: string): boolean {

@@ -1,5 +1,7 @@
 export const DIRECTOR_ROOMS_COPY = {
   title: 'Sala',
+  partRooms: 'Salas',
+  partChildren: 'Niños',
   loadError: 'No pudimos cargar las salas.',
   retry: 'Reintentar',
   emptyTitle: 'Todavía no hay salas',
