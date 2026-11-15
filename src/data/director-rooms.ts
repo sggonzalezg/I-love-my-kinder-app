@@ -1,4 +1,5 @@
 import type { DirectorRoomRow, DirectorRoomsInput, DirectorShiftRow } from '@/lib/director-rooms';
+import type { RoomRow } from '@/lib/room-form';
 import type { ShiftName } from '@/lib/shift';
 
 import { fetchRoomRoster, type RoomRoster } from './family-room';
@@ -54,6 +55,11 @@ export async function fetchDirectorRooms(nurseryId: string, now: Date): Promise<
         : [],
     ),
   };
+}
+
+export async function saveRoom(nurseryId: string, roomId: string | null, row: RoomRow): Promise<void> {
+  const rooms = supabase.from('rooms');
+  throwOnError(roomId ? await rooms.update(row).eq('id', roomId) : await rooms.insert({ nursery_id: nurseryId, ...row }));
 }
 
 export async function fetchDirectorGroupView(roomId: string, shiftId: string): Promise<DirectorGroupView> {

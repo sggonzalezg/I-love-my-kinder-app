@@ -3,9 +3,9 @@ import { TextInput, View } from 'react-native';
 import { Text } from '@/components/text';
 import { useColors } from '@/theme/use-theme';
 
-import { styles, useEventTextFieldStyles } from './EventTextField.styles';
+import { styles, useFormTextFieldStyles } from './FormTextField.styles';
 
-interface EventTextFieldProps {
+interface FormTextFieldProps {
   label: string;
   labelAside?: string;
   help?: string;
@@ -16,9 +16,9 @@ interface EventTextFieldProps {
   onChange: (text: string) => void;
 }
 
-export function EventTextField({ label, labelAside, help, value, multiline = false, editable, maxLength, onChange }: EventTextFieldProps) {
+export function FormTextField({ label, labelAside, help, value, multiline = false, editable, maxLength, onChange }: FormTextFieldProps) {
   const colors = useColors();
-  const themed = useEventTextFieldStyles();
+  const themed = useFormTextFieldStyles();
   return (
     <View style={styles.field}>
       <Text variant="label">
