@@ -4,6 +4,8 @@ import type { AuthorizationAnswer } from '@/lib/child-authorizations';
 import type { PersonKind } from '@/lib/child-people';
 import type { ChildFilePart } from '@/lib/director-child-file';
 
+const AUTHORIZATION_STATE_WORDS: Record<AuthorizationAnswer, string> = { granted: 'sí', denied: 'no', unanswered: 'sin responder' };
+
 export const DIRECTOR_CHILDREN_COPY = {
   searchPlaceholder: 'Buscar niño',
   roomFilter: 'Sala',
@@ -93,7 +95,7 @@ export const DIRECTOR_CHILDREN_COPY = {
   personNotFound: 'No encontramos a esta persona.',
   closeForm: 'Cerrar',
   authorizationChips: { image: 'Redes', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
-  authorizationState: (label: string, granted: boolean) => `${label}: ${granted ? 'sí' : 'no'}`,
+  authorizationState: (label: string, state: AuthorizationAnswer) => `${label}: ${AUTHORIZATION_STATE_WORDS[state]}`,
 } as const;
 
 export const CHILD_PHOTO_SOURCE_COPY: PhotoSourceCopy = {

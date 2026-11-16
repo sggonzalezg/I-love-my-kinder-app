@@ -6,7 +6,9 @@ import {
   childStatusLabel,
   filterChildren,
   roomFilterOptions,
+  type ChildAuthorizationRecord,
   type ChildEnrollment,
+  type ChildGuardian,
   type DirectorChildrenInput,
 } from '../director-children';
 
@@ -24,7 +26,22 @@ function input(overrides: Partial<DirectorChildrenInput> = {}): DirectorChildren
     ],
     enrollments: [enrollment(), enrollment({ childId: 'bruno' })],
     authorizations: [],
+    guardians: [],
     rooms: [],
+    ...overrides,
+  };
+}
+
+const ANA: ChildGuardian = { childId: 'mateo', userId: 'ana', name: 'Ana Rodríguez' };
+
+function record(overrides: Partial<ChildAuthorizationRecord>): ChildAuthorizationRecord {
+  return {
+    childId: 'mateo',
+    document_type: 'auth_image',
+    document_version: '2.0',
+    accepted: true,
+    created_at: '2026-03-01T10:00:00Z',
+    user_id: 'ana',
     ...overrides,
   };
 }
@@ -85,18 +102,31 @@ describe('buildChildEntries', () => {
     ]);
   });
 
-  it('marks each authorization by the latest record, in the panel order', () => {
+  it('marks each authorization by the latest guardian answer, in the panel order', () => {
     const authorizations = [
-      { childId: 'mateo', documentType: 'auth_health', accepted: true, createdAt: '2026-03-01T10:00:00Z' },
-      { childId: 'mateo', documentType: 'auth_image', accepted: true, createdAt: '2026-03-01T10:00:00Z' },
-      { childId: 'mateo', documentType: 'auth_image', accepted: false, createdAt: '2026-05-01T10:00:00Z' },
-      { childId: 'bruno', documentType: 'auth_health', accepted: false, createdAt: '2026-03-01T10:00:00Z' },
+      record({ document_type: 'auth_health', accepted: true }),
+      record({ document_type: 'auth_image', accepted: true }),
+      record({ document_type: 'auth_image', accepted: false, created_at: '2026-05-01T10:00:00Z' }),
     ];
-    const mateo = buildChildEntries(input({ authorizations }), NOW)[1];
+    const mateo = buildChildEntries(input({ authorizations, guardians: [ANA] }), NOW)[1];
     expect(mateo.authorizations).toEqual([
-      { key: 'image', granted: false },
-      { key: 'health', granted: true },
+      { key: 'image', state: 'denied' },
+      { key: 'health', state: 'granted' },
     ]);
+  });
+
+  it('marks an authorization nobody answered as unanswered, not as a no', () => {
+    const mateo = buildChildEntries(input({ authorizations: [record({ document_type: 'auth_image', accepted: true })], guardians: [ANA] }), NOW)[1];
+    expect(mateo.authorizations).toEqual([
+      { key: 'image', state: 'granted' },
+      { key: 'health', state: 'unanswered' },
+    ]);
+  });
+
+  it('ignores the answers of someone who is not a guardian of that child', () => {
+    const authorizations = [record({ childId: 'bruno', document_type: 'auth_health', accepted: false })];
+    const bruno = buildChildEntries(input({ authorizations, guardians: [ANA] }), NOW)[0];
+    expect(bruno.authorizations.map((mark) => mark.state)).toEqual(['unanswered', 'unanswered']);
   });
 });
 

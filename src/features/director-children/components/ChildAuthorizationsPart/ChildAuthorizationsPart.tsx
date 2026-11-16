@@ -1,21 +1,15 @@
-import { Check, Clock, X, type LucideIcon } from 'lucide-react-native';
 import Animated, { useReducedMotion } from 'react-native-reanimated';
 
-import { Chip, type ChipVariant } from '@/components/chip';
+import { Chip } from '@/components/chip';
 import { PeopleSection } from '@/components/PeopleSection/PeopleSection';
 import { PersonRow } from '@/components/PersonRow/PersonRow';
+import { AUTHORIZATION_ANSWER_CHIPS } from '@/features/director-children/authorization-answer-chips';
 import { FilePartLoadState } from '@/features/director-children/components/FilePartLoadState/FilePartLoadState';
 import { DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
-import type { AuthorizationAnswer, SignedAuthorization } from '@/lib/child-authorizations';
+import type { SignedAuthorization } from '@/lib/child-authorizations';
 import { listEntering } from '@/theme/motion';
 
 import { styles } from './ChildAuthorizationsPart.styles';
-
-const ANSWER_CHIPS: Record<AuthorizationAnswer, { variant: ChipVariant; icon: LucideIcon }> = {
-  granted: { variant: 'ok', icon: Check },
-  denied: { variant: 'grey', icon: X },
-  unanswered: { variant: 'wait', icon: Clock },
-};
 
 interface ChildAuthorizationsPartProps {
   authorizations: SignedAuthorization[] | null;
@@ -36,7 +30,7 @@ export function ChildAuthorizationsPart({ authorizations, failed, onReload }: Ch
             key={key}
             name={DIRECTOR_CHILDREN_COPY.authorizationTitles[key]}
             detail={detail}
-            action={<Chip label={DIRECTOR_CHILDREN_COPY.authorizationAnswers[state]} icon={ANSWER_CHIPS[state].icon} variant={ANSWER_CHIPS[state].variant} />}
+            action={<Chip label={DIRECTOR_CHILDREN_COPY.authorizationAnswers[state]} icon={AUTHORIZATION_ANSWER_CHIPS[state].icon} variant={AUTHORIZATION_ANSWER_CHIPS[state].variant} />}
           />
         ))}
       </PeopleSection>
