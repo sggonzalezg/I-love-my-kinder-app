@@ -3,6 +3,8 @@ import type { Href } from 'expo-router';
 import type { PersonKind } from '@/lib/child-people';
 
 export const LOGIN_ROUTE = '/phone' as Href;
+export const PUSH_PRIMER_ROUTE = '/push' as Href;
+export const FIRST_SIGN_IN_AUTHORIZATIONS_ROUTE = '/first-authorizations' as Href;
 export const NOTICES_ROUTE = '/notices' as Href;
 export const DELETE_ACCOUNT_ROUTE = '/delete-account' as Href;
 export const CALENDAR_ROUTE = '/calendar' as Href;

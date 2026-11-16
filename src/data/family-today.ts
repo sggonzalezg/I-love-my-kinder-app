@@ -42,7 +42,7 @@ interface NextEventRow {
   shifts: { name: ShiftName } | null;
 }
 
-async function fetchFirstName(userId: string): Promise<string> {
+export async function fetchFirstName(userId: string): Promise<string> {
   const rows = throwOnError<{ first_name: string }[]>(await supabase.from('family_members').select('first_name').eq('user_id', userId).limit(1));
   return rows[0]?.first_name ?? '';
 }
