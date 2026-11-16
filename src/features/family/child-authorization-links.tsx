@@ -37,7 +37,7 @@ export function ChildAuthorizationLinks({ userId }: { userId: string }) {
             <View style={styles.rowText}>
               <Text variant="bodyStrong">{child.firstName}</Text>
               <Text variant="small" color="muted">
-                Redes, visibilidad y salud
+                Redes y salud
               </Text>
             </View>
             <ChevronRight size={20} color={c.muted} />
