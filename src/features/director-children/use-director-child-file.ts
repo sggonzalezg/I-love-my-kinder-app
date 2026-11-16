@@ -3,8 +3,9 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useReducer } from 'react';
 
 import { usePhotoSourcePicker } from '@/components/PhotoSourceSheet/use-photo-source-picker';
-import { childPersonFormHref } from '@/constants/routes';
+import { childGroupFormHref, childPersonFormHref } from '@/constants/routes';
 import { fetchChildAuthorizations } from '@/data/child-authorizations';
+import { fetchChildEnrollments } from '@/data/child-enrollments';
 import { fetchChildPeople } from '@/data/child-people';
 import { fetchDirectorChildFile, replaceChildPhoto, updateChildColumns } from '@/data/director-child-file';
 import { useSession } from '@/data/session';
@@ -30,6 +31,8 @@ export function useDirectorChildFile(childId: string) {
   useReloadOnRefocus(people.reload);
   const authorizations = useAsync(() => fetchChildAuthorizations(childId), childId, { keepDataOnReload: true });
   useReloadOnRefocus(authorizations.reload);
+  const enrollments = useAsync(() => fetchChildEnrollments(childId), childId, { keepDataOnReload: true });
+  useReloadOnRefocus(enrollments.reload);
   const [state, dispatch] = useReducer(childFileReducer, INITIAL_CHILD_FILE_STATE);
   useFocusEffect(useCallback(() => () => dispatch({ type: CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN }), []));
   const child = file.data;
@@ -110,6 +113,13 @@ export function useDirectorChildFile(childId: string) {
       list: authorizations.data,
       failed: authorizations.failed,
       reload: authorizations.reload,
+    },
+    enrollments: {
+      list: enrollments.data,
+      failed: enrollments.failed,
+      reload: enrollments.reload,
+      change: (enrollmentId: string) => router.push(childGroupFormHref(childId, enrollmentId)),
+      enroll: () => router.push(childGroupFormHref(childId)),
     },
     photo: {
       path: photoPath,
