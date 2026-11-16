@@ -1,6 +1,6 @@
 import { toIsoDate } from './dates';
 import { nationalIdFieldError, nationalIdSaveMessage, normalizeNationalId } from './national-id';
-import { SHIFT_ORDER, shiftLabel, type ShiftName } from './shift';
+import { SHIFT_NAMES, shiftLabel, type ShiftName } from './shift';
 
 export const CHILD_NAME_MAX_LENGTH = 60;
 export const BIRTH_DATE_MAX_LENGTH = 10;
@@ -140,6 +140,6 @@ export function withDefaultShift(values: NewChildFormValues, shifts: NewChildCho
 
 export function shiftChoices(shifts: NewChildShift[]): NewChildChoice[] {
   return [...shifts]
-    .sort((first, second) => SHIFT_ORDER.indexOf(first.name) - SHIFT_ORDER.indexOf(second.name))
+    .sort((first, second) => SHIFT_NAMES.indexOf(first.name) - SHIFT_NAMES.indexOf(second.name))
     .map((shift) => ({ value: shift.id, label: shiftLabel(shift.name) }));
 }

@@ -4,6 +4,7 @@ export const LOGIN_ROUTE = '/phone' as Href;
 export const NOTICES_ROUTE = '/notices' as Href;
 export const DELETE_ACCOUNT_ROUTE = '/delete-account' as Href;
 export const CALENDAR_ROUTE = '/calendar' as Href;
+export const SETTINGS_ROUTE = '/settings' as Href;
 
 export function noticeHref(noticeId: string): Href {
   return `/notices/${encodeURIComponent(noticeId)}` as Href;
