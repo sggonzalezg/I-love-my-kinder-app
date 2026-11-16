@@ -4,7 +4,7 @@ import { SESSION_ACTIONS, initialSessionState, sessionReducer } from '../session
 
 const familySession: AuthSession = {
   user_id: 'user-1',
-  phone: '+59899123456',
+  email: 'ana.rodriguez@gmail.com',
   roles: ['family', 'teacher'],
   active_role: 'family',
   nursery_id: 'nursery-1',

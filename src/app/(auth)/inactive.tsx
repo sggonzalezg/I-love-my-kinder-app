@@ -1,10 +1,5 @@
-import { ContactNurseryNotice } from '@/components/contact-nursery-notice';
+import { AccountDeactivatedScreen } from '@/features/email-sign-in/screens/AccountDeactivatedScreen';
 
-export default function InactiveTeacherScreen() {
-  return (
-    <ContactNurseryNotice
-      title="Tu cuenta está inactiva"
-      message="No tienes acceso en este momento. Hablá con la dirección del jardín para activar tu cuenta."
-    />
-  );
+export default function AccountDeactivatedRoute() {
+  return <AccountDeactivatedScreen />;
 }

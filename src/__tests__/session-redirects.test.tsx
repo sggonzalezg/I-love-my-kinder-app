@@ -51,7 +51,7 @@ function renderApp() {
       '(app)/_layout': AppLayout,
       '(app)/index': HomeScreen,
       '(auth)/_layout': AuthLayout,
-      '(auth)/phone': LoginScreen,
+      '(auth)/sign-in': LoginScreen,
     },
     { initialUrl: '/', wrapper: SessionProvider },
   );
@@ -73,7 +73,7 @@ describe('session redirects', () => {
     storedSession(null);
     await renderApp();
     expect(await screen.findByText('Ingresar')).toBeTruthy();
-    expect(screen).toHavePathname('/phone');
+    expect(screen).toHavePathname('/sign-in');
   });
 
   it('opens the app for a stored session', async () => {
@@ -93,6 +93,6 @@ describe('session redirects', () => {
     });
 
     expect(await screen.findByText('Ingresar')).toBeTruthy();
-    expect(screen).toHavePathname('/phone');
+    expect(screen).toHavePathname('/sign-in');
   });
 });

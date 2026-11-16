@@ -45,7 +45,7 @@ export default function ProfileTab() {
               {session.person_name}
             </Text>
             <Text style={{ color: c.muted, marginTop: space.s1 }}>
-              {session.phone}
+              {session.email}
             </Text>
           </View>
           <Chip label={roleLabel} />
@@ -56,7 +56,7 @@ export default function ProfileTab() {
       <SectionHeader title="Mis datos" />
       <View style={[styles.section, { backgroundColor: c.surface }]}>
         <Row label="Nombre" value={session.person_name} />
-        <Row label="Teléfono" value={session.phone} />
+        <Row label="E-mail" value={session.email} />
         <Row label="Jardín" value={session.nursery_name} />
       </View>
 

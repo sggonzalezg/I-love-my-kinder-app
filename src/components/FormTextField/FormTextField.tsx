@@ -1,9 +1,11 @@
-import { TextInput, View, type KeyboardTypeOptions } from 'react-native';
+import { TextInput, View, type KeyboardTypeOptions, type TextInputProps } from 'react-native';
 
 import { Text } from '@/components/text';
 import { useColors } from '@/theme/use-theme';
 
 import { styles, useFormTextFieldStyles } from './FormTextField.styles';
+
+type TextEntryProps = Pick<TextInputProps, 'placeholder' | 'autoComplete' | 'textContentType' | 'autoCapitalize' | 'autoCorrect' | 'returnKeyType' | 'onSubmitEditing'>;
 
 interface FormTextFieldProps {
   label: string;
@@ -17,9 +19,10 @@ interface FormTextFieldProps {
   editable: boolean;
   maxLength: number;
   onChange: (text: string) => void;
+  textEntry?: TextEntryProps;
 }
 
-export function FormTextField({ label, labelAside, help, error, keyboardType, value, multiline = false, editable, maxLength, onChange }: FormTextFieldProps) {
+export function FormTextField({ label, labelAside, help, error, keyboardType, value, multiline = false, editable, maxLength, onChange, textEntry }: FormTextFieldProps) {
   const colors = useColors();
   const themed = useFormTextFieldStyles();
   return (
@@ -33,6 +36,7 @@ export function FormTextField({ label, labelAside, help, error, keyboardType, va
         ) : null}
       </Text>
       <TextInput
+        {...textEntry}
         value={value}
         onChangeText={onChange}
         editable={editable}
@@ -44,7 +48,7 @@ export function FormTextField({ label, labelAside, help, error, keyboardType, va
         style={[styles.input, multiline && styles.multiline, themed.input, error ? themed.inputError : null]}
       />
       {error ? (
-        <Text variant="small" tone="red">
+        <Text variant="small" tone="red" accessibilityRole="alert">
           {error}
         </Text>
       ) : help ? (
