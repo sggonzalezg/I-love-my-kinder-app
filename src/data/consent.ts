@@ -16,11 +16,10 @@ export interface OneTimeNotice {
   version: string;
 }
 
-// record-consent compares documentVersion as a number against its legal_documents version.
 export async function recordConsent({ documentId, version, accepted, screen, childId }: ConsentInput): Promise<void> {
   await invoke('record-consent', {
     documentType: documentId,
-    documentVersion: Number(version),
+    documentVersion: version,
     accepted,
     screen,
     childId,
