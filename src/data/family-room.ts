@@ -9,8 +9,8 @@ import { throwOnError } from './throw-on-error';
 export interface RosterChild {
   id: string;
   display_name: string;
-  first_name: string | null;
-  last_name: string | null;
+  first_name: string;
+  last_name: string;
   birth_date: string | null;
   photo_path: string | null;
   allergies: string | null;

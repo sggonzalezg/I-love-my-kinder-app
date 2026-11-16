@@ -38,8 +38,8 @@ describe('upcomingBirthdays', () => {
     expect(birthday).toMatchObject({ day: 28, month: 'octubre', monthShort: 'oct', weekday: 'Miércoles', isToday: false });
   });
 
-  it('leaves out children without a visible birthday', () => {
-    const children = [{ id: 'hidden', name: 'L.', birthDate: null }];
+  it('leaves out children without a birth date', () => {
+    const children = [{ id: 'lucia', name: 'Lucía R.', birthDate: null }];
 
     expect(upcomingBirthdays(children, TODAY)).toEqual([]);
   });

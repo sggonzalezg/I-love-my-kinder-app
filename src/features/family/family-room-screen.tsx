@@ -58,7 +58,7 @@ function RoomGroupView({ group, groups, onSelectGroup }: RoomGroupViewProps) {
   const birthdayChildren = (roster.data?.children ?? []).map((child) => ({
     id: child.id,
     name: classmateName(child),
-    firstName: child.first_name ?? classmateName(child),
+    firstName: child.first_name,
     birthDate: child.birth_date,
   }));
 

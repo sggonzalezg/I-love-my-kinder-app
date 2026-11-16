@@ -29,7 +29,7 @@ export function GroupRoster({ rosterChildren, groupLabel, childrenTitle }: Group
   const themed = useGroupRosterStyles();
 
   const birthdays = roomBirthdays(
-    rosterChildren.map((child) => ({ id: child.id, name: child.display_name, firstName: child.first_name ?? child.display_name, birthDate: child.birth_date })),
+    rosterChildren.map((child) => ({ id: child.id, name: child.display_name, firstName: child.first_name, birthDate: child.birth_date })),
     new Date(),
   );
   const hasCloseBirthday = birthdays.today.length + birthdays.upcoming.length > 0;
@@ -73,7 +73,7 @@ export function GroupRoster({ rosterChildren, groupLabel, childrenTitle }: Group
               <Animated.View entering={listEntering(index, reduced)}>
                 <RoomChildRow
                   name={child.display_name}
-                  initials={initials(child.first_name ?? child.display_name, child.last_name ?? '')}
+                  initials={initials(child.first_name, child.last_name)}
                   photoPath={child.photo_path}
                   hasAllergy={!!child.allergies}
                   onPress={() => router.push(childFileHref(child.id))}

@@ -18,16 +18,21 @@ describe('currentAuthorizations', () => {
 
     expect(states.auth_image).toEqual({ granted: false, changedAt: '2026-10-24T21:02:00Z' });
     expect(states.auth_health.granted).toBe(true);
-    expect(states.auth_visibility.granted).toBe(false);
   });
 
   it('does not depend on the order the records arrive in', () => {
     const records = [
-      { document_type: 'auth_visibility', accepted: true, created_at: '2026-10-24T21:02:00Z' },
-      { document_type: 'auth_visibility', accepted: false, created_at: '2026-03-03T12:00:00Z' },
+      { document_type: 'auth_health', accepted: true, created_at: '2026-10-24T21:02:00Z' },
+      { document_type: 'auth_health', accepted: false, created_at: '2026-03-03T12:00:00Z' },
     ];
 
-    expect(currentAuthorizations(records).auth_visibility.granted).toBe(true);
+    expect(currentAuthorizations(records).auth_health.granted).toBe(true);
+  });
+
+  it('asks only for social media images and health data, ignoring past visibility records', () => {
+    const records = [{ document_type: 'auth_visibility', accepted: true, created_at: '2026-03-03T12:00:00Z' }];
+
+    expect(Object.keys(currentAuthorizations(records))).toEqual(['auth_image', 'auth_health']);
   });
 });
 

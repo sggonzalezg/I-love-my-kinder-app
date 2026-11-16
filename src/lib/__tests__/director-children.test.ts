@@ -90,12 +90,11 @@ describe('buildChildEntries', () => {
       { childId: 'mateo', documentType: 'auth_health', accepted: true, createdAt: '2026-03-01T10:00:00Z' },
       { childId: 'mateo', documentType: 'auth_image', accepted: true, createdAt: '2026-03-01T10:00:00Z' },
       { childId: 'mateo', documentType: 'auth_image', accepted: false, createdAt: '2026-05-01T10:00:00Z' },
-      { childId: 'bruno', documentType: 'auth_visibility', accepted: true, createdAt: '2026-03-01T10:00:00Z' },
+      { childId: 'bruno', documentType: 'auth_health', accepted: false, createdAt: '2026-03-01T10:00:00Z' },
     ];
     const mateo = buildChildEntries(input({ authorizations }), NOW)[1];
     expect(mateo.authorizations).toEqual([
       { key: 'image', granted: false },
-      { key: 'visibility', granted: false },
       { key: 'health', granted: true },
     ]);
   });

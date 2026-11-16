@@ -2,7 +2,6 @@ import type { AuthorizationKey } from '@/lib/authorizations';
 
 export const AUTHORIZATION_PURPOSE: Record<AuthorizationKey, (child: string) => string> = {
   image: (child) => `Publicar fotos y videos de ${child} en las redes del jardín. No cambia lo que se ve en la galería ni en el chat.`,
-  visibility: () => 'Nombre, foto y cumpleaños en la lista de compañeros.',
   health: () => 'Alergias, solo para maestras y dirección.',
 };
 
