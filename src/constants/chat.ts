@@ -6,6 +6,10 @@ export function chatListFilteredHref(filterKey: string): Href {
   return { pathname: '/chat', params: { filter: filterKey } } as Href;
 }
 
+export function chatThreadHref(threadId: string): Href {
+  return `/chat/${encodeURIComponent(threadId)}` as Href;
+}
+
 export const CHAT_BODY_MAX_LENGTH = 2000;
 
 // shortcut: only the newest messages load, with no "load older"; add paging when a room chat outgrows it.
