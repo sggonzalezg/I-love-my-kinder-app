@@ -3,7 +3,9 @@ import { router, useFocusEffect } from 'expo-router';
 import { useCallback, useReducer } from 'react';
 
 import { usePhotoSourcePicker } from '@/components/PhotoSourceSheet/use-photo-source-picker';
-import { childPersonFormHref } from '@/constants/routes';
+import { childGroupFormHref, childPersonFormHref } from '@/constants/routes';
+import { fetchChildAuthorizations } from '@/data/child-authorizations';
+import { fetchChildEnrollments, withdrawChild } from '@/data/child-enrollments';
 import { fetchChildPeople } from '@/data/child-people';
 import { fetchDirectorChildFile, replaceChildPhoto, updateChildColumns } from '@/data/director-child-file';
 import { useSession } from '@/data/session';
@@ -27,6 +29,10 @@ export function useDirectorChildFile(childId: string) {
   const file = useAsync(() => fetchDirectorChildFile(childId), childId);
   const people = useAsync(() => fetchChildPeople(childId), childId, { keepDataOnReload: true });
   useReloadOnRefocus(people.reload);
+  const authorizations = useAsync(() => fetchChildAuthorizations(childId), childId, { keepDataOnReload: true });
+  useReloadOnRefocus(authorizations.reload);
+  const enrollments = useAsync(() => fetchChildEnrollments(childId), childId, { keepDataOnReload: true });
+  useReloadOnRefocus(enrollments.reload);
   const [state, dispatch] = useReducer(childFileReducer, INITIAL_CHILD_FILE_STATE);
   useFocusEffect(useCallback(() => () => dispatch({ type: CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN }), []));
   const child = file.data;
@@ -81,6 +87,22 @@ export function useDirectorChildFile(childId: string) {
     router.back();
   }
 
+  async function confirmWithdraw() {
+    if (!child) return;
+    dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+    try {
+      await withdrawChild(child.id);
+    } catch (error) {
+      console.warn('Child withdrawal failed:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_FAILED });
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED });
+    router.back();
+  }
+
   return {
     child,
     values,
@@ -102,6 +124,26 @@ export function useDirectorChildFile(childId: string) {
       toggleNationalId: (personId: string) => dispatch({ type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId }),
       edit: (kind: PersonKind, personId: string) => router.push(childPersonFormHref(childId, kind, personId)),
       add: (kind: PersonKind) => router.push(childPersonFormHref(childId, kind)),
+    },
+    authorizations: {
+      list: authorizations.data,
+      failed: authorizations.failed,
+      reload: authorizations.reload,
+    },
+    enrollments: {
+      list: enrollments.data,
+      failed: enrollments.failed,
+      reload: enrollments.reload,
+      change: (enrollmentId: string) => router.push(childGroupFormHref(childId, enrollmentId)),
+      enroll: () => router.push(childGroupFormHref(childId)),
+    },
+    withdraw: {
+      sheetOpen: state.withdraw !== 'closed',
+      withdrawing: state.withdraw === 'withdrawing',
+      failed: state.withdraw === 'failed',
+      open: () => dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED }),
+      close: () => dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED }),
+      confirm: confirmWithdraw,
     },
     photo: {
       path: photoPath,

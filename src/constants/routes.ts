@@ -35,6 +35,11 @@ export function childPersonFormHref(childId: string, kind: PersonKind, personId?
   return { pathname: '/child-person-form', params: personId ? { childId, kind, personId } : { childId, kind } } as Href;
 }
 
+/** Without `enrollmentId` the form enrolls the child in another group; with it, it changes that group. */
+export function childGroupFormHref(childId: string, enrollmentId?: string): Href {
+  return { pathname: '/child-group-form', params: enrollmentId ? { childId, enrollmentId } : { childId } } as Href;
+}
+
 export const CALENDAR_TAB_ROUTE = '/calendar' as Href;
 export const GALLERY_TAB_ROUTE = '/gallery' as Href;
 
