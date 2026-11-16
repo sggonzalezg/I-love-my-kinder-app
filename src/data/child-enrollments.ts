@@ -35,6 +35,15 @@ export async function fetchGroupFormData(nurseryId: string, childId: string): Pr
   return { ...choices, enrollments };
 }
 
+/** Ends every current enrollment now, a future end date included; RLS turns a refused update into zero rows. */
+export async function withdrawChild(childId: string): Promise<void> {
+  const now = new Date().toISOString();
+  const ended = throwOnError<{ id: string }[]>(
+    await supabase.from('enrollments').update({ ended_at: now }).eq('child_id', childId).or(`ended_at.is.null,ended_at.gt.${now}`).select('id'),
+  );
+  if (!ended.length) throw new Error('child_not_withdrawn');
+}
+
 /** Throws with the database message, so `enrollmentSaveMessage` can name the refused rule. */
 export async function saveGroupWrite(write: GroupWrite): Promise<void> {
   if (write.kind === 'enroll') throwOnError(await supabase.from('enrollments').insert(write.row));

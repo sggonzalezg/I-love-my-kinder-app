@@ -15,6 +15,7 @@ import { ChildPeoplePart } from '@/features/director-children/components/ChildPe
 import { ChildPhotoField } from '@/features/director-children/components/ChildPhotoField/ChildPhotoField';
 import { FilePartChips } from '@/features/director-children/components/FilePartChips/FilePartChips';
 import { HealthLockedCard } from '@/features/director-children/components/HealthLockedCard/HealthLockedCard';
+import { WithdrawChildSheet } from '@/features/director-children/components/WithdrawChildSheet/WithdrawChildSheet';
 import { CHILD_PHOTO_SOURCE_COPY, DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { useDirectorChildFile } from '@/features/director-children/use-director-child-file';
 import { PERSON_KINDS, type PersonKind } from '@/lib/child-people';
@@ -131,6 +132,7 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
             onReload={file.enrollments.reload}
             onChange={file.enrollments.change}
             onEnroll={file.enrollments.enroll}
+            onWithdraw={file.withdraw.open}
           />
         );
     }
@@ -184,6 +186,14 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
         onChoose={file.photo.choose}
         onClose={file.photo.close}
         onDismiss={file.photo.onSourceSheetDismissed}
+      />
+      <WithdrawChildSheet
+        visible={file.withdraw.sheetOpen}
+        firstName={child?.firstName ?? ''}
+        withdrawing={file.withdraw.withdrawing}
+        failed={file.withdraw.failed}
+        onConfirm={file.withdraw.confirm}
+        onClose={file.withdraw.close}
       />
     </View>
   );

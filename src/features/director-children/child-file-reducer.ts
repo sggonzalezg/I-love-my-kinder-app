@@ -2,6 +2,7 @@ import { CHILD_FILE_PARTS, type ChildFileField, type ChildFilePart, type ChildFi
 
 export type ChildFileStatus = 'editing' | 'saving';
 export type ChildPhotoStatus = 'idle' | 'uploading' | 'failed';
+export type ChildWithdrawStatus = 'closed' | 'open' | 'withdrawing' | 'failed';
 
 /** `savedPath` is the photo uploaded on this screen; null means the one the file loaded with. */
 export interface ChildPhotoState {
@@ -20,6 +21,7 @@ export interface ChildFileState {
   photo: ChildPhotoState;
   /** Pickup people whose cédula is shown; they hide again on another part or when the screen loses focus. */
   revealedIds: string[];
+  withdraw: ChildWithdrawStatus;
 }
 
 export const CHILD_FILE_ACTIONS = {
@@ -36,6 +38,10 @@ export const CHILD_FILE_ACTIONS = {
   PHOTO_SAVED: 'photoSaved',
   NATIONAL_ID_TOGGLED: 'nationalIdToggled',
   NATIONAL_IDS_HIDDEN: 'nationalIdsHidden',
+  WITHDRAW_OPENED: 'withdrawOpened',
+  WITHDRAW_CLOSED: 'withdrawClosed',
+  WITHDRAW_STARTED: 'withdrawStarted',
+  WITHDRAW_FAILED: 'withdrawFailed',
 } as const;
 
 export type ChildFileAction =
@@ -51,7 +57,11 @@ export type ChildFileAction =
   | { type: typeof CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED }
   | { type: typeof CHILD_FILE_ACTIONS.PHOTO_SAVED; path: string }
   | { type: typeof CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED; personId: string }
-  | { type: typeof CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN };
+  | { type: typeof CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN }
+  | { type: typeof CHILD_FILE_ACTIONS.WITHDRAW_OPENED }
+  | { type: typeof CHILD_FILE_ACTIONS.WITHDRAW_CLOSED }
+  | { type: typeof CHILD_FILE_ACTIONS.WITHDRAW_STARTED }
+  | { type: typeof CHILD_FILE_ACTIONS.WITHDRAW_FAILED };
 
 export const INITIAL_CHILD_FILE_STATE: ChildFileState = {
   part: CHILD_FILE_PARTS.data,
@@ -61,6 +71,7 @@ export const INITIAL_CHILD_FILE_STATE: ChildFileState = {
   saveFailed: false,
   photo: { sourceOpen: false, status: 'idle', cameraDenied: false, savedPath: null },
   revealedIds: [],
+  withdraw: 'closed',
 };
 
 function withPhoto(state: ChildFileState, photo: Partial<ChildPhotoState>): ChildFileState {
@@ -100,5 +111,14 @@ export function childFileReducer(state: ChildFileState, action: ChildFileAction)
         : { ...state, revealedIds: [...state.revealedIds, action.personId] };
     case CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN:
       return state.revealedIds.length ? { ...state, revealedIds: [] } : state;
+    case CHILD_FILE_ACTIONS.WITHDRAW_OPENED:
+      if (state.status === 'saving' || state.withdraw === 'withdrawing') return state;
+      return { ...state, withdraw: 'open' };
+    case CHILD_FILE_ACTIONS.WITHDRAW_CLOSED:
+      return state.withdraw === 'withdrawing' ? state : { ...state, withdraw: 'closed' };
+    case CHILD_FILE_ACTIONS.WITHDRAW_STARTED:
+      return { ...state, withdraw: 'withdrawing' };
+    case CHILD_FILE_ACTIONS.WITHDRAW_FAILED:
+      return { ...state, withdraw: 'failed' };
   }
 }

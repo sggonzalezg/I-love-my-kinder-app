@@ -21,9 +21,10 @@ interface ChildEnrollmentsPartProps {
   onReload: () => void;
   onChange: (enrollmentId: string) => void;
   onEnroll: () => void;
+  onWithdraw: () => void;
 }
 
-export function ChildEnrollmentsPart({ enrollments, failed, onReload, onChange, onEnroll }: ChildEnrollmentsPartProps) {
+export function ChildEnrollmentsPart({ enrollments, failed, onReload, onChange, onEnroll, onWithdraw }: ChildEnrollmentsPartProps) {
   const reduced = useReducedMotion();
   if (!enrollments) return <FilePartLoadState failed={failed} errorText={DIRECTOR_CHILDREN_COPY.enrollmentsLoadError} onReload={onReload} />;
 
@@ -50,6 +51,9 @@ export function ChildEnrollmentsPart({ enrollments, failed, onReload, onChange, 
       </PeopleSection>
       {canEnrollInAnotherGroup(enrollments) ? (
         <Button label={DIRECTOR_CHILDREN_COPY.enrollInAnotherGroup} icon={Plus} variant="soft" block onPress={onEnroll} />
+      ) : null}
+      {enrollments.length ? (
+        <Button label={DIRECTOR_CHILDREN_COPY.withdraw} variant="danger-soft" block style={styles.withdraw} onPress={onWithdraw} />
       ) : null}
     </Animated.View>
   );
