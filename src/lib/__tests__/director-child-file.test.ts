@@ -109,4 +109,8 @@ describe('savesWithActionBar', () => {
   it('leaves Contactos and Retiran to their own form', () => {
     expect([savesWithActionBar(CHILD_FILE_PARTS.contacts, true), savesWithActionBar(CHILD_FILE_PARTS.pickup, true)]).toEqual([false, false]);
   });
+
+  it('shows Autorizaciones read only, since the family answers them in the app', () => {
+    expect(savesWithActionBar(CHILD_FILE_PARTS.authorizations, true)).toBe(false);
+  });
 });

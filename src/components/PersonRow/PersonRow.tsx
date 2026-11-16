@@ -7,7 +7,7 @@ import { styles } from './PersonRow.styles';
 
 interface PersonRowProps {
   name: string;
-  detail: string;
+  detail: string | null;
   secondDetail?: string | null;
   action: ReactNode;
 }

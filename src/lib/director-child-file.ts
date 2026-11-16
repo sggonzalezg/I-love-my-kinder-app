@@ -4,7 +4,7 @@ import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 
 export const ALLERGIES_MAX_LENGTH = 500;
 
-export const CHILD_FILE_PARTS = { data: 'data', health: 'health', contacts: 'contacts', pickup: 'pickup' } as const;
+export const CHILD_FILE_PARTS = { data: 'data', health: 'health', contacts: 'contacts', pickup: 'pickup', authorizations: 'authorizations' } as const;
 export type ChildFilePart = (typeof CHILD_FILE_PARTS)[keyof typeof CHILD_FILE_PARTS];
 
 export interface DirectorChildFile {
@@ -72,7 +72,7 @@ export function isHealthGranted(records: AuthorizationRecord[]): boolean {
   return currentAuthorizations(records)[CHILD_AUTHORIZATIONS.health.id].granted;
 }
 
-/** Contactos and Retiran save each person in its own form; Salud saves only with the family's health authorization. */
+/** Contactos and Retiran save each person in its own form; Salud saves only with the family's health authorization; Autorizaciones is read only. */
 export function savesWithActionBar(part: ChildFilePart, healthGranted: boolean): boolean {
   return part === CHILD_FILE_PARTS.data || (part === CHILD_FILE_PARTS.health && healthGranted);
 }

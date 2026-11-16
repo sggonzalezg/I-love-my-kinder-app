@@ -8,7 +8,11 @@ import { useColors } from '@/theme/use-theme';
 
 import { LOCK_ICON_SIZE, styles } from './HealthLockedCard.styles';
 
-export function HealthLockedCard() {
+interface HealthLockedCardProps {
+  onSeeAuthorizations: () => void;
+}
+
+export function HealthLockedCard({ onSeeAuthorizations }: HealthLockedCardProps) {
   const colors = useColors();
   const backgroundStyles = useBackgroundColorStyles();
   return (
@@ -17,7 +21,10 @@ export function HealthLockedCard() {
       <View style={styles.text}>
         <Text variant="bodyStrong">{DIRECTOR_CHILDREN_COPY.healthLockedTitle}</Text>
         <Text variant="small" tone="muted">
-          {`${DIRECTOR_CHILDREN_COPY.healthLockedText} ${DIRECTOR_CHILDREN_COPY.healthLockedHint}`}
+          {`${DIRECTOR_CHILDREN_COPY.healthLockedText} ${DIRECTOR_CHILDREN_COPY.healthLockedHint} `}
+          <Text variant="smallStrong" tone="blue" accessibilityRole="link" onPress={onSeeAuthorizations}>
+            {DIRECTOR_CHILDREN_COPY.seeAuthorizations}
+          </Text>
         </Text>
       </View>
     </View>

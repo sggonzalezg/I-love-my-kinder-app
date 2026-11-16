@@ -4,6 +4,7 @@ import { useCallback, useReducer } from 'react';
 
 import { usePhotoSourcePicker } from '@/components/PhotoSourceSheet/use-photo-source-picker';
 import { childPersonFormHref } from '@/constants/routes';
+import { fetchChildAuthorizations } from '@/data/child-authorizations';
 import { fetchChildPeople } from '@/data/child-people';
 import { fetchDirectorChildFile, replaceChildPhoto, updateChildColumns } from '@/data/director-child-file';
 import { useSession } from '@/data/session';
@@ -27,6 +28,8 @@ export function useDirectorChildFile(childId: string) {
   const file = useAsync(() => fetchDirectorChildFile(childId), childId);
   const people = useAsync(() => fetchChildPeople(childId), childId, { keepDataOnReload: true });
   useReloadOnRefocus(people.reload);
+  const authorizations = useAsync(() => fetchChildAuthorizations(childId), childId, { keepDataOnReload: true });
+  useReloadOnRefocus(authorizations.reload);
   const [state, dispatch] = useReducer(childFileReducer, INITIAL_CHILD_FILE_STATE);
   useFocusEffect(useCallback(() => () => dispatch({ type: CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN }), []));
   const child = file.data;
@@ -102,6 +105,11 @@ export function useDirectorChildFile(childId: string) {
       toggleNationalId: (personId: string) => dispatch({ type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId }),
       edit: (kind: PersonKind, personId: string) => router.push(childPersonFormHref(childId, kind, personId)),
       add: (kind: PersonKind) => router.push(childPersonFormHref(childId, kind)),
+    },
+    authorizations: {
+      list: authorizations.data,
+      failed: authorizations.failed,
+      reload: authorizations.reload,
     },
     photo: {
       path: photoPath,

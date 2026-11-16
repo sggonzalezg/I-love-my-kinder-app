@@ -9,6 +9,7 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { ChildAuthorizationsPart } from '@/features/director-children/components/ChildAuthorizationsPart/ChildAuthorizationsPart';
 import { ChildPeoplePart } from '@/features/director-children/components/ChildPeoplePart/ChildPeoplePart';
 import { ChildPhotoField } from '@/features/director-children/components/ChildPhotoField/ChildPhotoField';
 import { FilePartChips } from '@/features/director-children/components/FilePartChips/FilePartChips';
@@ -22,7 +23,7 @@ import { BIRTH_DATE_MAX_LENGTH, CHILD_NAME_MAX_LENGTH, NEW_CHILD_MESSAGES } from
 
 import { KEYBOARD_BEHAVIOR, SKELETON_HEIGHTS, styles } from './DirectorChildFileScreen.styles';
 
-const SHOWN_PARTS = [CHILD_FILE_PARTS.data, CHILD_FILE_PARTS.health, CHILD_FILE_PARTS.contacts, CHILD_FILE_PARTS.pickup] as const;
+const SHOWN_PARTS = [CHILD_FILE_PARTS.data, CHILD_FILE_PARTS.health, CHILD_FILE_PARTS.contacts, CHILD_FILE_PARTS.pickup, CHILD_FILE_PARTS.authorizations] as const;
 
 interface DirectorChildFileScreenProps {
   childId: string;
@@ -80,7 +81,7 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
   }
 
   function healthFields(values: ChildFileValues, shownChild: DirectorChildFile) {
-    if (!shownChild.healthGranted) return <HealthLockedCard />;
+    if (!shownChild.healthGranted) return <HealthLockedCard onSeeAuthorizations={() => file.choosePart(CHILD_FILE_PARTS.authorizations)} />;
     return (
       <FormTextField
         label={DIRECTOR_CHILDREN_COPY.allergies}
@@ -120,6 +121,8 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
         return peoplePart(PERSON_KINDS.contact);
       case CHILD_FILE_PARTS.pickup:
         return peoplePart(PERSON_KINDS.pickup);
+      case CHILD_FILE_PARTS.authorizations:
+        return <ChildAuthorizationsPart authorizations={file.authorizations.list} failed={file.authorizations.failed} onReload={file.authorizations.reload} />;
     }
   }
 
