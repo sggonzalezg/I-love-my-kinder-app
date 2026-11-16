@@ -1,17 +1,18 @@
 import { KeyboardAvoidingView, View } from 'react-native';
 
-import { Avatar } from '@/components/avatar';
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
 import { FormActionBar } from '@/components/FormActionBar/FormActionBar';
 import { FormTextField } from '@/components/FormTextField/FormTextField';
+import { PhotoSourceSheet } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { ChildPhotoField } from '@/features/director-children/components/ChildPhotoField/ChildPhotoField';
 import { FilePartChips } from '@/features/director-children/components/FilePartChips/FilePartChips';
 import { HealthLockedCard } from '@/features/director-children/components/HealthLockedCard/HealthLockedCard';
-import { DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
+import { CHILD_PHOTO_SOURCE_COPY, DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { useDirectorChildFile } from '@/features/director-children/use-director-child-file';
 import { ALLERGIES_MAX_LENGTH, CHILD_FILE_PARTS, type ChildFileValues, type DirectorChildFile } from '@/lib/director-child-file';
 import { initials } from '@/lib/format';
@@ -34,9 +35,16 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
   function dataFields(values: ChildFileValues, shownChild: DirectorChildFile) {
     return (
       <>
-        <View style={styles.photo}>
-          <Avatar photoPath={shownChild.photoPath} initials={initials(shownChild.firstName, shownChild.lastName ?? '')} size="xl" />
-        </View>
+        <ChildPhotoField
+          photoPath={file.photo.path}
+          initials={initials(shownChild.firstName, shownChild.lastName ?? '')}
+          uploading={file.photo.uploading}
+          failed={file.photo.failed}
+          cameraDenied={file.photo.cameraDenied}
+          disabled={!editable}
+          onChange={file.photo.open}
+          onOpenSettings={file.photo.openSettings}
+        />
         <FormTextField
           label={DIRECTOR_CHILDREN_COPY.firstNames}
           value={values.firstName}
@@ -124,8 +132,15 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
     <View style={styles.root}>
       <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.root}>
         <Screen header={<TopBar title={title} backLabel={DIRECTOR_CHILDREN_COPY.backToChildren} />}>{body()}</Screen>
-        {canSave ? <FormActionBar label={DIRECTOR_CHILDREN_COPY.save} disabled={false} loading={file.saving} onPress={file.save} /> : null}
+        {canSave ? <FormActionBar label={DIRECTOR_CHILDREN_COPY.save} disabled={file.photo.uploading} loading={file.saving} onPress={file.save} /> : null}
       </KeyboardAvoidingView>
+      <PhotoSourceSheet
+        visible={file.photo.sourceOpen}
+        copy={CHILD_PHOTO_SOURCE_COPY}
+        onChoose={file.photo.choose}
+        onClose={file.photo.close}
+        onDismiss={file.photo.onSourceSheetDismissed}
+      />
     </View>
   );
 }
