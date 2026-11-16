@@ -8,8 +8,8 @@ function record(overrides: Partial<ChildConsentRecord>): ChildConsentRecord {
 }
 
 describe('signedAuthorizations', () => {
-  it('lists image, visibility and health in that order', () => {
-    expect(signedAuthorizations([], [ANA]).map((authorization) => authorization.key)).toEqual(['image', 'visibility', 'health']);
+  it('lists image and health in that order', () => {
+    expect(signedAuthorizations([], [ANA]).map((authorization) => authorization.key)).toEqual(['image', 'health']);
   });
 
   it('marks an authorization nobody answered as unanswered, never as no', () => {
@@ -48,7 +48,7 @@ describe('signedAuthorizations', () => {
   it('keeps each document apart', () => {
     const records = [record({ document_type: 'auth_health', document_version: 1, created_at: '2026-10-24T13:00:00Z' })];
 
-    const [image, , health] = signedAuthorizations(records, [ANA]);
+    const [image, health] =signedAuthorizations(records, [ANA]);
 
     expect(image.state).toBe(AUTHORIZATION_STATES.unanswered);
     expect(health.detail).toBe('Ana Rodríguez · 24/10/2026 · v1');

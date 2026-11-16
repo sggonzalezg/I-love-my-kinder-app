@@ -107,7 +107,7 @@ function buildChildren(
     const saved = queue.synced[key] ?? todayRoutines.get(child.id) ?? null;
     const queued = queue.items.find((item) => item.key === key);
     const status = childSyncStatus(queue.items, new Set(saved ? [child.id] : []), target);
-    const firstName = child.first_name ?? child.display_name;
+    const firstName = child.first_name;
     return {
       id: child.id,
       name: child.display_name,

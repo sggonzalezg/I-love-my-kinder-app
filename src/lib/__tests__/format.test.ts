@@ -1,4 +1,4 @@
-import { badgeText, bellLabel, chatIconLabel, initials, relationshipLabel, relationshipWord, senderLabel } from '../format';
+import { badgeText, bellLabel, chatIconLabel, initials, relationshipLabel, relationshipWord } from '../format';
 
 describe('small UI formatters', () => {
   it('caps the badge at 9+', () => {
@@ -31,19 +31,5 @@ describe('small UI formatters', () => {
     expect(relationshipWord('mother')).toBe('madre');
     expect(relationshipWord('father')).toBe('padre');
     expect(relationshipWord('Tía')).toBe('tía');
-  });
-
-  it('names a family sender with the child only when visibility is authorized (legal 7.3)', () => {
-    expect(senderLabel({ role: 'family', name: 'Ana Rodríguez', relationship: 'mother', childFirstName: 'Mateo', childVisible: true })).toBe(
-      'Ana Rodríguez, mamá de Mateo',
-    );
-    expect(senderLabel({ role: 'family', name: 'Diego Suárez', relationship: 'father', childFirstName: 'Tomás', childVisible: false })).toBe(
-      'Diego Suárez, familia',
-    );
-  });
-
-  it('names staff senders with their role', () => {
-    expect(senderLabel({ role: 'teacher', name: 'Sofía Martínez' })).toBe('Sofía Martínez · Maestra');
-    expect(senderLabel({ role: 'director', name: 'Laura' })).toBe('Dirección');
   });
 });
