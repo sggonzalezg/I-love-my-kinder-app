@@ -136,6 +136,61 @@ describe('childFileReducer', () => {
     });
   });
 
+  describe('withdraw', () => {
+    it('starts with the confirm sheet closed', () => {
+      expect(INITIAL_CHILD_FILE_STATE.withdraw).toBe('closed');
+    });
+
+    it('opens the confirm sheet', () => {
+      const state = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED });
+
+      expect(state.withdraw).toBe('open');
+    });
+
+    it('does not open the confirm sheet while the file is saving', () => {
+      const saving = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.SAVE_STARTED });
+      const state = childFileReducer(saving, { type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED });
+
+      expect(state).toBe(saving);
+    });
+
+    it('closes the confirm sheet', () => {
+      const opened = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED });
+      const state = childFileReducer(opened, { type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED });
+
+      expect(state.withdraw).toBe('closed');
+    });
+
+    it('marks the withdrawal as running', () => {
+      const opened = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED });
+      const state = childFileReducer(opened, { type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+
+      expect(state.withdraw).toBe('withdrawing');
+    });
+
+    it('keeps the sheet open while the withdrawal runs', () => {
+      const opened = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED });
+      const withdrawing = childFileReducer(opened, { type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+      const state = childFileReducer(withdrawing, { type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED });
+
+      expect(state).toBe(withdrawing);
+    });
+
+    it('keeps the sheet open with the failure', () => {
+      const withdrawing = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+      const state = childFileReducer(withdrawing, { type: CHILD_FILE_ACTIONS.WITHDRAW_FAILED });
+
+      expect(state.withdraw).toBe('failed');
+    });
+
+    it('clears the failure on a new try', () => {
+      const failed = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.WITHDRAW_FAILED });
+      const state = childFileReducer(failed, { type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+
+      expect(state.withdraw).toBe('withdrawing');
+    });
+  });
+
   describe('cédulas of the people who pick up', () => {
     it('shows a cédula on the first tap', () => {
       const state = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });

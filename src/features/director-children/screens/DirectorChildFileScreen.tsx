@@ -10,20 +10,21 @@ import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
 import { ChildAuthorizationsPart } from '@/features/director-children/components/ChildAuthorizationsPart/ChildAuthorizationsPart';
+import { ChildEnrollmentsPart } from '@/features/director-children/components/ChildEnrollmentsPart/ChildEnrollmentsPart';
 import { ChildPeoplePart } from '@/features/director-children/components/ChildPeoplePart/ChildPeoplePart';
 import { ChildPhotoField } from '@/features/director-children/components/ChildPhotoField/ChildPhotoField';
 import { FilePartChips } from '@/features/director-children/components/FilePartChips/FilePartChips';
 import { HealthLockedCard } from '@/features/director-children/components/HealthLockedCard/HealthLockedCard';
+import { WithdrawChildSheet } from '@/features/director-children/components/WithdrawChildSheet/WithdrawChildSheet';
 import { CHILD_PHOTO_SOURCE_COPY, DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { useDirectorChildFile } from '@/features/director-children/use-director-child-file';
 import { PERSON_KINDS, type PersonKind } from '@/lib/child-people';
-import { ALLERGIES_MAX_LENGTH, CHILD_FILE_PARTS, savesWithActionBar, type ChildFilePart, type ChildFileValues, type DirectorChildFile } from '@/lib/director-child-file';
+import { ALLERGIES_MAX_LENGTH, CHILD_FILE_PARTS, CHILD_FILE_PART_ORDER, savesWithActionBar, type ChildFilePart, type ChildFileValues, type DirectorChildFile } from '@/lib/director-child-file';
 import { initials } from '@/lib/format';
 import { BIRTH_DATE_MAX_LENGTH, CHILD_NAME_MAX_LENGTH, NEW_CHILD_MESSAGES } from '@/lib/new-child-form';
 
 import { KEYBOARD_BEHAVIOR, SKELETON_HEIGHTS, styles } from './DirectorChildFileScreen.styles';
 
-const SHOWN_PARTS = [CHILD_FILE_PARTS.data, CHILD_FILE_PARTS.health, CHILD_FILE_PARTS.contacts, CHILD_FILE_PARTS.pickup, CHILD_FILE_PARTS.authorizations] as const;
 
 interface DirectorChildFileScreenProps {
   childId: string;
@@ -123,6 +124,17 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
         return peoplePart(PERSON_KINDS.pickup);
       case CHILD_FILE_PARTS.authorizations:
         return <ChildAuthorizationsPart authorizations={file.authorizations.list} failed={file.authorizations.failed} onReload={file.authorizations.reload} />;
+      case CHILD_FILE_PARTS.enrollments:
+        return (
+          <ChildEnrollmentsPart
+            enrollments={file.enrollments.list}
+            failed={file.enrollments.failed}
+            onReload={file.enrollments.reload}
+            onChange={file.enrollments.change}
+            onEnroll={file.enrollments.enroll}
+            onWithdraw={file.withdraw.open}
+          />
+        );
     }
   }
 
@@ -153,7 +165,7 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
     }
     return (
       <View style={styles.form}>
-        <FilePartChips parts={SHOWN_PARTS} value={file.part} disabled={!editable} onChange={file.choosePart} />
+        <FilePartChips parts={CHILD_FILE_PART_ORDER} value={file.part} disabled={!editable} onChange={file.choosePart} />
         {partContent(file.part, file.values, child)}
         {file.saveFailed ? <Banner kind="error" text={NEW_CHILD_MESSAGES.saveFailed} /> : null}
       </View>
@@ -174,6 +186,14 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
         onChoose={file.photo.choose}
         onClose={file.photo.close}
         onDismiss={file.photo.onSourceSheetDismissed}
+      />
+      <WithdrawChildSheet
+        visible={file.withdraw.sheetOpen}
+        firstName={child?.firstName ?? ''}
+        withdrawing={file.withdraw.withdrawing}
+        failed={file.withdraw.failed}
+        onConfirm={file.withdraw.confirm}
+        onClose={file.withdraw.close}
       />
     </View>
   );
