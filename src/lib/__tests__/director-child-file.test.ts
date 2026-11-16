@@ -113,4 +113,8 @@ describe('savesWithActionBar', () => {
   it('shows Autorizaciones read only, since the family answers them in the app', () => {
     expect(savesWithActionBar(CHILD_FILE_PARTS.authorizations, true)).toBe(false);
   });
+
+  it('leaves Inscripciones to its own form', () => {
+    expect(savesWithActionBar(CHILD_FILE_PARTS.enrollments, true)).toBe(false);
+  });
 });
