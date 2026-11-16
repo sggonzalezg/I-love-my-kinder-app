@@ -1,8 +1,5 @@
-import type { AuthorizationRecord } from '@/lib/authorizations';
-import { AUTHORIZATION_KEYS } from '@/lib/authorizations';
 import type { ChildGroup, FamilyChild } from '@/lib/room-groups';
 import type { ShiftName } from '@/lib/shift';
-import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
@@ -76,16 +73,4 @@ export async function fetchRoomRoster(group: Pick<ChildGroup, 'roomId' | 'shiftI
     await supabase.rpc('get_room_roster', { room_id: group.roomId, shift_id: group.shiftId }),
   );
   return { children: roster.children ?? [], teachers: roster.teachers ?? [] };
-}
-
-const AUTHORIZATION_DOCUMENT_IDS = AUTHORIZATION_KEYS.map((key) => CHILD_AUTHORIZATIONS[key].id);
-
-export async function fetchChildAuthorizationRecords(childId: string): Promise<AuthorizationRecord[]> {
-  return throwOnError<AuthorizationRecord[]>(
-    await supabase
-      .from('consent_records')
-      .select('document_type, accepted, created_at')
-      .eq('child_id', childId)
-      .in('document_type', AUTHORIZATION_DOCUMENT_IDS),
-  );
 }
