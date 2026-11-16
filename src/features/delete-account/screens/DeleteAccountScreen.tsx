@@ -6,7 +6,7 @@ import { useEffect, useReducer } from 'react';
 import { View } from 'react-native';
 
 import { Button } from '@/components/button';
-import OtpInput from '@/components/otp-input';
+import { CODE_BOX_LOOKS, CodeBoxes } from '@/components/CodeBoxes/CodeBoxes';
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
@@ -22,7 +22,7 @@ import {
   deleteAccountReducer,
   initialDeleteAccountState,
 } from '@/features/delete-account/delete-account-reducer';
-import { RESEND_TICK_MS, deletionErrorMessage, isCompleteDeletionCode } from '@/lib/account-deletion';
+import { DELETION_CODE_LENGTH, RESEND_TICK_MS, deletionErrorMessage, isCompleteDeletionCode } from '@/lib/account-deletion';
 import { formatCountdown } from '@/lib/dates';
 
 import { styles } from './DeleteAccountScreen.styles';
@@ -92,7 +92,17 @@ export function DeleteAccountScreen() {
           {DELETE_ACCOUNT_COPY.codeSentTo}
           <Text variant="bodyStrong">{accountEmail.data ?? DELETE_ACCOUNT_COPY.accountEmailFallback}</Text>.
         </Text>
-        <OtpInput value={state.code} onChangeText={changeCode} error={!!state.error} editable={!isDeleting} style={styles.otp} />
+        <View style={styles.otp}>
+          <CodeBoxes
+            digits={state.code}
+            value={state.code}
+            length={DELETION_CODE_LENGTH}
+            look={state.error ? CODE_BOX_LOOKS.WRONG : CODE_BOX_LOOKS.FILLING}
+            editable={!isDeleting}
+            accessibilityLabel={DELETE_ACCOUNT_COPY.codeLabel}
+            onChange={changeCode}
+          />
+        </View>
         <View style={styles.actionsRow}>
           <Button label={DELETE_ACCOUNT_COPY.pasteCode} icon={ClipboardIcon} variant="plain" disabled={isDeleting} onPress={pasteCode} />
           {isCounting ? (

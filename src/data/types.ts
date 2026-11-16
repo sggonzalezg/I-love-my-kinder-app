@@ -4,7 +4,7 @@ import type { Role } from '@/lib/role';
 
 export interface AuthSession {
   user_id: string;
-  phone: string;
+  email: string;
   roles: Role[];
   active_role: Role;
   nursery_id: string;
@@ -14,7 +14,3 @@ export interface AuthSession {
   profile_photo?: string;
 }
 
-export interface AuthError {
-  code: 'unknown_number' | 'inactive_teacher' | 'network' | 'invalid_code' | 'expired_code' | 'too_many_attempts';
-  message: string;
-}

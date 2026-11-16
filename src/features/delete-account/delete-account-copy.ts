@@ -32,6 +32,7 @@ export const DELETE_ACCOUNT_COPY = {
   codeTitle: 'Confirmá que sos vos',
   back: 'Volver',
   codeSentTo: 'Te mandamos un código de 6 números a ',
+  codeLabel: 'Código de 6 números',
   accountEmailFallback: 'tu e-mail',
   pasteCode: 'Pegar código',
   resendIn: (countdown: string) => `Reenviar en ${countdown}`,

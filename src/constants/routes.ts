@@ -2,7 +2,18 @@ import type { Href } from 'expo-router';
 
 import type { PersonKind } from '@/lib/child-people';
 
-export const LOGIN_ROUTE = '/phone' as Href;
+export const LOGIN_ROUTE = '/sign-in' as Href;
+export const LOGIN_CONSENT_ROUTE = '/consent' as Href;
+export const ACCOUNT_DEACTIVATED_ROUTE = '/inactive' as Href;
+
+/** `waiting` opens the code screen on "Esperá un momento" when Supabase refused the send for its rate limits. */
+export function emailCodeHref(email: string, waiting = false): Href {
+  return { pathname: '/code', params: waiting ? { email, waiting: '1' } : { email } } as Href;
+}
+
+export function accountNotEnabledHref(email: string): Href {
+  return { pathname: '/not-enabled', params: { email } } as Href;
+}
 export const PUSH_PRIMER_ROUTE = '/push' as Href;
 export const FIRST_SIGN_IN_AUTHORIZATIONS_ROUTE = '/first-authorizations' as Href;
 export const NOTICES_ROUTE = '/notices' as Href;
