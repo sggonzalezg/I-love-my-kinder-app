@@ -15,8 +15,8 @@ import { AudienceRadios } from '@/features/calendar/components/AudienceRadios/Au
 import { DateSheet } from '@/features/calendar/components/DateSheet/DateSheet';
 import { DirectorAudienceFields } from '@/features/calendar/components/DirectorAudienceFields/DirectorAudienceFields';
 import { DiscardSheet } from '@/features/calendar/components/DiscardSheet/DiscardSheet';
-import { EventImageField } from '@/features/calendar/components/EventImageField/EventImageField';
 import { FormTextField } from '@/components/FormTextField/FormTextField';
+import { EventImageField } from '@/features/calendar/components/EventImageField/EventImageField';
 import { IconChips } from '@/features/calendar/components/IconChips/IconChips';
 import { ResignSheet } from '@/features/calendar/components/ResignSheet/ResignSheet';
 import { FormActionBar } from '@/components/FormActionBar/FormActionBar';
