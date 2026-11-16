@@ -1,10 +1,11 @@
-import { router, type Href } from 'expo-router';
+import { router } from 'expo-router';
 import { Clipboard } from 'lucide-react-native';
 import { View } from 'react-native';
 
 import { Chip } from '@/components/chip';
 import { PressableScale } from '@/components/pressable-scale';
 import { Text } from '@/components/text';
+import { outingPermissionHref } from '@/constants/routes';
 import { pendingRequestLine, type FamilyOutingRequest } from '@/lib/outing-permission';
 import { useColors } from '@/theme/use-theme';
 import { PERMISSION_COPY } from './outing-permission-copy';
@@ -25,7 +26,7 @@ export function PermissionRequestCard({ request }: PermissionRequestCardProps) {
     <PressableScale
       accessibilityRole="button"
       accessibilityLabel={`${PERMISSION_COPY.requestTitle}. ${line}. ${PERMISSION_COPY.statusChip.pending}`}
-      onPress={() => router.push(`/permission/${request.eventId}` as Href)}
+      onPress={() => router.push(outingPermissionHref(request.eventId))}
       style={styles.card}>
       <Clipboard size={ICON_SIZE} color={c.wait} strokeWidth={1.8} />
       <View style={styles.text}>

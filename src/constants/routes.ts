@@ -51,6 +51,12 @@ export function eventHref(eventId: string): Href {
   return `/event/${encodeURIComponent(eventId)}` as Href;
 }
 
+export const ROOM_TAB_ROUTE = '/room' as Href;
+
+export function outingPermissionHref(eventId: string): Href {
+  return `/permission/${encodeURIComponent(eventId)}` as Href;
+}
+
 export function outingPermissionsHref(eventId: string): Href {
   return `/outing-permissions/${encodeURIComponent(eventId)}` as Href;
 }

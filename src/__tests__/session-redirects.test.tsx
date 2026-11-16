@@ -20,6 +20,7 @@ jest.mock('react-native-gesture-handler', () => ({
 }));
 
 jest.mock('@/data/push-tokens', () => ({ useRefreshPushToken: jest.fn(), forgetDevicePushToken: jest.fn() }));
+jest.mock('@/data/push-deep-links', () => ({ useOpenTappedPush: jest.fn() }));
 
 jest.mock('@/data/supabase', () => ({
   invoke: jest.fn(),
