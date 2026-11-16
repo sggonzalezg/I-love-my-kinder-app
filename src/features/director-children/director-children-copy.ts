@@ -1,5 +1,6 @@
 import type { PhotoSourceCopy } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import type { AuthorizationKey } from '@/lib/authorizations';
+import type { AuthorizationAnswer } from '@/lib/child-authorizations';
 import type { PersonKind } from '@/lib/child-people';
 import type { ChildFilePart } from '@/lib/director-child-file';
 
@@ -28,7 +29,11 @@ export const DIRECTOR_CHILDREN_COPY = {
   noResultsTitle: 'No encontramos a nadie',
   noResultsHint: 'Probá con otro nombre o con otra sala.',
   groupsSeparator: ', ',
-  fileParts: { data: 'Datos', health: 'Salud', contacts: 'Contactos', pickup: 'Retiran' } satisfies Record<ChildFilePart, string>,
+  fileParts: { data: 'Datos', health: 'Salud', contacts: 'Contactos', pickup: 'Retiran', authorizations: 'Autorizaciones' } satisfies Record<ChildFilePart, string>,
+  authorizationTitles: { image: 'Imagen en redes sociales', visibility: 'Mostrar a familias', health: 'Datos de salud' } satisfies Record<AuthorizationKey, string>,
+  authorizationAnswers: { granted: 'Sí', denied: 'No', unanswered: 'Sin responder' } satisfies Record<AuthorizationAnswer, string>,
+  authorizationsLoadError: 'No pudimos cargar las autorizaciones.',
+  seeAuthorizations: 'Ver autorizaciones',
   filePartsLabel: 'Secciones de la ficha',
   allergies: 'Alergias',
   allergiesHelp: (firstName: string) => `Las ven solo las maestras de ${firstName} y la dirección.`,

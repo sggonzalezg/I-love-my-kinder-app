@@ -7,13 +7,13 @@ import { CircleActionButton } from '@/components/CircleActionButton/CircleAction
 import { IconButton } from '@/components/icon-button';
 import { PeopleSection } from '@/components/PeopleSection/PeopleSection';
 import { PersonRow } from '@/components/PersonRow/PersonRow';
-import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
+import { FilePartLoadState } from '@/features/director-children/components/FilePartLoadState/FilePartLoadState';
 import { DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { PERSON_KINDS, personDetailLine, personNationalId, personNationalIdLine, type ChildPerson, type PersonKind } from '@/lib/child-people';
 import { listEntering } from '@/theme/motion';
 
-import { SKELETON_ROW_HEIGHTS, styles } from './ChildPeoplePart.styles';
+import { styles } from './ChildPeoplePart.styles';
 
 interface ChildPeoplePartProps {
   kind: PersonKind;
@@ -30,23 +30,7 @@ export function ChildPeoplePart({ kind, people, failed, revealedIds, onReload, o
   const reduced = useReducedMotion();
   const isPickup = kind === PERSON_KINDS.pickup;
 
-  if (failed && !people) {
-    return (
-      <View style={styles.error}>
-        <Text tone="red">{DIRECTOR_CHILDREN_COPY.peopleLoadError}</Text>
-        <Button label={DIRECTOR_CHILDREN_COPY.retry} variant="soft" onPress={onReload} />
-      </View>
-    );
-  }
-  if (!people) {
-    return (
-      <View style={styles.part}>
-        {SKELETON_ROW_HEIGHTS.map((height, index) => (
-          <Skeleton key={index} height={height} />
-        ))}
-      </View>
-    );
-  }
+  if (!people) return <FilePartLoadState failed={failed} errorText={DIRECTOR_CHILDREN_COPY.peopleLoadError} onReload={onReload} />;
 
   function nationalIdButton(person: ChildPerson, nationalId: string | null) {
     if (!nationalId) return null;
