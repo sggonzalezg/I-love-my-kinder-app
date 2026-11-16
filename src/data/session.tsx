@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useReducer } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import type { AuthError, AuthSession } from './types';
+import { forgetDevicePushToken } from './push-tokens';
 import { supabase, invoke } from './supabase';
 import { SESSION_ACTIONS, initialSessionState, sessionReducer } from './session-reducer';
 import { resolveRoles, getActiveRole, type Role } from '@/lib/role';
@@ -144,6 +145,7 @@ export async function verifyPhoneCode(phone: string, code: string): Promise<Auth
 }
 
 export async function signOut(): Promise<void> {
+  await forgetDevicePushToken();
   await supabase.auth.signOut();
   await AsyncStorage.removeItem(SESSION_STORAGE_KEY);
   await forgetSavedFamilyToday();

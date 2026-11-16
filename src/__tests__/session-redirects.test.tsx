@@ -19,6 +19,8 @@ jest.mock('react-native-gesture-handler', () => ({
   GestureHandlerRootView: ({ children }: { children: React.ReactNode }) => children,
 }));
 
+jest.mock('@/data/push-tokens', () => ({ useRefreshPushToken: jest.fn(), forgetDevicePushToken: jest.fn() }));
+
 jest.mock('@/data/supabase', () => ({
   invoke: jest.fn(),
   supabase: {
