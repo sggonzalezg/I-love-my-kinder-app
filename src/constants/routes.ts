@@ -1,5 +1,7 @@
 import type { Href } from 'expo-router';
 
+import type { PersonKind } from '@/lib/child-people';
+
 export const LOGIN_ROUTE = '/phone' as Href;
 export const NOTICES_ROUTE = '/notices' as Href;
 export const DELETE_ACCOUNT_ROUTE = '/delete-account' as Href;
@@ -26,6 +28,11 @@ export const NEW_CHILD_ROUTE = '/child-form' as Href;
 
 export function editRoomHref(roomId: string, name: string, age: string | null): Href {
   return { pathname: '/room-form', params: { id: roomId, name, age: age ?? '' } } as Href;
+}
+
+/** Without `personId` the form adds a new person; the cédula is read by id, never passed here. */
+export function childPersonFormHref(childId: string, kind: PersonKind, personId?: string): Href {
+  return { pathname: '/child-person-form', params: personId ? { childId, kind, personId } : { childId, kind } } as Href;
 }
 
 export const CALENDAR_TAB_ROUTE = '/calendar' as Href;
