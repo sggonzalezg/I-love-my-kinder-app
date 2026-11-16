@@ -7,6 +7,7 @@ const TWO_GUARDIANS = 2;
 export const CHILD_AUTHORIZATIONS_COPY = {
   title: (childFirstName: string) => `Autorizaciones de ${childFirstName}`,
   back: 'Volver',
+  backToToday: 'Volver a Hoy',
   loadError: 'No pudimos cargar las autorizaciones.',
   retry: 'Reintentar',
   saved: 'Guardado',

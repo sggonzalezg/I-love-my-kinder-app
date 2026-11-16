@@ -43,6 +43,14 @@ export function childGroupFormHref(childId: string, enrollmentId?: string): Href
 export const CALENDAR_TAB_ROUTE = '/calendar' as Href;
 export const GALLERY_TAB_ROUTE = '/gallery' as Href;
 
+export const AUTHORIZATIONS_FROM_TODAY = 'today';
+
+/** From Hoy's reminder card, F3 opens on the first unanswered authorization and its back button says "Volver a Hoy". */
+export function childAuthorizationsHref(childId: string, childFirstName: string, reminderFocus?: string): Href {
+  const params = { childId, name: childFirstName };
+  return { pathname: '/authorizations/[childId]', params: reminderFocus ? { ...params, focus: reminderFocus, from: AUTHORIZATIONS_FROM_TODAY } : params } as Href;
+}
+
 export function childDayHref(childId: string): Href {
   return `/day/${encodeURIComponent(childId)}` as Href;
 }

@@ -13,6 +13,7 @@ const SECTION_TITLE_GAP = 10;
 const SKELETON_CARD_GAP = 14;
 
 export const styles = StyleSheet.create({
+  root: { flex: 1 },
   kids: { gap: KID_CARD_GAP },
   sectionHeader: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginTop: SECTION_TOP, marginBottom: SECTION_TITLE_GAP },
   skeletonCard: { flexDirection: 'row', alignItems: 'center', gap: SKELETON_CARD_GAP, borderRadius: radius.lg, padding: space.s3 },

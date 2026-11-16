@@ -1,11 +1,13 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import { FAMILY_TODAY_STORAGE_KEY_PREFIX } from '@/constants/cache';
+import type { ChildAuthorizationStateRow } from '@/lib/child-authorization-status';
 import { toIsoDate } from '@/lib/dates';
 import { kidDayStatus, loadWithSavedFallback, nextEventWindowEnd, type KidDayStatus, type NextEventTiming, type TodayRoutineKey } from '@/lib/family-today';
 import type { FamilyChild } from '@/lib/room-groups';
 import type { ShiftName } from '@/lib/shift';
 
+import { fetchChildAuthorizationStates } from './child-authorizations';
 import { fetchFamilyChildren } from './family-room';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
@@ -24,6 +26,8 @@ export interface FamilyToday {
   kids: TodayKid[];
   unreadNotices: number;
   nextEvent: NextEvent | null;
+  /** Missing in a cache saved before the reminder card existed. */
+  authorizationStates?: ChildAuthorizationStateRow[];
 }
 
 interface RoutineKeyRow {
@@ -89,18 +93,19 @@ async function fetchNextEvent(now: Date): Promise<NextEvent | null> {
 }
 
 async function fetchFamilyToday(userId: string, now: Date): Promise<FamilyToday> {
-  const [firstName, children, unreadNotices, nextEvent] = await Promise.all([
+  const [firstName, children, unreadNotices, nextEvent, authorizationStates] = await Promise.all([
     fetchFirstName(userId),
     fetchFamilyChildren(userId),
     fetchUnreadNoticeCount(userId),
     fetchNextEvent(now),
+    fetchChildAuthorizationStates(),
   ]);
   const todayRoutines = await fetchTodayRoutineKeys(
     children.map((child) => child.id),
     now,
   );
   const kids = children.map((child) => ({ ...child, dayStatus: kidDayStatus(child, todayRoutines) }));
-  return { firstName, kids, unreadNotices, nextEvent };
+  return { firstName, kids, unreadNotices, nextEvent, authorizationStates };
 }
 
 async function readSavedFamilyToday(userId: string): Promise<FamilyToday | null> {

@@ -15,7 +15,7 @@ import { useSettingsForm } from '@/features/director-settings/use-director-setti
 import { formatDbTime } from '@/lib/dates';
 import { ADDRESS_MAX_LENGTH, PHONE_MAX_LENGTH, type NurserySettings } from '@/lib/director-settings';
 import { shiftLabel } from '@/lib/shift';
-import { formLayoutTransition } from '@/theme/motion';
+import { layoutReflowTransition } from '@/theme/motion';
 
 import { KEYBOARD_BEHAVIOR, LATEST_SHIFT_TIME, SHIFT_TIME_MINUTE_STEP, styles } from './SettingsForm.styles';
 
@@ -44,7 +44,7 @@ export function SettingsForm({ saved }: SettingsFormProps) {
     <View style={styles.root}>
       <KeyboardAvoidingView behavior={KEYBOARD_BEHAVIOR} style={styles.root}>
         <Screen header={<TopBar title={DIRECTOR_SETTINGS_COPY.title} backLabel={DIRECTOR_SETTINGS_COPY.back} />}>
-          <Animated.View layout={formLayoutTransition} style={styles.form}>
+          <Animated.View layout={layoutReflowTransition} style={styles.form}>
             <FormTextField
               label={DIRECTOR_SETTINGS_COPY.address}
               value={details.address}
@@ -72,7 +72,7 @@ export function SettingsForm({ saved }: SettingsFormProps) {
               maxLength={PHONE_MAX_LENGTH}
               onChange={(value) => form.changeField('urgentPhone', value)}
             />
-            <Animated.View layout={formLayoutTransition} style={styles.shifts}>
+            <Animated.View layout={layoutReflowTransition} style={styles.shifts}>
               <Text variant="section" accessibilityRole="header">
                 {DIRECTOR_SETTINGS_COPY.shifts}
               </Text>

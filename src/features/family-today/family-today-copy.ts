@@ -11,4 +11,7 @@ export const FAMILY_TODAY_COPY = {
   loadError: 'No pudimos cargar tus hijos.',
   retry: 'Reintentar',
   noChildren: 'Tu hijo no está inscripto en el jardín.',
+  reminderTitle: (firstName: string) => `Faltan las autorizaciones de ${firstName}`,
+  reminderAnswer: 'Responder',
+  remindersFinished: (firstName: string) => `Listo: respondiste las autorizaciones de ${firstName}`,
 } as const;
