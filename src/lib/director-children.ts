@@ -1,8 +1,8 @@
-import { AUTHORIZATION_KEYS, currentAuthorizations, type AuthorizationKey } from './authorizations';
+import type { AuthorizationKey } from './authorizations';
+import { signedAuthorizations, type AuthorizationAnswer, type ChildConsentRecord, type Guardian } from './child-authorizations';
 import { countLabel, initials } from './format';
 import { foldForSearch } from './search';
 import { groupLabel, type ShiftName } from './shift';
-import { CHILD_AUTHORIZATIONS } from '@/legal/texts';
 
 export const ALL_ROOMS = 'all';
 
@@ -24,11 +24,12 @@ export interface ChildEnrollment {
   endedAt: string | null;
 }
 
-export interface ChildAuthorizationRecord {
+export interface ChildAuthorizationRecord extends ChildConsentRecord {
   childId: string;
-  documentType: string;
-  accepted: boolean;
-  createdAt: string;
+}
+
+export interface ChildGuardian extends Guardian {
+  childId: string;
 }
 
 export interface DirectorRoomOption {
@@ -40,6 +41,7 @@ export interface DirectorChildrenInput {
   children: DirectorChildRow[];
   enrollments: ChildEnrollment[];
   authorizations: ChildAuthorizationRecord[];
+  guardians: ChildGuardian[];
   rooms: DirectorRoomOption[];
 }
 
@@ -47,7 +49,7 @@ export type ChildStatus = { kind: 'active' } | { kind: 'leaving'; on: string } |
 
 export interface ChildAuthorizationMark {
   key: AuthorizationKey;
-  granted: boolean;
+  state: AuthorizationAnswer;
 }
 
 export interface DirectorChildEntry {
@@ -94,12 +96,11 @@ function openGroups(enrollments: ChildEnrollment[], now: Date): DirectorChildEnt
     .map((enrollment) => ({ roomId: enrollment.roomId, label: groupLabel(enrollment.roomName, enrollment.shift) }));
 }
 
-function authorizationMarks(records: ChildAuthorizationRecord[]): ChildAuthorizationMark[] {
-  const states = currentAuthorizations(records.map((record) => ({ document_type: record.documentType, accepted: record.accepted, created_at: record.createdAt })));
-  return AUTHORIZATION_KEYS.map((key) => ({ key, granted: states[CHILD_AUTHORIZATIONS[key].id].granted }));
+function authorizationMarks(records: ChildAuthorizationRecord[], guardians: ChildGuardian[]): ChildAuthorizationMark[] {
+  return signedAuthorizations(records, guardians).map(({ key, state }) => ({ key, state }));
 }
 
-export function buildChildEntries({ children, enrollments, authorizations }: DirectorChildrenInput, now: Date): DirectorChildEntry[] {
+export function buildChildEntries({ children, enrollments, authorizations, guardians }: DirectorChildrenInput, now: Date): DirectorChildEntry[] {
   return children
     .map((child) => {
       const childEnrollments = enrollments.filter((enrollment) => enrollment.childId === child.id);
@@ -109,7 +110,10 @@ export function buildChildEntries({ children, enrollments, authorizations }: Dir
         initials: initials(child.firstName, child.lastName ?? ''),
         photoPath: child.photoPath,
         groups: openGroups(childEnrollments, now),
-        authorizations: authorizationMarks(authorizations.filter((record) => record.childId === child.id)),
+        authorizations: authorizationMarks(
+          authorizations.filter((record) => record.childId === child.id),
+          guardians.filter((guardian) => guardian.childId === child.id),
+        ),
         status: childStatus(childEnrollments, now),
       };
     })
