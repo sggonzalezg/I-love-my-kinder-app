@@ -1,4 +1,4 @@
-import { AUTHORIZATIONS_FROM_TODAY, childAuthorizationsHref } from '../routes';
+import { AUTHORIZATIONS_FROM_TODAY, childAuthorizationsHref, legalDocumentHref } from '../routes';
 
 describe('childAuthorizationsHref', () => {
   it('opens the child authorizations with only the name when no reminder sent it', () => {
@@ -13,5 +13,11 @@ describe('childAuthorizationsHref', () => {
       pathname: '/authorizations/[childId]',
       params: { childId: 'child-mateo', name: 'Mateo', focus: 'health', from: AUTHORIZATIONS_FROM_TODAY },
     });
+  });
+});
+
+describe('legalDocumentHref', () => {
+  it('opens the in-app reader of a legal document', () => {
+    expect(legalDocumentHref('privacy')).toBe('/legal/privacy');
   });
 });

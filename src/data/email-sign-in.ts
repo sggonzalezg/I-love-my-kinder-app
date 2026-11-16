@@ -3,9 +3,9 @@ import type { Href } from 'expo-router';
 
 import { LOGIN_CONSENT_ROUTE } from '@/constants/routes';
 import { SESSION_STORAGE_KEY } from '@/constants/storage';
-import { getDocumentsToAccept, LOGIN_DOCUMENT_IDS, type LoginConsentRecord } from '@/lib/consent';
 import { linkedProfile, type PersonRow, type TeacherRow } from '@/lib/session-profile';
 
+import { fetchPendingLoginDocuments } from './consent';
 import { routeAfterLoginConsent } from './first-sign-in-authorizations';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
@@ -64,12 +64,6 @@ export async function startSignedInSession(userId: string, email: string): Promi
 }
 
 export async function routeAfterSignIn(session: AuthSession): Promise<Href> {
-  const records = await supabase
-    .from('consent_records')
-    .select('document_type, document_version, accepted')
-    .eq('user_id', session.user_id)
-    .in('document_type', LOGIN_DOCUMENT_IDS)
-    .then((result) => throwOnError<LoginConsentRecord[]>(result));
-  if (getDocumentsToAccept(records ?? []).length) return LOGIN_CONSENT_ROUTE;
+  if ((await fetchPendingLoginDocuments(session.user_id)).length) return LOGIN_CONSENT_ROUTE;
   return routeAfterLoginConsent(session);
 }

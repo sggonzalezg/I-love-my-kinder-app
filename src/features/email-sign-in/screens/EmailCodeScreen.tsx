@@ -9,7 +9,7 @@ import { CODE_BOX_LOOKS, CodeBoxes, type CodeBoxLook } from '@/components/CodeBo
 import { Screen } from '@/components/screen';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
-import { AlertLine } from '@/features/email-sign-in/components/AlertLine/AlertLine';
+import { AlertLine } from '@/components/AlertLine/AlertLine';
 import { SpamTip } from '@/features/email-sign-in/components/SpamTip/SpamTip';
 import { CODE_STATUSES, type CodeStatus } from '@/features/email-sign-in/email-code-reducer';
 import { EMAIL_SIGN_IN_COPY } from '@/features/email-sign-in/email-sign-in-copy';
