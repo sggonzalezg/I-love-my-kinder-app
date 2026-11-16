@@ -6,31 +6,26 @@ import Animated, { useReducedMotion } from 'react-native-reanimated';
 
 import { Banner } from '@/components/banner';
 import { Button } from '@/components/button';
+import { CircleActionButton } from '@/components/CircleActionButton/CircleActionButton';
+import { PeopleSection } from '@/components/PeopleSection/PeopleSection';
+import { PersonRow } from '@/components/PersonRow/PersonRow';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
-import { fetchChildFile, type PickupPerson } from '@/data/child-file';
+import { fetchChildFile } from '@/data/child-file';
 import { useAsync } from '@/data/use-async';
 import { CHILD_FILE_ACTIONS, childFileReducer, INITIAL_CHILD_FILE_STATE } from '@/features/child-file/child-file-reducer';
 import { CHILD_FILE_COPY } from '@/features/child-file/child-file-copy';
 import { AllergyCard } from '@/features/child-file/components/AllergyCard/AllergyCard';
 import { ChildHeader } from '@/features/child-file/components/ChildHeader/ChildHeader';
-import { CircleActionButton } from '@/features/child-file/components/CircleActionButton/CircleActionButton';
-import { PeopleSection } from '@/features/child-file/components/PeopleSection/PeopleSection';
-import { PersonRow } from '@/features/child-file/components/PersonRow/PersonRow';
-import { allergyState, childFileSubtitle, detailLine, formatNationalId, maskNationalId } from '@/lib/child-file';
+import { allergyState, childFileSubtitle, detailLine } from '@/lib/child-file';
+import { personNationalIdLine } from '@/lib/child-people';
 import { relationshipLabel } from '@/lib/format';
 import { formatUyPhone } from '@/lib/phone';
 import { listEntering } from '@/theme/motion';
 
 import { SKELETON_CARD_HEIGHT, SKELETON_HEADER_HEIGHT, SKELETON_LIST_HEIGHT, styles } from './ChildFileScreen.styles';
-
-function nationalIdText(person: PickupPerson, revealed: boolean): string | null {
-  if (!person.national_id) return null;
-  const shown = revealed ? formatNationalId(person.national_id) : maskNationalId(person.national_id);
-  return `${CHILD_FILE_COPY.nationalIdPrefix} ${shown}`;
-}
 
 export function ChildFileScreen({ childId }: { childId: string }) {
   const reduced = useReducedMotion();
@@ -100,7 +95,7 @@ export function ChildFileScreen({ childId }: { childId: string }) {
               <PersonRow
                 key={person.id}
                 name={person.name}
-                detail={detailLine([relationship(person.relationship), nationalIdText(person, revealed)])}
+                detail={detailLine([relationship(person.relationship), person.national_id ? personNationalIdLine(person.national_id, revealed) : null])}
                 action={
                   person.national_id ? (
                     <CircleActionButton

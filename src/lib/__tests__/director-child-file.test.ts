@@ -5,6 +5,7 @@ import {
   childFileErrors,
   initialChildFileValues,
   isHealthGranted,
+  savesWithActionBar,
   type DirectorChildFile,
 } from '../director-child-file';
 import { NEW_CHILD_MESSAGES } from '../new-child-form';
@@ -93,5 +94,19 @@ describe('isHealthGranted', () => {
 
   it('is not granted without records', () => {
     expect(isHealthGranted([])).toBe(false);
+  });
+});
+
+describe('savesWithActionBar', () => {
+  it('saves Datos with the action bar', () => {
+    expect(savesWithActionBar(CHILD_FILE_PARTS.data, false)).toBe(true);
+  });
+
+  it('saves Salud only with the health authorization', () => {
+    expect([savesWithActionBar(CHILD_FILE_PARTS.health, true), savesWithActionBar(CHILD_FILE_PARTS.health, false)]).toEqual([true, false]);
+  });
+
+  it('leaves Contactos and Retiran to their own form', () => {
+    expect([savesWithActionBar(CHILD_FILE_PARTS.contacts, true), savesWithActionBar(CHILD_FILE_PARTS.pickup, true)]).toEqual([false, false]);
   });
 });

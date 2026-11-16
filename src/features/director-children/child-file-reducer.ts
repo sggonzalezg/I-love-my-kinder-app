@@ -18,6 +18,8 @@ export interface ChildFileState {
   showErrors: boolean;
   saveFailed: boolean;
   photo: ChildPhotoState;
+  /** Pickup people whose cédula is shown; they hide again on another part or when the screen loses focus. */
+  revealedIds: string[];
 }
 
 export const CHILD_FILE_ACTIONS = {
@@ -32,6 +34,8 @@ export const CHILD_FILE_ACTIONS = {
   PHOTO_UPLOAD_STARTED: 'photoUploadStarted',
   PHOTO_UPLOAD_FAILED: 'photoUploadFailed',
   PHOTO_SAVED: 'photoSaved',
+  NATIONAL_ID_TOGGLED: 'nationalIdToggled',
+  NATIONAL_IDS_HIDDEN: 'nationalIdsHidden',
 } as const;
 
 export type ChildFileAction =
@@ -45,7 +49,9 @@ export type ChildFileAction =
   | { type: typeof CHILD_FILE_ACTIONS.PHOTO_CAMERA_DENIED }
   | { type: typeof CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED }
   | { type: typeof CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED }
-  | { type: typeof CHILD_FILE_ACTIONS.PHOTO_SAVED; path: string };
+  | { type: typeof CHILD_FILE_ACTIONS.PHOTO_SAVED; path: string }
+  | { type: typeof CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED; personId: string }
+  | { type: typeof CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN };
 
 export const INITIAL_CHILD_FILE_STATE: ChildFileState = {
   part: CHILD_FILE_PARTS.data,
@@ -54,6 +60,7 @@ export const INITIAL_CHILD_FILE_STATE: ChildFileState = {
   showErrors: false,
   saveFailed: false,
   photo: { sourceOpen: false, status: 'idle', cameraDenied: false, savedPath: null },
+  revealedIds: [],
 };
 
 function withPhoto(state: ChildFileState, photo: Partial<ChildPhotoState>): ChildFileState {
@@ -77,7 +84,7 @@ export function childFileReducer(state: ChildFileState, action: ChildFileAction)
       return withPhoto(state, { status: 'idle', savedPath: action.path });
     case CHILD_FILE_ACTIONS.PART_CHOSEN:
       if (state.status === 'saving') return state;
-      return { ...state, part: action.part, showErrors: false, saveFailed: false };
+      return { ...state, part: action.part, showErrors: false, saveFailed: false, revealedIds: [] };
     case CHILD_FILE_ACTIONS.FIELD_CHANGED:
       if (state.status === 'saving') return state;
       return { ...state, edits: { ...state.edits, [action.field]: action.value }, saveFailed: false };
@@ -87,5 +94,11 @@ export function childFileReducer(state: ChildFileState, action: ChildFileAction)
       return { ...state, status: 'saving', showErrors: true, saveFailed: false };
     case CHILD_FILE_ACTIONS.SAVE_FAILED:
       return { ...state, status: 'editing', saveFailed: true };
+    case CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED:
+      return state.revealedIds.includes(action.personId)
+        ? { ...state, revealedIds: state.revealedIds.filter((id) => id !== action.personId) }
+        : { ...state, revealedIds: [...state.revealedIds, action.personId] };
+    case CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN:
+      return state.revealedIds.length ? { ...state, revealedIds: [] } : state;
   }
 }

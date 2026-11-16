@@ -8,6 +8,7 @@ const TITLE_GAP = 10;
 
 export const styles = StyleSheet.create({
   section: { marginTop: space.s6, gap: TITLE_GAP },
+  untitledSection: { gap: TITLE_GAP },
   list: { borderRadius: radius.lg, overflow: 'hidden' },
   separator: { height: SEPARATOR_HEIGHT },
 });
