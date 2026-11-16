@@ -1,20 +1,11 @@
+import type { ChildPeople } from '@/lib/child-people';
 import { groupLabel, type ShiftName } from '@/lib/shift';
 
+import { fetchChildPeople } from './child-people';
 import { supabase } from './supabase';
 import { throwOnError } from './throw-on-error';
 
-export interface ChildContact {
-  id: string;
-  name: string;
-  relationship: string | null;
-  phone: string;
-}
-
-export interface PickupPerson extends ChildContact {
-  national_id: string | null;
-}
-
-export interface ChildFile {
+export interface ChildFile extends ChildPeople {
   id: string;
   firstName: string;
   lastName: string;
@@ -22,8 +13,6 @@ export interface ChildFile {
   photoPath: string | null;
   allergies: string | null;
   groupLabels: string[];
-  emergencyContacts: ChildContact[];
-  pickupPeople: PickupPerson[];
 }
 
 interface ChildRow {
@@ -36,17 +25,14 @@ interface ChildRow {
   enrollments: { ended_at: string | null; rooms: { name: string } | null; shifts: { name: ShiftName } | null }[];
 }
 
-const CONTACT_COLUMNS = 'id, name, relationship, phone';
-
 export async function fetchChildFile(childId: string): Promise<ChildFile> {
-  const [childResult, contactsResult, pickupResult] = await Promise.all([
+  const [childResult, people] = await Promise.all([
     supabase
       .from('children')
       .select('id, first_name, last_name, birth_date, photo_path, allergies, enrollments(ended_at, rooms(name), shifts(name))')
       .eq('id', childId)
       .single(),
-    supabase.from('emergency_contacts').select(CONTACT_COLUMNS).eq('child_id', childId).order('created_at'),
-    supabase.from('pickup_people').select(`${CONTACT_COLUMNS}, national_id`).eq('child_id', childId).order('created_at'),
+    fetchChildPeople(childId),
   ]);
   const child = throwOnError<ChildRow>(childResult);
 
@@ -60,7 +46,6 @@ export async function fetchChildFile(childId: string): Promise<ChildFile> {
     groupLabels: child.enrollments.flatMap((enrollment) =>
       !enrollment.ended_at && enrollment.rooms && enrollment.shifts ? [groupLabel(enrollment.rooms.name, enrollment.shifts.name)] : [],
     ),
-    emergencyContacts: throwOnError<ChildContact[]>(contactsResult),
-    pickupPeople: throwOnError<PickupPerson[]>(pickupResult),
+    ...people,
   };
 }

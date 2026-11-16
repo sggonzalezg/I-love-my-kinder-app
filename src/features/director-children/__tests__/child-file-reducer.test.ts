@@ -135,4 +135,39 @@ describe('childFileReducer', () => {
       expect(state.edits.firstName).toBe('Mateo');
     });
   });
+
+  describe('cédulas of the people who pick up', () => {
+    it('shows a cédula on the first tap', () => {
+      const state = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });
+
+      expect(state.revealedIds).toEqual(['p1']);
+    });
+
+    it('hides it again on the second tap', () => {
+      const shown = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });
+      const state = childFileReducer(shown, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });
+
+      expect(state.revealedIds).toEqual([]);
+    });
+
+    it('hides every cédula when the part changes', () => {
+      const shown = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });
+      const state = childFileReducer(shown, { type: CHILD_FILE_ACTIONS.PART_CHOSEN, part: CHILD_FILE_PARTS.contacts });
+
+      expect(state.revealedIds).toEqual([]);
+    });
+
+    it('hides every cédula when the screen loses focus', () => {
+      const shown = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_ID_TOGGLED, personId: 'p1' });
+      const state = childFileReducer(shown, { type: CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN });
+
+      expect(state.revealedIds).toEqual([]);
+    });
+
+    it('keeps the same state when nothing is shown', () => {
+      const state = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.NATIONAL_IDS_HIDDEN });
+
+      expect(state).toBe(INITIAL_CHILD_FILE_STATE);
+    });
+  });
 });

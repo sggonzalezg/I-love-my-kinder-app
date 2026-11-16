@@ -9,18 +9,20 @@ import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
 import { TopBar } from '@/components/top-bar';
+import { ChildPeoplePart } from '@/features/director-children/components/ChildPeoplePart/ChildPeoplePart';
 import { ChildPhotoField } from '@/features/director-children/components/ChildPhotoField/ChildPhotoField';
 import { FilePartChips } from '@/features/director-children/components/FilePartChips/FilePartChips';
 import { HealthLockedCard } from '@/features/director-children/components/HealthLockedCard/HealthLockedCard';
 import { CHILD_PHOTO_SOURCE_COPY, DIRECTOR_CHILDREN_COPY } from '@/features/director-children/director-children-copy';
 import { useDirectorChildFile } from '@/features/director-children/use-director-child-file';
-import { ALLERGIES_MAX_LENGTH, CHILD_FILE_PARTS, type ChildFileValues, type DirectorChildFile } from '@/lib/director-child-file';
+import { PERSON_KINDS, type PersonKind } from '@/lib/child-people';
+import { ALLERGIES_MAX_LENGTH, CHILD_FILE_PARTS, savesWithActionBar, type ChildFilePart, type ChildFileValues, type DirectorChildFile } from '@/lib/director-child-file';
 import { initials } from '@/lib/format';
 import { BIRTH_DATE_MAX_LENGTH, CHILD_NAME_MAX_LENGTH, NEW_CHILD_MESSAGES } from '@/lib/new-child-form';
 
 import { KEYBOARD_BEHAVIOR, SKELETON_HEIGHTS, styles } from './DirectorChildFileScreen.styles';
 
-const SHOWN_PARTS = [CHILD_FILE_PARTS.data, CHILD_FILE_PARTS.health] as const;
+const SHOWN_PARTS = [CHILD_FILE_PARTS.data, CHILD_FILE_PARTS.health, CHILD_FILE_PARTS.contacts, CHILD_FILE_PARTS.pickup] as const;
 
 interface DirectorChildFileScreenProps {
   childId: string;
@@ -92,6 +94,35 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
     );
   }
 
+  function peoplePart(kind: PersonKind) {
+    const lists = file.people.lists;
+    return (
+      <ChildPeoplePart
+        kind={kind}
+        people={lists ? (kind === PERSON_KINDS.pickup ? lists.pickupPeople : lists.emergencyContacts) : null}
+        failed={file.people.failed}
+        revealedIds={file.people.revealedIds}
+        onReload={file.people.reload}
+        onToggleNationalId={file.people.toggleNationalId}
+        onEdit={(personId) => file.people.edit(kind, personId)}
+        onAdd={() => file.people.add(kind)}
+      />
+    );
+  }
+
+  function partContent(part: ChildFilePart, values: ChildFileValues, shownChild: DirectorChildFile) {
+    switch (part) {
+      case CHILD_FILE_PARTS.data:
+        return dataFields(values, shownChild);
+      case CHILD_FILE_PARTS.health:
+        return healthFields(values, shownChild);
+      case CHILD_FILE_PARTS.contacts:
+        return peoplePart(PERSON_KINDS.contact);
+      case CHILD_FILE_PARTS.pickup:
+        return peoplePart(PERSON_KINDS.pickup);
+    }
+  }
+
   function body() {
     if (file.failed) {
       return (
@@ -120,13 +151,13 @@ export function DirectorChildFileScreen({ childId }: DirectorChildFileScreenProp
     return (
       <View style={styles.form}>
         <FilePartChips parts={SHOWN_PARTS} value={file.part} disabled={!editable} onChange={file.choosePart} />
-        {file.part === CHILD_FILE_PARTS.data ? dataFields(file.values, child) : healthFields(file.values, child)}
+        {partContent(file.part, file.values, child)}
         {file.saveFailed ? <Banner kind="error" text={NEW_CHILD_MESSAGES.saveFailed} /> : null}
       </View>
     );
   }
 
-  const canSave = child !== null && (file.part === CHILD_FILE_PARTS.data || child.healthGranted);
+  const canSave = child !== null && savesWithActionBar(file.part, child.healthGranted);
 
   return (
     <View style={styles.root}>

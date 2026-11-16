@@ -1,5 +1,6 @@
 import type { PhotoSourceCopy } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import type { AuthorizationKey } from '@/lib/authorizations';
+import type { PersonKind } from '@/lib/child-people';
 import type { ChildFilePart } from '@/lib/director-child-file';
 
 export const DIRECTOR_CHILDREN_COPY = {
@@ -27,7 +28,7 @@ export const DIRECTOR_CHILDREN_COPY = {
   noResultsTitle: 'No encontramos a nadie',
   noResultsHint: 'Probá con otro nombre o con otra sala.',
   groupsSeparator: ', ',
-  fileParts: { data: 'Datos', health: 'Salud' } satisfies Record<ChildFilePart, string>,
+  fileParts: { data: 'Datos', health: 'Salud', contacts: 'Contactos', pickup: 'Retiran' } satisfies Record<ChildFilePart, string>,
   filePartsLabel: 'Secciones de la ficha',
   allergies: 'Alergias',
   allergiesHelp: (firstName: string) => `Las ven solo las maestras de ${firstName} y la dirección.`,
@@ -41,6 +42,27 @@ export const DIRECTOR_CHILDREN_COPY = {
   photoFailed: 'No pudimos cambiar la foto. Probá de nuevo.',
   cameraDenied: 'Necesitamos permiso para usar la cámara.',
   openSettings: 'Abrir Ajustes',
+  addContact: 'Sumar contacto',
+  addPickupPerson: 'Sumar persona',
+  pickupHelp: 'La familia te da estos datos y le avisa a esa persona.',
+  noContacts: 'Todavía no hay contactos de emergencia.',
+  noPickupPeople: 'Todavía no hay personas autorizadas a retirarlo.',
+  peopleLoadError: 'No pudimos cargar los contactos.',
+  editPerson: (name: string) => `Editar a ${name}`,
+  showNationalId: (name: string) => `Mostrar cédula de ${name}`,
+  hideNationalId: (name: string) => `Ocultar cédula de ${name}`,
+  personFormTitles: {
+    contact: { add: 'Sumar contacto de emergencia', edit: 'Editar contacto' },
+    pickup: { add: 'Sumar persona que retira', edit: 'Editar persona que retira' },
+  } satisfies Record<PersonKind, { add: string; edit: string }>,
+  personName: 'Nombre y apellido',
+  relationship: 'Vínculo',
+  phone: 'Teléfono',
+  pickupNationalIdHelp: 'La maestra la controla antes de entregar al niño a alguien que no conoce. La ven solo la dirección y las maestras del niño.',
+  personSaveFailed: 'No pudimos guardar. Probá de nuevo.',
+  personLoadError: 'No pudimos cargar a esta persona.',
+  personNotFound: 'No encontramos a esta persona.',
+  closeForm: 'Cerrar',
   authorizationChips: { image: 'Redes', visibility: 'Visibilidad', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
   authorizationState: (label: string, granted: boolean) => `${label}: ${granted ? 'sí' : 'no'}`,
 } as const;
