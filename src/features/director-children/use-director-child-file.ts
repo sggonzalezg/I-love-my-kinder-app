@@ -5,7 +5,7 @@ import { useCallback, useReducer } from 'react';
 import { usePhotoSourcePicker } from '@/components/PhotoSourceSheet/use-photo-source-picker';
 import { childGroupFormHref, childPersonFormHref } from '@/constants/routes';
 import { fetchChildAuthorizations } from '@/data/child-authorizations';
-import { fetchChildEnrollments } from '@/data/child-enrollments';
+import { fetchChildEnrollments, withdrawChild } from '@/data/child-enrollments';
 import { fetchChildPeople } from '@/data/child-people';
 import { fetchDirectorChildFile, replaceChildPhoto, updateChildColumns } from '@/data/director-child-file';
 import { useSession } from '@/data/session';
@@ -87,6 +87,22 @@ export function useDirectorChildFile(childId: string) {
     router.back();
   }
 
+  async function confirmWithdraw() {
+    if (!child) return;
+    dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_STARTED });
+    try {
+      await withdrawChild(child.id);
+    } catch (error) {
+      console.warn('Child withdrawal failed:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_FAILED });
+      return;
+    }
+    Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+    dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED });
+    router.back();
+  }
+
   return {
     child,
     values,
@@ -120,6 +136,14 @@ export function useDirectorChildFile(childId: string) {
       reload: enrollments.reload,
       change: (enrollmentId: string) => router.push(childGroupFormHref(childId, enrollmentId)),
       enroll: () => router.push(childGroupFormHref(childId)),
+    },
+    withdraw: {
+      sheetOpen: state.withdraw !== 'closed',
+      withdrawing: state.withdraw === 'withdrawing',
+      failed: state.withdraw === 'failed',
+      open: () => dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_OPENED }),
+      close: () => dispatch({ type: CHILD_FILE_ACTIONS.WITHDRAW_CLOSED }),
+      confirm: confirmWithdraw,
     },
     photo: {
       path: photoPath,
