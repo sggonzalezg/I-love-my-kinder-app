@@ -37,10 +37,15 @@ const TOO_MANY_REQUESTS_STATUS = 429;
 const RATE_LIMIT_CODES = ['over_email_send_rate_limit', 'over_request_rate_limit'];
 const RETRYABLE_FETCH_ERROR = 'AuthRetryableFetchError';
 const REFUSED_CODE_STATUS = 403;
-const REFUSED_CODE_CODES = ['otp_expired', 'invalid_credentials'];
+const REFUSED_CODE_CODES = ['otp_expired', 'invalid_credentials', 'invalid_code'];
 
 export function normalizeEmail(raw: string): string {
   return raw.trim().toLowerCase();
+}
+
+export function isReviewEmail(email: string, reviewEmail: string | undefined): boolean {
+  const review = normalizeEmail(reviewEmail ?? '');
+  return review !== '' && normalizeEmail(email) === review;
 }
 
 export function emailProblem(raw: string): EmailProblem | null {

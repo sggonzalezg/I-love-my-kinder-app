@@ -3,6 +3,7 @@ import {
   EMAIL_PROBLEMS,
   SIGN_IN_FAILURES,
   emailProblem,
+  isReviewEmail,
   normalizeEmail,
   sendCodeFailure,
   verifyCodeFailure,
@@ -97,5 +98,29 @@ describe('verifyCodeFailure', () => {
 
   it('reads a server error as another failure', () => {
     expect(verifyCodeFailure({ status: 500, message: 'Database error' }, SENT_AT, SENT_AT)).toBe(SIGN_IN_FAILURES.OTHER);
+  });
+
+  it('calls the review sign-in refusal a wrong code', () => {
+    expect(verifyCodeFailure({ status: 401, code: 'invalid_code', message: 'El código no es correcto' }, SENT_AT, SENT_AT)).toBe(
+      SIGN_IN_FAILURES.WRONG_CODE,
+    );
+  });
+});
+
+describe('isReviewEmail', () => {
+  it('matches the review email whatever its case and spaces', () => {
+    expect(isReviewEmail(' Review@Test.local ', 'review@test.local')).toBe(true);
+  });
+
+  it('does not match another email', () => {
+    expect(isReviewEmail('ana@gmail.com', 'review@test.local')).toBe(false);
+  });
+
+  it('is off when the build sets no review email', () => {
+    expect(isReviewEmail('review@test.local', undefined)).toBe(false);
+  });
+
+  it('is off when the review email setting is blank', () => {
+    expect(isReviewEmail('', '  ')).toBe(false);
   });
 });
