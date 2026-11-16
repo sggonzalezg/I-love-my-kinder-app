@@ -63,4 +63,76 @@ describe('childFileReducer', () => {
 
     expect(switched).toBe(saving);
   });
+
+  describe('photo', () => {
+    it('starts with the source sheet closed and no new photo', () => {
+      const photo = INITIAL_CHILD_FILE_STATE.photo;
+
+      expect(photo).toEqual({ sourceOpen: false, status: 'idle', cameraDenied: false, savedPath: null });
+    });
+
+    it('opens the source sheet and clears an earlier camera refusal and failure', () => {
+      const denied = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_CAMERA_DENIED });
+      const failed = childFileReducer(denied, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED });
+      const state = childFileReducer(failed, { type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_OPENED });
+
+      expect(state.photo).toEqual({ sourceOpen: true, status: 'idle', cameraDenied: false, savedPath: null });
+    });
+
+    it('closes the source sheet', () => {
+      const opened = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_OPENED });
+      const state = childFileReducer(opened, { type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_CLOSED });
+
+      expect(state.photo.sourceOpen).toBe(false);
+    });
+
+    it('does not open the source sheet while the file is saving', () => {
+      const saving = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.SAVE_STARTED });
+      const state = childFileReducer(saving, { type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_OPENED });
+
+      expect(state).toBe(saving);
+    });
+
+    it('does not open the source sheet while a photo uploads', () => {
+      const uploading = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED });
+      const state = childFileReducer(uploading, { type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_OPENED });
+
+      expect(state).toBe(uploading);
+    });
+
+    it('marks the camera as refused', () => {
+      const state = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_CAMERA_DENIED });
+
+      expect(state.photo.cameraDenied).toBe(true);
+    });
+
+    it('marks the upload and clears an earlier failure', () => {
+      const failed = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED });
+      const state = childFileReducer(failed, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED });
+
+      expect(state.photo.status).toBe('uploading');
+    });
+
+    it('keeps the photo it had after a failed upload', () => {
+      const saved = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_SAVED, path: 'n/children/c/first.jpg' });
+      const uploading = childFileReducer(saved, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED });
+      const state = childFileReducer(uploading, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED });
+
+      expect([state.photo.status, state.photo.savedPath]).toEqual(['failed', 'n/children/c/first.jpg']);
+    });
+
+    it('holds the new photo path once saved', () => {
+      const uploading = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED });
+      const state = childFileReducer(uploading, { type: CHILD_FILE_ACTIONS.PHOTO_SAVED, path: 'n/children/c/new.jpg' });
+
+      expect([state.photo.status, state.photo.savedPath]).toEqual(['idle', 'n/children/c/new.jpg']);
+    });
+
+    it('keeps the field edits while the photo changes', () => {
+      const edited = childFileReducer(INITIAL_CHILD_FILE_STATE, { type: CHILD_FILE_ACTIONS.FIELD_CHANGED, field: 'firstName', value: 'Mateo' });
+      const state = childFileReducer(edited, { type: CHILD_FILE_ACTIONS.PHOTO_SAVED, path: 'n/children/c/new.jpg' });
+
+      expect(state.edits.firstName).toBe('Mateo');
+    });
+  });
 });

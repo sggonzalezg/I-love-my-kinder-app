@@ -1,3 +1,4 @@
+import type { PhotoSourceCopy } from '@/components/PhotoSourceSheet/PhotoSourceSheet';
 import type { AuthorizationKey } from '@/lib/authorizations';
 import type { ChildFilePart } from '@/lib/director-child-file';
 
@@ -36,6 +37,17 @@ export const DIRECTOR_CHILDREN_COPY = {
   save: 'Guardar',
   fileLoadError: 'No pudimos cargar la ficha.',
   fileNotFound: 'No encontramos a este niño.',
+  changePhoto: 'Cambiar foto',
+  photoFailed: 'No pudimos cambiar la foto. Probá de nuevo.',
+  cameraDenied: 'Necesitamos permiso para usar la cámara.',
+  openSettings: 'Abrir Ajustes',
   authorizationChips: { image: 'Redes', visibility: 'Visibilidad', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
   authorizationState: (label: string, granted: boolean) => `${label}: ${granted ? 'sí' : 'no'}`,
 } as const;
+
+export const CHILD_PHOTO_SOURCE_COPY: PhotoSourceCopy = {
+  title: 'Cambiar foto',
+  takePhoto: 'Sacar foto',
+  choosePhoto: 'Elegir de la galería',
+  cancel: 'Cancelar',
+};

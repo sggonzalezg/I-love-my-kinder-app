@@ -2,7 +2,9 @@ import * as Haptics from 'expo-haptics';
 import { router } from 'expo-router';
 import { useReducer } from 'react';
 
-import { fetchDirectorChildFile, updateChildColumns } from '@/data/director-child-file';
+import { usePhotoSourcePicker } from '@/components/PhotoSourceSheet/use-photo-source-picker';
+import { fetchDirectorChildFile, replaceChildPhoto, updateChildColumns } from '@/data/director-child-file';
+import { useSession } from '@/data/session';
 import { useAsync } from '@/data/use-async';
 import { CHILD_FILE_ACTIONS, INITIAL_CHILD_FILE_STATE, childFileReducer } from '@/features/director-children/child-file-reducer';
 import {
@@ -24,6 +26,28 @@ export function useDirectorChildFile(childId: string) {
   const values = child ? { ...initialChildFileValues(child), ...state.edits } : null;
   const errors = values ? childFileErrors(state.part, values, new Date()) : NO_ERRORS;
   const shownErrors = state.showErrors ? errors : NO_ERRORS;
+  const { session } = useSession();
+  const photoPath = state.photo.savedPath ?? child?.photoPath ?? null;
+
+  async function uploadPhoto(localUri: string) {
+    if (!child || !session) return;
+    dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_STARTED });
+    try {
+      const path = await replaceChildPhoto({ nurseryId: session.nursery_id, childId: child.id, localUri, previousPath: photoPath });
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
+      dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_SAVED, path });
+    } catch (error) {
+      console.warn('Child photo change failed:', error);
+      Haptics.notificationAsync(Haptics.NotificationFeedbackType.Error);
+      dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_UPLOAD_FAILED });
+    }
+  }
+
+  const photoPicker = usePhotoSourcePicker({
+    closeSheet: () => dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_CLOSED }),
+    onPicked: uploadPhoto,
+    onCameraDenied: () => dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_CAMERA_DENIED }),
+  });
 
   async function save() {
     if (!child || !values) return;
@@ -63,5 +87,15 @@ export function useDirectorChildFile(childId: string) {
     choosePart: (part: ChildFilePart) => dispatch({ type: CHILD_FILE_ACTIONS.PART_CHOSEN, part }),
     change: (field: ChildFileField, value: string) => dispatch({ type: CHILD_FILE_ACTIONS.FIELD_CHANGED, field, value }),
     save,
+    photo: {
+      path: photoPath,
+      sourceOpen: state.photo.sourceOpen,
+      uploading: state.photo.status === 'uploading',
+      failed: state.photo.status === 'failed',
+      cameraDenied: state.photo.cameraDenied,
+      open: () => dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_OPENED }),
+      close: () => dispatch({ type: CHILD_FILE_ACTIONS.PHOTO_SOURCE_CLOSED }),
+      ...photoPicker,
+    },
   };
 }
