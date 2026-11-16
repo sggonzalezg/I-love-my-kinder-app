@@ -3,6 +3,7 @@ import { router } from 'expo-router';
 import { useEffect, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
 
+import { AuthorizationTextSheet } from '@/components/AuthorizationTextSheet/AuthorizationTextSheet';
 import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Sheet } from '@/components/sheet';
@@ -22,7 +23,6 @@ import {
 } from '@/lib/authorizations';
 import { space } from '@/theme/tokens';
 import { AuthorizationRow } from './authorization-row';
-import { AuthorizationTextSheet } from './authorization-text-sheet';
 import { AUTHORIZATION_SAVE_ERROR, AUTHORIZATION_SAVED, authorizationsFootnote, authorizationsIntro } from './authorization-copy';
 
 const SCREEN_ID = 'F3';
@@ -123,7 +123,7 @@ export function AuthorizationsScreen({ childId, childName }: AuthorizationsScree
         )}
       </Sheet>
 
-      <AuthorizationTextSheet authorizationKey={textKey} childName={childName} onClose={() => setTextKey(null)} />
+      <AuthorizationTextSheet authorizationKey={textKey} childFullName={childName} onClose={() => setTextKey(null)} />
 
       {showSaved && <Toast message={AUTHORIZATION_SAVED} />}
     </View>
