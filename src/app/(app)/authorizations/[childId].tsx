@@ -1,8 +1,9 @@
 import { useLocalSearchParams } from 'expo-router';
 
-import { AuthorizationsScreen } from '@/features/family/authorizations-screen';
+import { focusKeyFromParam } from '@/features/child-authorizations/child-authorizations-copy';
+import { ChildAuthorizationsScreen } from '@/features/child-authorizations/screens/ChildAuthorizationsScreen';
 
 export default function AuthorizationsRoute() {
-  const { childId, name } = useLocalSearchParams<{ childId: string; name: string }>();
-  return <AuthorizationsScreen childId={childId} childName={name ?? ''} />;
+  const { childId, name, focus } = useLocalSearchParams<{ childId: string; name?: string; focus?: string }>();
+  return <ChildAuthorizationsScreen childId={childId} childFirstName={name ?? ''} focusKey={focusKeyFromParam(focus)} />;
 }

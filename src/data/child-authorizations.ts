@@ -22,6 +22,36 @@ export async function fetchChildAuthorizationStates(targetChildId?: string): Pro
   );
 }
 
+export interface ChildAuthorizationsContext {
+  childFirstName: string;
+  childFullName: string;
+  guardianCount: number;
+  ownFirstName: string;
+  rows: ChildAuthorizationStateRow[];
+}
+
+interface ChildWithGuardianLinksRow {
+  first_name: string;
+  last_name: string | null;
+  family_member_children: { family_member_id: string }[];
+}
+
+export async function fetchChildAuthorizationsContext(childId: string, userId: string): Promise<ChildAuthorizationsContext> {
+  const [child, ownMember, rows] = await Promise.all([
+    supabase.from('children').select('first_name, last_name, family_member_children(family_member_id)').eq('id', childId).single(),
+    supabase.from('family_members').select('first_name').eq('user_id', userId).limit(1),
+    fetchChildAuthorizationStates(childId),
+  ]);
+  const { first_name: firstName, last_name: lastName, family_member_children: guardianLinks } = throwOnError<ChildWithGuardianLinksRow>(child);
+  return {
+    childFirstName: firstName,
+    childFullName: [firstName, lastName].filter(Boolean).join(' '),
+    guardianCount: guardianLinks.length,
+    ownFirstName: throwOnError<{ first_name: string }[]>(ownMember)[0]?.first_name ?? '',
+    rows,
+  };
+}
+
 interface AuthorizationAnswerInput {
   childId: string;
   key: AuthorizationKey;
