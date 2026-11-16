@@ -1,4 +1,4 @@
-// Verbatim from projects/i-love-my-kinder/legal/consent-texts.md v1.10 (04/11/2026).
+// Verbatim from projects/i-love-my-kinder/legal/consent-texts.md v1.21 (16/11/2026).
 // Do not reword: each acceptance points at the exact text and version the person saw.
 
 export const NURSERY_NAME = 'I Love My Kinder';
@@ -10,7 +10,7 @@ export const CONSENT = {
   privacyBefore: 'Leí la ',
   privacyLink: 'Política de privacidad',
   privacyAfter:
-    ' y autorizo el tratamiento de mis datos personales para las finalidades que allí se indican, incluido el envío de mi teléfono y de las notificaciones a proveedores en Estados Unidos.',
+    ' y autorizo el tratamiento de mis datos personales para las finalidades que allí se indican, incluido su alojamiento en Brasil y el envío de mi mail y de las notificaciones a proveedores en Estados Unidos.',
   error: 'Necesitamos que aceptes para seguir',
   updated: (docName: string, date: string) => `Actualizamos ${docName} el ${date}. Leelo y aceptalo para seguir usando la app.`,
 };

@@ -6,7 +6,7 @@ import { recordConsent } from '@/data/consent';
 import { useColors } from '@/theme/use-theme';
 import { space, screenMargin } from '@/theme/tokens';
 import { CONSENT } from '@/legal/texts';
-import { getDocumentsToAccept, LOGIN_DOCUMENTS } from '@/lib/consent';
+import { LOGIN_CONSENT_SCREEN_ID, LOGIN_DOCUMENTS } from '@/lib/consent';
 import Button from '@/components/button';
 import ConsentCheckbox from '@/components/consent-checkbox';
 import Text from '@/components/text';
@@ -32,8 +32,8 @@ export default function ConsentScreen() {
     setError(null);
 
     try {
-      for (const document of [LOGIN_DOCUMENTS.terms, LOGIN_DOCUMENTS.privacy]) {
-        await recordConsent({ documentId: document.id, version: document.version, accepted: true, screen: 'S0c' });
+      for (const document of Object.values(LOGIN_DOCUMENTS)) {
+        await recordConsent({ documentId: document.id, version: document.version, accepted: true, screen: LOGIN_CONSENT_SCREEN_ID });
       }
 
       router.replace('/(auth)/push' as any);

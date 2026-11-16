@@ -4,7 +4,7 @@ import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useSession, verifyPhoneCode } from '@/data/session';
 import { supabase } from '@/data/supabase';
 import { toE164 } from '@/lib/phone';
-import { getDocumentsToAccept } from '@/lib/consent';
+import { getDocumentsToAccept, LOGIN_DOCUMENT_IDS } from '@/lib/consent';
 import { useColors } from '@/theme/use-theme';
 import { space, screenMargin } from '@/theme/tokens';
 import Button from '@/components/button';
@@ -46,9 +46,9 @@ export default function CodeLoginScreen() {
       // Check which login documents need acceptance.
       const { data: records } = await supabase
         .from('consent_records')
-        .select('document_id, version, accepted')
+        .select('document_type, document_version, accepted')
         .eq('user_id', session.user_id)
-        .in('document_id', ['terms', 'privacy']);
+        .in('document_type', LOGIN_DOCUMENT_IDS);
 
       const docsToAccept = getDocumentsToAccept(records || []);
 
