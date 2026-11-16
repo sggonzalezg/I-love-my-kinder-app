@@ -12,11 +12,16 @@ export function noticeHref(noticeId: string): Href {
 export function childFileHref(childId: string): Href {
   return `/child/${encodeURIComponent(childId)}` as Href;
 }
+export function directorChildHref(childId: string): Href {
+  return `/director-child/${encodeURIComponent(childId)}` as Href;
+}
+
 export function roomGroupHref(roomId: string, shiftId: string): Href {
   return `/room-group/${encodeURIComponent(roomId)}/${encodeURIComponent(shiftId)}` as Href;
 }
 
 export const NEW_ROOM_ROUTE = '/room-form' as Href;
+export const NEW_CHILD_ROUTE = '/child-form' as Href;
 
 export function editRoomHref(roomId: string, name: string, age: string | null): Href {
   return { pathname: '/room-form', params: { id: roomId, name, age: age ?? '' } } as Href;
