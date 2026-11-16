@@ -31,13 +31,6 @@ export const CHILD_AUTHORIZATIONS = {
     text: (child: string) =>
       `Como madre, padre o tutor legal de ${child}, autorizo a ${NURSERY_NAME} a publicar fotos y videos de ${child} tomados durante las actividades del Jardín en su Instagram (https://www.instagram.com/ilovemykinder_), donde puede verlos cualquier persona. Se conservan publicados mientras ${child} esté inscripto, salvo que retire esta autorización. Sé que puedo retirarla en cualquier momento desde la app o pidiéndolo al Jardín; desde ese momento no se publican nuevas imágenes y el Jardín quita las que publicó en sus cuentas, pero no puede recuperar copias que otras personas hayan guardado o compartido. Esta autorización es solo para redes sociales. Dentro de la app, las fotos y videos en los que aparece ${child} pueden llegar a otras familias de su sala.`,
   },
-  visibility: {
-    id: 'auth_visibility',
-    version: '1.1',
-    title: 'Mostrar a las familias de la sala',
-    text: (child: string) =>
-      `Autorizo que las familias de la sala y turno de ${child} vean en la lista de la sala su nombre, su foto y el día y mes de su cumpleaños (sin el año). Si no lo autorizo, en la lista verán solo sus iniciales y no su cumpleaños. Puedo retirarla en cualquier momento.`,
-  },
   health: {
     id: 'auth_health',
     version: '1.0',

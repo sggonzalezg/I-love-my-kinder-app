@@ -40,23 +40,3 @@ export function relationshipShortWord(relationship: string): string {
 export function relationshipWord(relationship: string): string {
   return RELATIONSHIPS[relationship]?.formal ?? relationship.toLowerCase();
 }
-
-type Sender =
-  | { role: 'family'; name: string; relationship: string; childFirstName: string; childVisible: boolean }
-  | { role: 'teacher' | 'assistant' | 'director'; name: string };
-
-/** The child's first name appears only with the visibility authorization (legal/consent-texts.md 7.3). */
-export function senderLabel(sender: Sender): string {
-  switch (sender.role) {
-    case 'director':
-      return 'Dirección';
-    case 'teacher':
-      return `${sender.name} · Maestra`;
-    case 'assistant':
-      return `${sender.name} · Asistente`;
-    case 'family': {
-      if (!sender.childVisible) return `${sender.name}, familia`;
-      return `${sender.name}, ${relationshipShortWord(sender.relationship)} de ${sender.childFirstName}`;
-    }
-  }
-}

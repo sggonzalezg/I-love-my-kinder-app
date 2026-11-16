@@ -54,7 +54,7 @@ export const DIRECTOR_CHILDREN_COPY = {
   groupFormActions: { change: 'Guardar', enroll: 'Inscribir' },
   room: 'Sala',
   enrollmentNotFound: 'Este grupo ya cambió. Volvé a la ficha.',
-  authorizationTitles: { image: 'Imagen en redes sociales', visibility: 'Mostrar a familias', health: 'Datos de salud' } satisfies Record<AuthorizationKey, string>,
+  authorizationTitles: { image: 'Imagen en redes sociales', health: 'Datos de salud' } satisfies Record<AuthorizationKey, string>,
   authorizationAnswers: { granted: 'Sí', denied: 'No', unanswered: 'Sin responder' } satisfies Record<AuthorizationAnswer, string>,
   authorizationsLoadError: 'No pudimos cargar las autorizaciones.',
   seeAuthorizations: 'Ver autorizaciones',
@@ -92,7 +92,7 @@ export const DIRECTOR_CHILDREN_COPY = {
   personLoadError: 'No pudimos cargar a esta persona.',
   personNotFound: 'No encontramos a esta persona.',
   closeForm: 'Cerrar',
-  authorizationChips: { image: 'Redes', visibility: 'Visibilidad', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
+  authorizationChips: { image: 'Redes', health: 'Salud' } satisfies Record<AuthorizationKey, string>,
   authorizationState: (label: string, granted: boolean) => `${label}: ${granted ? 'sí' : 'no'}`,
 } as const;
 
