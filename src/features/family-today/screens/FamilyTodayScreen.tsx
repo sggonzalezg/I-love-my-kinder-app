@@ -7,22 +7,25 @@ import { Button } from '@/components/button';
 import { Screen } from '@/components/screen';
 import { Skeleton } from '@/components/skeleton';
 import { Text } from '@/components/text';
+import { Toast } from '@/components/toast';
 import { CALENDAR_TAB_ROUTE, GALLERY_TAB_ROUTE, childDayHref, eventHref } from '@/constants/routes';
 import { useSession } from '@/data/session';
 import { useFamilyOutingRequests } from '@/data/use-family-outing-requests';
 import type { TodayKid } from '@/data/family-today';
 import { useUnreadChatThreads } from '@/features/chat/use-unread-chat-threads';
 import { ChildDayScreen } from '@/features/child-day/screens/ChildDayScreen';
+import { AuthorizationReminderList } from '@/features/family-today/components/AuthorizationReminderList/AuthorizationReminderList';
 import { FamilyTodayTopBar } from '@/features/family-today/components/FamilyTodayTopBar/FamilyTodayTopBar';
 import { KidCard } from '@/features/family-today/components/KidCard/KidCard';
 import { NextEventRow } from '@/features/family-today/components/NextEventRow/NextEventRow';
 import { TodayActions } from '@/features/family-today/components/TodayActions/TodayActions';
 import { FAMILY_TODAY_COPY } from '@/features/family-today/family-today-copy';
+import { useAuthorizationReminders } from '@/features/family-today/use-authorization-reminders';
 import { useFamilyToday } from '@/features/family-today/use-family-today';
 import { PermissionRequestCard } from '@/features/outing-permission/permission-request-card';
 import { familyGreeting, onlyKidWithDay } from '@/lib/family-today';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
-import { listEntering } from '@/theme/motion';
+import { layoutReflowTransition, listEntering } from '@/theme/motion';
 
 import { SKELETON_CHIPS_LINE, SKELETON_KID_CARDS, SKELETON_NAME_LINE, SKELETON_PHOTO_SIZE, styles } from './FamilyTodayScreen.styles';
 
@@ -53,6 +56,9 @@ export function FamilyTodayScreen() {
   const unreadChats = useUnreadChatThreads(session?.user_id ?? null);
   const pendingRequests = useFamilyOutingRequests().filter((request) => request.status === 'pending');
   const { familyToday, offline, loading, failed, reload } = useFamilyToday();
+  const reminders = useAuthorizationReminders(familyToday);
+  const reminderList = <AuthorizationReminderList reminders={reminders} />;
+  const finishedToast = reminders.finishedChildName ? <Toast message={FAMILY_TODAY_COPY.remindersFinished(reminders.finishedChildName)} /> : null;
 
   const unreadNotices = familyToday?.unreadNotices ?? 0;
   const nextEvent = familyToday?.nextEvent ?? null;
@@ -76,18 +82,22 @@ export function FamilyTodayScreen() {
   const onlyKid = familyToday && !offline ? onlyKidWithDay(familyToday.kids) : null;
   if (onlyKid) {
     return (
-      <ChildDayScreen
-        childId={onlyKid.id}
-        home={{
-          actions: <TodayActions unreadNotices={unreadNotices} unreadChats={unreadChats} />,
-          footer: (
-            <>
-              {permissionCards}
-              {nextEventSection}
-            </>
-          ),
-        }}
-      />
+      <View style={styles.root}>
+        <ChildDayScreen
+          childId={onlyKid.id}
+          home={{
+            actions: <TodayActions unreadNotices={unreadNotices} unreadChats={unreadChats} />,
+            reminders: reminderList,
+            footer: (
+              <>
+                {permissionCards}
+                {nextEventSection}
+              </>
+            ),
+          }}
+        />
+        {finishedToast}
+      </View>
     );
   }
 
@@ -105,22 +115,26 @@ export function FamilyTodayScreen() {
   }
 
   return (
-    <Screen header={header}>
-      {offline ? <Banner kind="offline" text={FAMILY_TODAY_COPY.offline} /> : null}
-      {permissionCards}
-      {loading || !familyToday ? (
-        <KidCardsSkeleton />
-      ) : (
-        <View style={styles.kids}>
-          {familyToday.kids.length === 0 ? <Text tone="muted">{FAMILY_TODAY_COPY.noChildren}</Text> : null}
-          {familyToday.kids.map((kid, index) => (
-            <Animated.View key={kid.id} entering={listEntering(index, reduced)}>
-              <KidCard kid={kid} onPress={() => openKid(kid)} />
-            </Animated.View>
-          ))}
-        </View>
-      )}
-      {nextEventSection}
-    </Screen>
+    <View style={styles.root}>
+      <Screen header={header}>
+        {offline ? <Banner kind="offline" text={FAMILY_TODAY_COPY.offline} /> : null}
+        {permissionCards}
+        {reminderList}
+        {loading || !familyToday ? (
+          <KidCardsSkeleton />
+        ) : (
+          <Animated.View layout={layoutReflowTransition} style={styles.kids}>
+            {familyToday.kids.length === 0 ? <Text tone="muted">{FAMILY_TODAY_COPY.noChildren}</Text> : null}
+            {familyToday.kids.map((kid, index) => (
+              <Animated.View key={kid.id} entering={listEntering(index, reduced)}>
+                <KidCard kid={kid} onPress={() => openKid(kid)} />
+              </Animated.View>
+            ))}
+          </Animated.View>
+        )}
+        {nextEventSection ? <Animated.View layout={layoutReflowTransition}>{nextEventSection}</Animated.View> : null}
+      </Screen>
+      {finishedToast}
+    </View>
   );
 }

@@ -24,6 +24,7 @@ import { formatLongDate, fromIsoDate } from '@/lib/dates';
 import { initials } from '@/lib/format';
 import { shiftLabel } from '@/lib/shift';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
+import { layoutReflowTransition } from '@/theme/motion';
 import { useIsDark } from '@/theme/use-theme';
 
 import { SKELETON, shiftEntering, styles, topInsetStyle } from './ChildDayScreen.styles';
@@ -33,7 +34,7 @@ const EMPTY_DAY_ILLUSTRATION = require('@/assets/images/blocks-markus-spiske.jpg
 interface ChildDayScreenProps {
   childId: string;
   /** With one child, F6 is the Hoy tab itself: no back button, F2's actions in the header and its cards below the day. */
-  home?: { actions: ReactNode; footer: ReactNode };
+  home?: { actions: ReactNode; reminders: ReactNode; footer: ReactNode };
 }
 
 function singleRoomName(groups: DayGroup[]): string | null {
@@ -122,7 +123,8 @@ export function ChildDayScreen({ childId, home }: ChildDayScreenProps) {
             </Text>
           ) : null}
         </View>
-        <Animated.View key={day.shown.group.key} entering={shiftEntering(day.enterFrom, reduced)}>
+        {day.isToday ? home?.reminders : null}
+        <Animated.View key={day.shown.group.key} entering={shiftEntering(day.enterFrom, reduced)} layout={layoutReflowTransition}>
           <ShiftDay
             shown={day.shown}
             day={selectedDay}

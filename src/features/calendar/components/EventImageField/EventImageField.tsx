@@ -9,7 +9,7 @@ import { Text } from '@/components/text';
 import { EVENT_FORM_COPY } from '@/features/calendar/event-form-copy';
 import type { EventImage } from '@/lib/event-image';
 import { useBackgroundColorStyles } from '@/theme/color-styles';
-import { attachmentEntering, formLayoutTransition } from '@/theme/motion';
+import { attachmentEntering, layoutReflowTransition } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
 
 import { ATTACH_ICON_SIZE, ATTACH_PRESSED_SCALE, REMOVE_ICON_SIZE, styles } from './EventImageField.styles';
@@ -28,7 +28,7 @@ export function EventImageField({ image, cameraDenied, disabled, onAdd, onRemove
   const backgroundStyles = useBackgroundColorStyles();
 
   return (
-    <Animated.View layout={formLayoutTransition} style={styles.field}>
+    <Animated.View layout={layoutReflowTransition} style={styles.field}>
       <Text variant="label">
         {EVENT_FORM_COPY.image}
         <Text variant="small" tone="muted">

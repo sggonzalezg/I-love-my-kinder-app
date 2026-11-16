@@ -14,7 +14,7 @@ export interface FamilyTodayState {
 export function useFamilyToday(): FamilyTodayState {
   const { session } = useSession();
   const userId = session?.user_id ?? null;
-  const load = useAsync(() => loadFamilyToday(userId!, new Date()), userId);
+  const load = useAsync(() => loadFamilyToday(userId!, new Date()), userId, { keepDataOnReload: true });
   useReloadOnRefocus(load.reload);
 
   return {

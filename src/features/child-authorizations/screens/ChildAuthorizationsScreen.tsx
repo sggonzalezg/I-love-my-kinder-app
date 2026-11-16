@@ -28,9 +28,10 @@ interface ChildAuthorizationsScreenProps {
   /** Shown in the title while the child loads. */
   childFirstName: string;
   focusKey: AuthorizationKey | null;
+  openedFromToday: boolean;
 }
 
-export function ChildAuthorizationsScreen({ childId, childFirstName, focusKey }: ChildAuthorizationsScreenProps) {
+export function ChildAuthorizationsScreen({ childId, childFirstName, focusKey, openedFromToday }: ChildAuthorizationsScreenProps) {
   const { view, loading, failed, reload, answer } = useChildAuthorizations(childId);
   const [state, dispatch] = useReducer(childAuthorizationsReducer, initialChildAuthorizationsState);
   const scrollRef = useRef<ScrollViewInstance>(null);
@@ -61,7 +62,7 @@ export function ChildAuthorizationsScreen({ childId, childFirstName, focusKey }:
     <View style={styles.root}>
       <Screen
         bleed
-        header={<TopBar title={CHILD_AUTHORIZATIONS_COPY.title(firstName)} backLabel={CHILD_AUTHORIZATIONS_COPY.back} onBack={() => router.back()} />}>
+        header={<TopBar title={CHILD_AUTHORIZATIONS_COPY.title(firstName)} backLabel={openedFromToday ? CHILD_AUTHORIZATIONS_COPY.backToToday : CHILD_AUTHORIZATIONS_COPY.back} onBack={() => router.back()} />}>
         <ScrollView ref={scrollRef} contentContainerStyle={styles.content}>
           {failed && !view && (
             <View style={styles.error}>

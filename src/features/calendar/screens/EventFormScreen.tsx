@@ -44,7 +44,7 @@ import {
 } from '@/lib/event-form';
 import { isOuting, typeChangeValues } from '@/lib/outing-fields';
 import { askPermissionCaption, outingBannerText } from '@/lib/outing-form';
-import { formLayoutTransition } from '@/theme/motion';
+import { layoutReflowTransition } from '@/theme/motion';
 import { useColors } from '@/theme/use-theme';
 
 import { ERROR_ICON_SIZE, KEYBOARD_BEHAVIOR, SKELETON_HEIGHT, styles } from './EventFormScreen.styles';
@@ -230,7 +230,7 @@ export function EventFormScreen() {
               onOpenSettings={imagePicker.openSettings}
             />
 
-            <Animated.View layout={formLayoutTransition} style={styles.section}>
+            <Animated.View layout={layoutReflowTransition} style={styles.section}>
               <Text variant="label">{EVENT_FORM_COPY.notifications}</Text>
               <FormRows>
                 {form.isEdit ? null : (

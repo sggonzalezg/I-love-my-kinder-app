@@ -1,4 +1,4 @@
-import { cubicBezier, Easing, FadeInDown, Keyframe, LinearTransition, ReduceMotion } from 'react-native-reanimated';
+import { cubicBezier, Easing, FadeInDown, FadeOut, Keyframe, LinearTransition, ReduceMotion } from 'react-native-reanimated';
 
 export const duration = { fast: 120, base: 220, slow: 320, exitBase: 150, beat: 900 } as const;
 
@@ -43,8 +43,20 @@ export const attachmentEntering = new Keyframe({
   .duration(duration.base)
   .reduceMotion(ReduceMotion.System);
 
-/** The fields under an attached image move down with it instead of jumping. */
-export const formLayoutTransition = LinearTransition.duration(duration.base).easing(easeOut).reduceMotion(ReduceMotion.System);
+/** What sits below a block that appears or leaves moves with it instead of jumping (the fields under an attached image, the cards under a leaving one). */
+export const layoutReflowTransition = LinearTransition.duration(duration.base).easing(easeOut).reduceMotion(ReduceMotion.System);
+
+export const REMINDER_CARD_LEAVE_DELAY_MS = 600;
+const REMINDER_CARD_LEAVE_SCALE = 0.96;
+
+// Design section 7, "Reminder card leaves": scale to .96 with a fade; a short fade with reduced motion.
+export function reminderCardExiting(reduced: boolean) {
+  if (reduced) return FadeOut.duration(duration.fast);
+  return new Keyframe({
+    0: { opacity: 1, transform: [{ scale: 1 }] },
+    100: { opacity: 0, transform: [{ scale: REMINDER_CARD_LEAVE_SCALE }], easing: easeOut },
+  }).duration(duration.base);
+}
 
 export const pressSpring ={ damping: 18, stiffness: 220 } as const;
 
