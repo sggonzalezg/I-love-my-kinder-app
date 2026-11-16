@@ -3,6 +3,7 @@ import { View, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import { useSession } from '@/data/session';
 import { recordConsent } from '@/data/consent';
+import { routeAfterLoginConsent } from '@/data/first-sign-in-authorizations';
 import { useColors } from '@/theme/use-theme';
 import { space, screenMargin } from '@/theme/tokens';
 import { CONSENT } from '@/legal/texts';
@@ -36,7 +37,7 @@ export default function ConsentScreen() {
         await recordConsent({ documentId: document.id, version: document.version, accepted: true, screen: LOGIN_CONSENT_SCREEN_ID });
       }
 
-      router.replace('/(auth)/push' as any);
+      router.replace(await routeAfterLoginConsent(session));
     } catch (err: any) {
       if (err.message?.includes('offline') || err.message?.includes('network')) {
         setOffline(true);

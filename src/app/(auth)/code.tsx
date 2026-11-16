@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { View, useColorScheme } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { routeAfterLoginConsent } from '@/data/first-sign-in-authorizations';
 import { useSession, verifyPhoneCode } from '@/data/session';
 import { supabase } from '@/data/supabase';
 import { toE164 } from '@/lib/phone';
@@ -55,7 +56,7 @@ export default function CodeLoginScreen() {
       if (docsToAccept.length > 0) {
         router.replace('/(auth)/consent' as any);
       } else {
-        router.replace('/(auth)/push' as any);
+        router.replace(await routeAfterLoginConsent(session));
       }
     } catch (err: any) {
       if (err.code === 'invalid_code') {
