@@ -1,6 +1,8 @@
 import { StyleSheet } from 'react-native';
+import type { CSSTransitionProperties } from 'react-native-reanimated';
 
 import { TRANSPARENT, type BackgroundName } from '@/theme/color-styles';
+import { cssEaseOut, duration } from '@/theme/motion';
 import { radius, space } from '@/theme/tokens';
 
 export type ButtonPaletteVariant = 'primary' | 'soft' | 'plain' | 'danger' | 'danger-soft' | 'ghost';
@@ -28,3 +30,9 @@ export const styles = StyleSheet.create({
 export function buttonHeightStyle(height: number) {
   return { minHeight: height };
 }
+
+export const colorFade: CSSTransitionProperties = {
+  transitionProperty: 'backgroundColor',
+  transitionDuration: duration.fast,
+  transitionTimingFunction: cssEaseOut,
+};

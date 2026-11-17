@@ -14,6 +14,10 @@ export function emailCodeHref(email: string, waiting = false): Href {
 export function accountNotEnabledHref(email: string): Href {
   return { pathname: '/not-enabled', params: { email } } as Href;
 }
+export function legalDocumentHref(documentKey: string): Href {
+  return `/legal/${encodeURIComponent(documentKey)}` as Href;
+}
+
 export const PUSH_PRIMER_ROUTE = '/push' as Href;
 export const FIRST_SIGN_IN_AUTHORIZATIONS_ROUTE = '/first-authorizations' as Href;
 export const NOTICES_ROUTE = '/notices' as Href;
