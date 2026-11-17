@@ -53,6 +53,12 @@ export const darkColors: Colors = {
   white: '#FFFFFF',
 };
 
+/** Set by Google's sign-in branding rules, outside the brand palette (design.md "Provider button"). */
+export const googleButtonColors = {
+  light: { background: '#FFFFFF', ink: '#1F1F1F', line: '#747775' },
+  dark: { background: '#131314', ink: '#E3E3E3', line: '#8E918F' },
+} as const;
+
 /** The dark plate under white controls laid over a photo, the same in both themes. */
 export const mediaPlateColor = 'rgba(13,20,38,0.72)';
 

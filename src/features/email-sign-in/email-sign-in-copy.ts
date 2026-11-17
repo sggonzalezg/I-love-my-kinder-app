@@ -1,4 +1,5 @@
 import { EMAIL_CODE_LENGTH, EMAIL_PROBLEMS, type EmailProblem } from '@/lib/email-sign-in';
+import type { SocialProvider } from '@/lib/social-sign-in';
 
 export const NURSERY_EMAIL_SENDER = 'hola@ilovemykinder.uy';
 
@@ -45,6 +46,16 @@ export const EMAIL_SIGN_IN_COPY = {
 
   deactivatedTitle: 'Tu cuenta de este jardín ya no está activa. Hablá con la dirección',
   writeNursery: 'Escribirle al jardín',
+} as const;
+
+const PROVIDER_NAMES: Record<SocialProvider, string> = { apple: 'Apple', google: 'Google' };
+
+export const SOCIAL_SIGN_IN_COPY = {
+  continueWith: { apple: 'Continuar con Apple', google: 'Continuar con Google' } satisfies Record<SocialProvider, string>,
+  opening: { apple: 'Abriendo Apple…', google: 'Abriendo Google…' } satisfies Record<SocialProvider, string>,
+  orWithEmail: 'o con tu e-mail',
+  cancelled: (provider: SocialProvider) => `No terminaste de entrar con ${PROVIDER_NAMES[provider]}. Probá de nuevo o usá tu e-mail.`,
+  failed: (provider: SocialProvider) => `No pudimos entrar con ${PROVIDER_NAMES[provider]}. Probá de nuevo o entrá con tu e-mail.`,
 } as const;
 
 export const EMAIL_PROBLEM_COPY: Record<EmailProblem, string> = {

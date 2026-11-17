@@ -1,18 +1,15 @@
 import * as Haptics from 'expo-haptics';
-import { useRouter } from 'expo-router';
 import { useEffect, useReducer } from 'react';
 
-import { ACCOUNT_DEACTIVATED_ROUTE } from '@/constants/routes';
-import { routeAfterSignIn, sendEmailCode, startSignedInSession, verifyEmailCode } from '@/data/email-sign-in';
-import { useSession } from '@/data/session';
+import { sendEmailCode, verifyEmailCode } from '@/data/email-sign-in';
 import { CODE_STATUSES, EMAIL_CODE_ACTIONS, emailCodeReducer, initialEmailCodeState } from '@/features/email-sign-in/email-code-reducer';
+import { useCompleteSignIn } from '@/features/email-sign-in/use-complete-sign-in';
 import { SIGN_IN_FAILURES, sendCodeFailure, verifyCodeFailure, type AuthFailure } from '@/lib/email-sign-in';
 
 const RESEND_TICK_MS = 1000;
 
 export function useEmailCode(email: string, startsWaiting: boolean) {
-  const router = useRouter();
-  const { startSession } = useSession();
+  const completeSignIn = useCompleteSignIn();
   const [state, dispatch] = useReducer(emailCodeReducer, startsWaiting, (isWaiting) => initialEmailCodeState(Date.now(), isWaiting));
   const isCounting = state.resendSeconds > 0;
 
@@ -31,13 +28,7 @@ export function useEmailCode(email: string, startsWaiting: boolean) {
         const userId = await verifyEmailCode(email, state.code);
         Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
         if (isMounted) dispatch({ type: EMAIL_CODE_ACTIONS.VERIFIED });
-        const session = await startSignedInSession(userId, email);
-        if (!session) {
-          router.replace(ACCOUNT_DEACTIVATED_ROUTE);
-          return;
-        }
-        startSession(session);
-        router.replace(await routeAfterSignIn(session));
+        await completeSignIn(userId, email);
       } catch (error) {
         const failure = verifyCodeFailure(error as AuthFailure, state.sentAt, Date.now());
         if (failure === SIGN_IN_FAILURES.OTHER) console.warn('Email code sign-in failed:', error);
